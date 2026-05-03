@@ -67,15 +67,17 @@ function load() {
       datasDir:        path.join(ROOT, p['datas_dir']        || 'shared/datas/'),
       packetsDir:      path.join(ROOT, p['packets_dir']      || 'shared/packets/'),
       dbSchema:        path.join(ROOT, p['db_schema']        || 'server/db/schema.json'),
-      clientGenerated: path.join(ROOT, p['client_generated'] || 'client/src/generated/'),
-      serverGenerated: path.join(ROOT, p['server_generated'] || 'server/src/generated/'),
+      clientGenerated:        path.join(ROOT, p['client_generated']         || 'client/src/generated/'),
+      clientScriptsGenerated: path.join(ROOT, p['client_scripts_generated'] || 'client/src/generated/scripts/'),
+      serverGenerated:        path.join(ROOT, p['server_generated']         || 'server/src/generated/'),
       migrationsDir:   path.join(ROOT, p['migrations_dir']   || 'server/db/migrations/'),
       protoGenerated:  path.join(ROOT, p['proto_generated']  || 'generated/proto/'),
     },
 
     dataGen: {
-      clientTargets: (ini['data-gen']?.['client_targets'] || 'CS,C').split(',').map(s => s.trim()),
-      serverTargets: (ini['data-gen']?.['server_targets'] || 'CS,S').split(',').map(s => s.trim()),
+      clientTargets:   (ini['data-gen']?.['client_targets']  || 'CS,C').split(',').map(s => s.trim()),
+      serverTargets:   (ini['data-gen']?.['server_targets']  || 'CS,S').split(',').map(s => s.trim()),
+      clientNamespace: ini['data-gen']?.['client_namespace'] || 'Generated.Data',
     },
 
     packetGen: {
