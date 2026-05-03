@@ -3,7 +3,7 @@
 ## Nav
 | path | role |
 |------|------|
-| *(user-created)* | One subdirectory per data domain (e.g. `characters/`, `items/`) |
+| `ingame/` | In-game stage definitions (grid size, color node positions) | → `ingame/CLAUDE.md` |
 
 ## Rules
 FILE: `[domain]_[table].csv`  e.g. `characters_base.csv`, `items_effects.csv`
