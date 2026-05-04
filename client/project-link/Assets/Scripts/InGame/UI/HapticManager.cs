@@ -1,27 +1,19 @@
-using UnityEngine;
+// Moved to ProjectLink.Core.HapticManager
+// Shim kept so existing Unity meta files and callers in this namespace remain valid
+using ProjectLink.Core;
 
 namespace ProjectLink.InGame.UI
 {
     public static class HapticManager
     {
-        public static bool Enabled { get; set; } = true;
-
-        // Called when a drag attempts a blocked cell direction
-        public static void PlayBlocked() => TryVibrate();
-
-        // Called when a color pair is successfully connected
-        public static void PlayConnected() => TryVibrate();
-
-        // Called when a path is deleted via erase mode
-        public static void PlayErased() => TryVibrate();
-
-        static void TryVibrate()
+        public static bool Enabled
         {
-            if (!Enabled) return;
-#if UNITY_ANDROID || UNITY_IOS
-            try { Handheld.Vibrate(); }
-            catch { }
-#endif
+            get => Core.HapticManager.Enabled;
+            set => Core.HapticManager.Enabled = value;
         }
+
+        public static void PlayBlocked()   => Core.HapticManager.PlayBlocked();
+        public static void PlayConnected() => Core.HapticManager.PlayConnected();
+        public static void PlayErased()    => Core.HapticManager.PlayErased();
     }
 }
