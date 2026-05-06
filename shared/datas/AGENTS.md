@@ -4,6 +4,7 @@
 | path | role |
 |------|------|
 | `ingame/` | In-game stage definitions (grid size, color node positions) | → `ingame/AGENTS.md` |
+| `string/` | Client localization string tables | ??`string/AGENTS.md` |
 
 ## Rules
 FILE: `[domain]_[table].csv`  e.g. `characters_base.csv`, `items_effects.csv`

@@ -1,41 +1,47 @@
-# server — [FILL IN: framework name & version]
+# server — ASP.NET Core 8 | C# | Entity Framework Core
 
 ## Stack
-[FILL IN when architecture is decided]
-Example A (stateless): ASP.NET Core 8 | C# | Entity Framework Core
-Example B (stateful):  C++ | Boost.Asio | custom binary protocol
+ASP.NET Core 8 Web API | C# | Entity Framework Core 8 (ORM only, no migrations) | Npgsql | StackExchange.Redis | JWT Bearer
 
 ## Nav
 | path | role |
 |------|------|
 | `db/` | DB schema definition + migration history | → `db/AGENTS.md` |
-| *(fill in after project structure is established)* | |
-| `src/generated/` | Auto-generated — DO NOT edit | → see Rules |
+| `src/ProjectLink.sln` | Solution file |
+| `src/ProjectLink.Domain/` | Entities, interfaces — no dependencies |
+| `src/ProjectLink.Application/` | Use cases (commands/queries), ISessionCache |
+| `src/ProjectLink.Infrastructure/` | EF Core DbContext, repositories, Redis cache, JWT key cache |
+| `src/ProjectLink.API/` | Startup, controllers, middleware, Dockerfile |
+| `generated/` | Auto-generated — DO NOT edit | → see Rules |
+| `../.env.example` | Root environment variable template |
 
 ## Rules
 - NEVER edit `*/generated/*` — source is in `shared/`
-- `generated/data/` — from `shared/datas/` via `npm run gen:data`
-- `generated/packets/` — from `shared/packets/` via `npm run gen:packets`
-- `generated/` is NOT for DB models — DB is managed via `db/schema.json`
+- EF Core is used as ORM ONLY — never run `dotnet ef migrations` or `dotnet ef database update`
+- DB schema is managed by `npm run gen:orm` (reads `server/db/schema.json`)
+- NEVER commit `.env` — use root `.env.example`
 - NEW_DIR: create `AGENTS.md` for it + update Nav above
 
 ## DB Schema
 File: `server/db/schema.json`
 CMD:  `npm run gen:orm` — reads schema.json — syncs tables on connected DB
 Migration SQL is saved to `server/db/migrations/` (review before applying in production)
-See `server/db/schema.json` format in README.md
+
+## Project References
+API → Application → Domain
+Infrastructure → Domain
+API → Infrastructure
 
 ## Serena
-[FILL IN when architecture is decided]
-Example A (ASP.NET C#):
-  FIND: `[Domain][Type].cs` → `find_symbol('[Domain][Type]')`
-  PATTERN: namespace `[Project].[Domain].[Layer]`
-  ENTRY: `[domain]/` — scan with `get_symbols_overview`
-
-Example B (C++ Boost.Asio):
-  FIND: `[domain]_[type].hpp` → `find_symbol('namespace::[ClassName]')`
-  PATTERN: 1 .hpp per class | implementation in matching .cpp
-  ENTRY: `include/` — all public interfaces
+FIND: `[Domain][Type].cs` → `find_symbol('[Domain][Type]')`
+PATTERN: namespace `ProjectLink.[Layer]` or `ProjectLink.[Layer].[Domain]`
+ENTRY: `src/ProjectLink.Domain/` — entities and interfaces
+ENTRY: `src/ProjectLink.Application/` — handlers and services
+ENTRY: `src/ProjectLink.Infrastructure/` — repositories and cache
 
 ## Conventions
-[FILL IN: naming rules, layer structure, coding style for chosen stack]
+- Namespaces: `ProjectLink.{Layer}` or `ProjectLink.{Layer}.{Domain}`
+- No comments unless WHY is non-obvious
+- `async/await` throughout — no `.Result` or `.Wait()`
+- CancellationToken passed through all async methods
+- Column names mapped to snake_case in `OnModelCreating`
