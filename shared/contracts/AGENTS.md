@@ -70,3 +70,8 @@ shared/contracts/
 | `RankingListResponse` | class | `Entries`, `MyRank?` — used for all 3 list endpoints |
 | `MyRankEntry` | class | `Rank`, `Value` — one category |
 | `MyRankResponse` | class | `StagesCleared?`, `TotalScore?` — `/api/ranking/me` |
+
+## Cross-refs
+- Consumed by: server `API.Controllers.StageController`, `StaminaController`, `CurrencyController`, `InventoryController` (request/response bodies)
+- Consumed by: server `Application.StageService`, `StaminaService`, `CurrencyService`, `InventoryService`, `RankingService` (return types)
+- Consumed by: client `Generated/Contracts/` (Unity copy of these .cs files — manual sync)

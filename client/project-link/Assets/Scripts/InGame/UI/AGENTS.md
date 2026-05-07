@@ -23,6 +23,11 @@
 | `PausePopup.Init(Action)` | method | onResume callback; back-press resumes |
 | `TimeoutPopup.Init(int)` | method | stageId only; OnBackPressed() is no-op |
 
+## Cross-refs
+- Consumed by: client `Core.InGameController` (show/hide popups, call InGameHUD.Init/Refresh/SetTimerDisplay)
+- Depends on: client `InGame.StageTimer` (timer remaining seconds → InGameHUD.SetTimerDisplay)
+- Depends on: `shared/datas/string/` (localized strings via `Utils.LocalizedText` in popup labels)
+
 ## Rules
 - Timer text format: always `MM:SS` zero-padded (e.g. `01:30`, `00:09`).
 - Timer urgency threshold: <= 10 s switches to `_timerUrgent` red.

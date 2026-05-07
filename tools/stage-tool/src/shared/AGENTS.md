@@ -22,6 +22,11 @@
 | `validateUpdateStageId` | function | Allows only existing stage IDs |
 | `validateDeleteStageId` | function | Allows only the last stage ID |
 
+## Cross-refs
+- Consumed by: `tools/stage-tool/src/server/` (StageRepository uses codec, validation; HTTP routes use types)
+- Consumed by: `tools/stage-tool/src/client/` (App uses codec, normalizeAndValidateStage, ValidationError)
+- Gen output: stage CSV rows written by `tools/stage-tool/src/server/StageRepository` to `shared/datas/ingame/*.csv`
+
 ## Rules
 - Node groups are `1..20`; `0` means empty.
 - Cell map codes are `0..1295`; `0` empty, `1` obstacle, `2+` gimmicks.

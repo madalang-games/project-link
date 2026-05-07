@@ -17,6 +17,12 @@
 | `StageData.NodeColors` | field | `Dictionary<int,Color>`; nodeGroupId → Unity Color |
 | `StageLoader.Load(int)` | method | static; returns StageData or null (logs error if not found) |
 
+## Cross-refs
+- Gen output: `client/Assets/Resources/Data/` (runtime CSVs read by StageLoader via CsvLoader)
+- Consumed by: client `Core.InGameController` (calls StageLoader.Load at scene start)
+- Consumed by: client `Core.GameContext` (holds selected stageId used by StageLoader)
+- Depends on: `client/Assets/Scripts/Data/Generated/` classes (IngameStage, IngameNodeColors — gen from shared/datas/ingame/)
+
 ## Rules
 - Generated model types live in `Generated/` — do not define them here
 - Source data: `shared/datas/` CSVs; runtime data: `Resources/Data/` CSVs (gen:data output)

@@ -5,7 +5,7 @@
 |---|---|---|
 | `Data/` | Generated runtime CSV data | `Data/AGENTS.md` |
 | `UI/` | UI reference sprites and AssetResource sprite sheets | `UI/AGENTS.md` |
-| `Prefabs/` | Runtime-loadable prefabs | `Prefabs/AGENTS.md` |
+| `Prefabs/UI/` | Popup prefabs loaded by `PopupManager` | `Prefabs/UI/AGENTS.md` |
 
 ## Rules
 - Assets in this tree are loaded through Unity `Resources`.

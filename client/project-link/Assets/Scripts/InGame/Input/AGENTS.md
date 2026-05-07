@@ -17,6 +17,10 @@
 | `TouchInputHandler.OnLongPressCanceled` | event | `Action` — fires on release after longpress confirmed (unsubscribed; kept for compat) |
 | `InputSnapper.Snap(Vector2,Board,float)` | method | static; clamps to board bounds; returns Cell reference |
 
+## Cross-refs
+- Consumed by: client `Core.InGameController` (subscribes OnDragStart/Move/End → PathDrawer calls)
+- Depends on: (pure input layer — no game data dependencies)
+
 ## Rules
 - **OnDragStart is DEFERRED**: fires only when `moved > _longPressMoveLimit` (0.15 world units, Inspector-configurable)
 - Longpress threshold: `_longPressThreshold = 0.7 s` (Inspector-configurable)

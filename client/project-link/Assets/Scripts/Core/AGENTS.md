@@ -56,6 +56,10 @@
 | `FontRegistry.Instance` | prop | loaded via `Resources.Load("FontRegistry")` |
 | `FontRegistry.TryGetFonts(LanguageCode,...)` | method | out regular + bold TMP_FontAsset |
 
+## Cross-refs
+- Consumed by: all scenes (InGame, OutGame) — singleton managers accessed globally via static Instance
+- Depends on: client `Data.StageLoader` (InGameController loads StageData at scene start, GameContext holds selected stageId)
+
 ## Rules
 - All singletons pattern: `if (Instance != null) { Destroy(gameObject); return; }` in Awake
 - Popup T must extend `PopupBase`; use `UILayer.Popup` for all overlays

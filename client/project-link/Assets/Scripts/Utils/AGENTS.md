@@ -15,6 +15,12 @@
 | `ColorPalette.Init(Dictionary<int,Color>)` | method | static; populates color map from StageData.NodeColors; must be called before Get() |
 | `ColorPalette.Get(int)` | method | static; nodeGroupId → Color; returns magenta for unknown IDs |
 
+## Cross-refs
+- Consumed by: client `Data.StageLoader` (CsvLoader.Load for IngameStage/IngameNodeColors), client `Core.LocalizationManager` (CsvLoader.Load for Clientstring)
+- Consumed by: client `InGame.Board.BoardView`, `InGame.Path.PathView` (GridUtils.CellToWorld)
+- Consumed by: client `Core.InGameController`, `InGame.Board.CellView` (ColorPalette.Get)
+- Depends on: (pure utility layer — no game data dependencies)
+
 ## Rules
 - All classes are static utility; no MonoBehaviour, no state (ColorPalette holds initialized dictionary)
 - CsvLoader uses reflection — field names in T must exactly match CSV header row

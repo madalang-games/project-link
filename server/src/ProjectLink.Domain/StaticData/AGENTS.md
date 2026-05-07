@@ -15,6 +15,11 @@
 | `IngameItemData.Type` | property | `OBSTACLE_REMOVE` or `NODE_PAIR_REMOVE` — drives validation in item use flow |
 | `IngameItemData.CostSoft` | property | authoritative cost; client-provided cost is not trusted |
 
+## Cross-refs
+- Depends on: `shared/datas/ingame/` → `server/generated/data/ingame/` (gen pipeline source)
+- Consumed by: server `Infrastructure.Data.StaticDataService` (deserializes CSV rows into these POCOs)
+- Consumed by: server `Application.StageService`, `Application.InventoryService` (via `IStaticDataService`)
+
 ## Rules
 - These are read-only POCOs — no logic, no dependencies
 - Source of truth is `shared/datas/ingame/*.csv`; server loads from `generated/data/ingame/*.csv`

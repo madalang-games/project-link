@@ -41,10 +41,27 @@ This convention is enforced by AI agents; violations should be fixed before comm
 - Contents must be exactly one line: `@AGENTS.md`
 - Never write instructions directly into `CLAUDE.md` — use `AGENTS.md` instead
 
+**Cross-refs** — add `## Cross-refs` to leaf and source-of-truth AGENTS.md:
+- `Consumed by:` — classes/files that use this module's output (non-obvious consumers only)
+- `Depends on:` — classes/files this module reads/imports
+- `Gen output:` — generated artifacts (data source files only)
+- Use `Layer.ClassName` notation; omit method unless needed for disambiguation
+- Place between `## Symbols` and `## Rules` in leaf files
+
 ## Agent Context Convention
 - `AGENTS.md` is the single source of truth for AI agent instructions
 - Edit only `AGENTS.md`; never edit `CLAUDE.md` directly
 - `CLAUDE.md` must remain a Claude Code compatibility wrapper: contents = `@AGENTS.md`
+
+## New System Checklist
+When adding a cross-cutting system (touches ≥2 of: data / server / client):
+1. `shared/datas/[domain]/` — define CSV schema → update AGENTS.md Cross-refs (Gen output + Consumed by)
+2. `shared/contracts/` — define request/response DTOs → update contracts AGENTS.md
+3. `server/db/schema.json` — add table definition → run `gen:orm`
+4. Server layers (Domain → Infrastructure → API) — implement → update each AGENTS.md
+5. Client — implement → update AGENTS.md
+6. Run `tools/gen-all.bat`
+7. Update `TODO-List/AGENTS.md` progress
 
 ## Formats
 FILE (data):      `[domain]_[table].csv`         e.g. `characters_base.csv`

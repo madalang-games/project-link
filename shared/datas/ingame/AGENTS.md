@@ -40,6 +40,12 @@
 **ingame_stage_nodes**
 - Legacy table kept until client loader migration is complete.
 
+## Cross-refs
+- Gen output: `client/generated/data/ingame/` and `server/generated/data/ingame/` (via `npm run gen:data`)
+- Consumed by: server `Infrastructure.StaticDataService` (loads ingame CSVs at startup)
+- Consumed by: server `Domain.IngameStageData`, `Domain.IngameItemData` (POCO source)
+- Consumed by: client `Data.StageLoader` (decodes nodeMap/cellMap), client `Data.Generated` classes
+
 ## Rules
 - Stage IDs must remain contiguous. Add only `maxStageId + 1`; delete only `maxStageId`; update only existing stages.
 - `nodeMap` and `cellMap` length must equal `width * height * 2`.

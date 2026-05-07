@@ -35,6 +35,10 @@
 | `PathView.Init(PathModel,int,int,float)` | method | binds LineRenderer to PathModel; boardWidth/Height/cellSize |
 | `PathView.Refresh()` | method | rebuilds LineRenderer positions from PathModel.Cells |
 
+## Cross-refs
+- Consumed by: client `Core.InGameController` (drives PathDrawer, evaluates clear via PathValidator.IsCleared)
+- Depends on: client `InGame.Board` (Cell claim/release), client `InGame.Input.TouchInputHandler` (drag events → PathDrawer.ProcessCell)
+
 ## Rules
 - Multi-path per group: `_paths` is `Dictionary<int, List<PathModel>>`; each group can have multiple paths
 - `TryStartPath` on a Node clears all existing paths that start or end at that node, then creates a new one

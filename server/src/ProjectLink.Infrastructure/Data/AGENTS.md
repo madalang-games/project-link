@@ -12,6 +12,11 @@
 | `StaticDataService.GetItem` | method | O(1) lookup by itemId; returns null if not found |
 | `StaticDataService.GetAllStages` | method | used by ranking cold-start rebuild |
 
+## Cross-refs
+- Depends on: `server/generated/data/ingame/` CSV files (gen from `shared/datas/ingame/`)
+- Depends on: server `Domain.StaticData.IngameStageData`, `Domain.StaticData.IngameItemData` (POCO targets)
+- Consumed by: server `Application.StageService`, `Application.InventoryService` (via `IStaticDataService`)
+
 ## Rules
 - Loads from `AppContext.BaseDirectory/generated/data/ingame/` — files must be present at startup
 - Missing CSV → logs warning + returns empty dictionary (does not crash)

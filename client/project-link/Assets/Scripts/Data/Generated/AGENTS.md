@@ -28,6 +28,11 @@
 | `IngameNodeColors.hexColor` | field | string; HTML hex color e.g. `#FF3B3B` |
 | `IngameNodeColors.displayName` | field | string; human-readable color name |
 
+## Cross-refs
+- Gen output: auto-generated from `shared/datas/ingame/` and `shared/datas/string/` CSVs
+- Consumed by: client `Data.StageLoader` (IngameStage, IngameNodeColors), client `Core.LocalizationManager` (Clientstring)
+- Source: `shared/datas/ingame/AGENTS.md`, `shared/datas/string/AGENTS.md`
+
 ## Rules
 - NEVER edit — regenerate with `npm run gen:data` (or `tools/gen-data.bat`)
 - To add/change fields: edit source CSV in `shared/datas/`, re-run gen

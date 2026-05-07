@@ -43,5 +43,10 @@ string | string(N) | datetime | date | json | bytes
 PK=primary key | FK:[table]=foreign key | NN=not null | UQ=unique | IDX=index | AUTO=auto-increment
 Combinable with comma: `["PK", "AUTO", "NN"]`
 
+## Cross-refs
+- Gen output: `server/db/migrations/` SQL files (CREATE/ALTER TABLE via `npm run gen:orm`)
+- Consumed by: server `Infrastructure.Persistence.AppDbContext` (EF Core entity mapping)
+- Consumed by: server `Infrastructure.Persistence.*Repository` classes (query targets)
+
 ## Serena
 FIND: table definition → `schema.json` (single file, search by table name string)

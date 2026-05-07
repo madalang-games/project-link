@@ -42,6 +42,11 @@
 | `CellView.Init(Cell,float)` | method | binds to cell reference, sets sprite size |
 | `CellView.Refresh()` | method | repaints sprite: Obstacle=dark gray, Gimmick=cyan, Node=full color, Path=×0.65, Empty=gray(0.15) |
 
+## Cross-refs
+- Consumed by: client `Core.InGameController` (creates Board, drives BoardView.Init/Refresh)
+- Consumed by: client `InGame.Path.PathModel` (Cell claim/release via Board.ClaimPath/ReleasePath)
+- Depends on: `shared/datas/ingame/` stage layout data (via client `Data.StageLoader` → StageData.NodeMap/CellMap)
+
 ## Rules
 - `Board` is pure data — no MonoBehaviour, no Unity types
 - Sorting layer order: Board (background) → Path → Node

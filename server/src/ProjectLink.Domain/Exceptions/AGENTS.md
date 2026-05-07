@@ -20,6 +20,10 @@
 |--------|------|------|
 | `DomainException.ErrorCode` | property | error code string returned to client; maps to `error_messages.csv` |
 
+## Cross-refs
+- Consumed by: server `Application.StageService`, `StaminaService`, `CurrencyService`, `InventoryService` (thrown on validation failure)
+- Consumed by: server `API.Middleware.GlobalExceptionMiddleware` (caught + mapped to HTTP status codes)
+
 ## Rules
 - Every `ErrorCode` value must have a corresponding row in `shared/datas/string/error_messages.csv`
 - HTTP status mapping is owned by `GlobalExceptionMiddleware` — do not embed status codes in exceptions

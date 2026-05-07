@@ -21,6 +21,10 @@
 | `UI/AssetResource2` | Resources path | load sliced sprites with `Resources.LoadAll<Sprite>()` |
 | `UI/AssetResource3` | Resources path | load sliced sprites with `Resources.LoadAll<Sprite>()` |
 
+## Cross-refs
+- Consumed by: client `OutGame.UI` popup controllers (AssetResource sprite sheets loaded at runtime via `Resources.LoadAll<Sprite>`)
+- Consumed by: client `Editor.ProjectLinkUIBuilder` (ConfigureUiTextureImports slices AssetResource sheets)
+
 ## Rules
 - Runtime code should not load full scene/popup reference PNGs as UI backgrounds.
 - Use generated wireframe slots as assignment points for final sprites.

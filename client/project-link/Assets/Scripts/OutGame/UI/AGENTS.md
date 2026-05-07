@@ -50,6 +50,10 @@
 | `BuyItemPopup.Init()` | method | binds Inspector refs or fallback buttons: CloseIconButton, CloseButton, BuyButton |
 | `EnergyPopup.Init()` | method | binds Inspector refs or fallback buttons: CloseIconButton, CloseButton, WatchAdButton, RefillButton |
 
+## Cross-refs
+- Consumed by: client `Core.PopupManager` (outgame popups loaded from `Resources/Prefabs/UI/` and pushed via PopupManager.Request)
+- Depends on: client `Core.GameContext` (stage selection state), `shared/datas/string/` (LocalizedText for all visible labels)
+
 ## Rules
 - Namespace: `ProjectLink.OutGame.UI`
 - Scene navigation uses `SceneLoader.LoadScene`; shared state uses `GameContext`

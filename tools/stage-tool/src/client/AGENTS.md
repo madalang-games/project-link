@@ -20,6 +20,10 @@
 | `App.editorDefaults` | state | Defaults fetched from `/api/defaults`; used by Add button to initialize new stage fields |
 | `App.newStage` | method | Creates new stage with stageId = maxId+1 and values from `editorDefaults` |
 
+## Cross-refs
+- Depends on: `tools/stage-tool/src/server/` HTTP API (`/api/stages`, `/api/defaults`, `/api/node-colors`)
+- Depends on: `tools/stage-tool/src/shared/` (codec for map display, normalizeAndValidateStage, ValidationError)
+
 ## Rules
 - Keep API calls under `/api`; Vite proxies them to the local server in development.
 - Render node group colors from `/api/node-colors`; fallback colors are UI-only.

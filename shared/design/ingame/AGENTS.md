@@ -20,6 +20,10 @@ InGame board, path, node, and stage rule documentation.
 | `ClearCondition.ValidPairs` | rule | Stage clears only when every node in every group remains connected as valid pairs |
 | `Camera.LargeBoard` | requirement | Large boards require zoom and pan with transformed hit testing |
 
+## Cross-refs
+- Depends on: `shared/datas/ingame/` CSV schema (data-driven alignment required — nodeMap, cellMap, nodeGroupId)
+- Consumed by: (none — design spec only, not imported by code)
+
 ## Rules
 
 - Use ASCII only.

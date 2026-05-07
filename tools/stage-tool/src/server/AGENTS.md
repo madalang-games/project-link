@@ -23,6 +23,11 @@
 | `validateStages.ts.main` | function | Validates all source stage rows and exits nonzero on failure |
 | `resolveEditorDefaults` | function | Reads `[stage-editor]` from `template.ini`; returns `EditorDefaults` with width/height/timeLimit/difficulty |
 
+## Cross-refs
+- Consumed by: `tools/stage-tool/src/client/` (HTTP API calls under `/api`)
+- Depends on: `shared/datas/ingame/*.csv` (StageRepository reads/writes source CSVs directly)
+- Depends on: `tools/stage-tool/src/shared/` (codec, validation, types used in all routes)
+
 ## Rules
 - Writes must be atomic temp-file renames.
 - Preserve CSV metadata rows exactly when saving.

@@ -25,3 +25,7 @@ FILE: `[domain].types.json`  e.g. `item.types.json`
 ## Note
 Types here are documentation and validation hints.
 Actual enum code must be written in client/server source.
+
+## Cross-refs
+- Consumed by: `shared/datas/**/*.csv` row 3 type columns (e.g. `ItemType` in ingame_item.csv)
+- Consumed by: server domain entities and client data models (type names must match enum definitions)

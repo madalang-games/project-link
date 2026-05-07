@@ -16,6 +16,10 @@
 | `ProjectLinkUIBuilder.AddScrollView(...)` | method | creates visible ScrollRect placeholder with Viewport/Content/items |
 | `ProjectLinkUIBuilder.AddLobbyTabController(...)` | method | attaches LobbyTabController by type name and assigns serialized refs |
 
+## Cross-refs
+- Consumed by: Unity Editor only (not included in player builds)
+- Depends on: client `Core` scene/popup structure (BuildAllSceneUI/BuildPopupPrefabs reconstruct from scratch)
+
 ## Rules
 - Editor-only folder; auto-excluded from player builds (Unity convention)
 - Scene builders must be idempotent: destroy existing generated roots before recreating

@@ -25,6 +25,10 @@
 | `StageTimer.IsExpired` | prop | true after OnTimeUp has fired |
 | `StageTimer.OnTimeUp` | event | `Action`; fired once when elapsed ≥ timeLimit |
 
+## Cross-refs
+- Consumed by: client `Core.InGameController` (ticks StageTimer each Update, wires OnTimeUp)
+- Depends on: client `Core.InGameController` (scene lifecycle — Start/Update/scene teardown)
+
 ## Rules
 - Namespace: `ProjectLink.InGame.[SubDir]` mirrors folder structure
 - `StageTimer` is a pure C# class (no MonoBehaviour); tick via `InGameController.Update()`

@@ -35,3 +35,7 @@ PK,NN,NN,NN,NN,NN
 | `popup_` | Shared popup UI |
 | `language_` | Language selector labels |
 | `country_` | Country/region labels |
+
+## Cross-refs
+- Gen output: `client/generated/data/string/clientstring.csv` (via `npm run gen:data`)
+- Consumed by: client `Data.Generated.Clientstring` (generated model), client `Utils.LocalizedText` (runtime string lookup via `LocalizationManager`)
