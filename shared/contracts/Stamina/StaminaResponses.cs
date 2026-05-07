@@ -16,6 +16,16 @@ public class StaminaAdRewardResponse
 
 public class StaminaExtendResponse
 {
-    public int StaminaCurrent { get; set; }
+    public int  StaminaCurrent   { get; set; }
     public long SoftBalanceAfter { get; set; }
+}
+
+public class StaminaRefillResponse
+{
+    public int     Current          { get; set; }
+    public int     Max              { get; set; }
+    public int     Added            { get; set; }
+    public int     SoftCost         { get; set; }
+    public long    SoftBalanceAfter { get; set; }
+    public string? NextRechargeAt   { get; set; }
 }

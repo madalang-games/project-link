@@ -6,3 +6,5 @@ public class StaminaAdRewardRequest
 }
 
 public class StaminaExtendRequest { }
+
+public class StaminaRefillRequest { }
