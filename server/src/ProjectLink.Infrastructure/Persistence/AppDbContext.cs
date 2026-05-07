@@ -14,10 +14,12 @@ public class AppDbContext : DbContext
     public DbSet<CurrencyLog>      CurrencyLogs     => Set<CurrencyLog>();
     public DbSet<StaminaState>     StaminaStates    => Set<StaminaState>();
     public DbSet<Inventory>        Inventories      => Set<Inventory>();
-    public DbSet<UserProfile>      UserProfiles     => Set<UserProfile>();
-    public DbSet<StageBestRecord>  StageBestRecords => Set<StageBestRecord>();
-    public DbSet<UserRankingCache> RankingCaches    => Set<UserRankingCache>();
-    public DbSet<ActionLog>        ActionLogs       => Set<ActionLog>();
+    public DbSet<UserProfile>             UserProfiles             => Set<UserProfile>();
+    public DbSet<StageBestRecord>         StageBestRecords         => Set<StageBestRecord>();
+    public DbSet<UserRankingCache>        RankingCaches            => Set<UserRankingCache>();
+    public DbSet<ActionLog>               ActionLogs               => Set<ActionLog>();
+    public DbSet<DailyChallengeProgress>  DailyChallengeProgresses => Set<DailyChallengeProgress>();
+    public DbSet<PlayerSettings>          PlayerSettings           => Set<PlayerSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -104,8 +106,36 @@ public class AppDbContext : DbContext
             e.HasKey(x => x.UserId);
             e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
             e.Property(x => x.DisplayName).HasColumnName("display_name").HasMaxLength(64);
+            e.Property(x => x.AvatarId).HasColumnName("avatar_id").HasDefaultValue(1);
             e.Property(x => x.AccountCreatedAt).HasColumnName("account_created_at");
             e.Property(x => x.LastLoginAt).HasColumnName("last_login_at");
+        });
+
+        modelBuilder.Entity<DailyChallengeProgress>(e =>
+        {
+            e.ToTable("daily_challenge_progress");
+            e.HasKey(x => new { x.UserId, x.ChallengeDate });
+            e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
+            e.Property(x => x.ChallengeDate).HasColumnName("challenge_date");
+            e.Property(x => x.PlayCount).HasColumnName("play_count").HasDefaultValue(0);
+            e.Property(x => x.Completed).HasColumnName("completed").HasDefaultValue(false);
+            e.Property(x => x.StreakDays).HasColumnName("streak_days").HasDefaultValue(0);
+            e.Property(x => x.LastStreakDate).HasColumnName("last_streak_date");
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.HasIndex(x => x.UserId).HasDatabaseName("idx_daily_challenge_user_id");
+        });
+
+        modelBuilder.Entity<PlayerSettings>(e =>
+        {
+            e.ToTable("player_settings");
+            e.HasKey(x => x.UserId);
+            e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
+            e.Property(x => x.BgmEnabled).HasColumnName("bgm_enabled").HasDefaultValue(true);
+            e.Property(x => x.SfxEnabled).HasColumnName("sfx_enabled").HasDefaultValue(true);
+            e.Property(x => x.HapticsEnabled).HasColumnName("haptics_enabled").HasDefaultValue(true);
+            e.Property(x => x.NotificationsEnabled).HasColumnName("notifications_enabled").HasDefaultValue(true);
+            e.Property(x => x.Language).HasColumnName("language").HasMaxLength(8).HasDefaultValue("EN");
+            e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
         });
 
         modelBuilder.Entity<StageBestRecord>(e =>

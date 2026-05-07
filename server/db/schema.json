@@ -102,8 +102,36 @@
       "columns": [
         { "name": "user_id",            "type": "string(36)", "constraints": ["PK","NN"] },
         { "name": "display_name",       "type": "string(64)", "constraints": ["NN"] },
+        { "name": "avatar_id",          "type": "int32",      "constraints": ["NN"], "default": "1" },
         { "name": "account_created_at", "type": "datetime",   "constraints": ["NN"] },
         { "name": "last_login_at",      "type": "datetime",   "constraints": ["NN"] }
+      ]
+    },
+    {
+      "name": "daily_challenge_progress",
+      "comment": "Per-user per-day challenge tracking — play count and streak state",
+      "columns": [
+        { "name": "user_id",         "type": "string(36)", "constraints": ["PK","NN"] },
+        { "name": "challenge_date",  "type": "date",       "constraints": ["PK","NN"] },
+        { "name": "play_count",      "type": "int32",      "constraints": ["NN"], "default": "0" },
+        { "name": "completed",       "type": "bool",       "constraints": ["NN"], "default": "false" },
+        { "name": "streak_days",     "type": "int32",      "constraints": ["NN"], "default": "0" },
+        { "name": "last_streak_date","type": "date",       "constraints": [] },
+        { "name": "created_at",      "type": "datetime",   "constraints": ["NN"] }
+      ],
+      "indexes": [{ "name": "idx_daily_challenge_user_id", "columns": ["user_id"] }]
+    },
+    {
+      "name": "player_settings",
+      "comment": "Server-synced player preferences — authoritative if client-server sync is enabled",
+      "columns": [
+        { "name": "user_id",               "type": "string(36)", "constraints": ["PK","NN"] },
+        { "name": "bgm_enabled",           "type": "bool",       "constraints": ["NN"], "default": "true" },
+        { "name": "sfx_enabled",           "type": "bool",       "constraints": ["NN"], "default": "true" },
+        { "name": "haptics_enabled",       "type": "bool",       "constraints": ["NN"], "default": "true" },
+        { "name": "notifications_enabled", "type": "bool",       "constraints": ["NN"], "default": "true" },
+        { "name": "language",              "type": "string(8)",  "constraints": ["NN"], "default": "'EN'" },
+        { "name": "updated_at",            "type": "datetime",   "constraints": ["NN"] }
       ]
     },
     {
