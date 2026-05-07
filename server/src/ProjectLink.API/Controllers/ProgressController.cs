@@ -2,38 +2,35 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectLink.Application.Progress;
-using ProjectLink.Domain.Entities;
+using ProjectLink.Contracts.Progress;
 
 namespace ProjectLink.API.Controllers;
 
 [ApiController]
 [Route("api/progress")]
+[Authorize]
 public class ProgressController : ControllerBase
 {
-    private readonly GetProgressQueryHandler    _getHandler;
-    private readonly UpsertProgressCommandHandler _upsertHandler;
+    private readonly GetProgressQueryHandler _getHandler;
 
-    public ProgressController(GetProgressQueryHandler getHandler, UpsertProgressCommandHandler upsertHandler)
+    public ProgressController(GetProgressQueryHandler getHandler)
     {
-        _getHandler    = getHandler;
-        _upsertHandler = upsertHandler;
+        _getHandler = getHandler;
     }
 
     [HttpGet]
-    [Authorize]
     public async Task<IActionResult> Get(CancellationToken ct)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var result = await _getHandler.HandleAsync(new GetProgressQuery(userId, ct));
-        return Ok(result);
+        return Ok(await _getHandler.HandleAsync(new GetProgressQuery(userId, ct)));
     }
 
     [HttpPost("batch")]
-    [Authorize]
-    public async Task<IActionResult> UpsertBatch([FromBody] IEnumerable<StageProgress> records, CancellationToken ct)
+    public async Task<IActionResult> GetBatch([FromBody] BatchProgressRequest req, CancellationToken ct)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        await _upsertHandler.HandleAsync(new UpsertProgressCommand(userId, records, ct));
-        return NoContent();
+        var userId   = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var response = await _getHandler.HandleAsync(new GetProgressQuery(userId, ct));
+        var filtered = response.Stages.Where(s => req.StageIds.Contains(s.StageId)).ToList();
+        return Ok(new ProgressResponse { Stages = filtered });
     }
 }
