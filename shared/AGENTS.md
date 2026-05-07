@@ -3,7 +3,7 @@
 ## Nav
 | path | role |
 |------|------|
-| `packets/` | Packet protocol definitions (source for gen-packets) | → `packets/AGENTS.md` |
+| `contracts/` | Shared C# DTO contracts (server + Unity) | → `contracts/AGENTS.md` |
 | `datas/` | Game meta data / design data (source for gen-data) | → `datas/AGENTS.md` |
 | `types/` | Shared enums and constants | → `types/AGENTS.md` |
 

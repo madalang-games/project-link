@@ -5,11 +5,9 @@
 |------|------|
 | `config-loader.js` | Loads `template.ini` + `.env`, exports merged config |
 | `gen-data.js` | `shared/datas/**/*.csv` -> `*/generated/data/**/*.csv` |
-| `gen-packets.js` | `shared/packets/*.packet.json` -> `*/generated/packets/*` |
 | `gen-orm.js` | `server/db/schema.json` -> DB CREATE/ALTER TABLE + migration SQL |
-| `gen-all.bat` / `gen-all.sh` | Runs all three gen steps in order |
+| `gen-all.bat` / `gen-all.sh` | Runs all gen steps in order |
 | `gen-data.bat` | Runs gen-data only |
-| `gen-packets.bat` | Runs gen-packets only |
 | `gen-orm.bat` | Runs gen-orm only |
 | `start-stage-editor.bat` | Starts stage editor dev server (UI + API) with CRUD console logs |
 | `stage-tool/` | Local TypeScript web tool for stage CRUD, validation, and visualization |
@@ -24,8 +22,6 @@
 ## Serena
 FIND: config values - `config-loader.js` exports
 FIND: CSV parsing logic - `gen-data.js` `parseCSV()`
-FIND: packet gen (protobuf) - `gen-packets.js` `generateProto()`
-FIND: packet gen (rest) - `gen-packets.js` `generateCSharpDTO()` / `generateCppDTO()`
 FIND: DB schema sync - `gen-orm.js` `main()`
 
 ## Adding a new gen tool
