@@ -11,6 +11,7 @@ namespace ProjectLink.InGame.UI
         public Action OnPausePressed;
 
         TextMeshProUGUI _pipeCounterText;
+        TextMeshProUGUI _moveCounterText;
         TextMeshProUGUI _timerText;
         Func<int> _getConnectedCount;
         int _totalColors;
@@ -86,9 +87,16 @@ namespace ProjectLink.InGame.UI
             AddHotspot(root, "PaintButton", new Vector2(470f, 56f), new Vector2(140f, 140f), false).onClick.AddListener(OpenBuyItemPopup);
 
             _pipeCounterText = AddDynamicLabel(root, "0 / 0", 60, new Vector2(42f, -105f), new Vector2(150f, 80f), true);
+            _moveCounterText = AddDynamicLabel(root, "", 34, new Vector2(0f, -42f), new Vector2(260f, 56f), true);
 
             if (showTimer)
                 _timerText = AddDynamicLabel(root, "--:--", 36, new Vector2(-345f, -82f), new Vector2(150f, 58f), true);
+        }
+
+        public void SetMoveDisplay(int movesUsed, int moveLimit)
+        {
+            if (_moveCounterText == null) return;
+            _moveCounterText.text = moveLimit > 0 ? $"{movesUsed}/{moveLimit}" : movesUsed.ToString();
         }
 
         static RectTransform AddImageSlot(RectTransform parent, string name, Vector2 position, Vector2 size, bool top)

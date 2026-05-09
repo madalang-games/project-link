@@ -4,8 +4,9 @@
 | file | class | role |
 |---|---|---|
 | `InGameHUD.cs` | `InGameHUD` | Runtime wireframe HUD slots + transparent tool hotspots |
+| `GameWireframeController.cs` | `GameWireframeController` | Game generated UI refs; Inspector-assignable shell buttons/labels |
 | `CircularGauge.cs` | `CircularGauge` | LineRenderer arc progress indicator (erase mode) |
-| `ClearPopup.cs` | `ClearPopup` | Stage-clear overlay: star display + Next/Retry/Lobby |
+| `ClearPopup.cs` | `ClearPopup`, `StageClearPopupModel` | Prefab-compatible stage-clear overlay with server reward/progress fields |
 | `PausePopup.cs` | `PausePopup` | Pause overlay: Resume/Retry/Lobby |
 | `TimeoutPopup.cs` | `TimeoutPopup` | Time-expired overlay: Retry/Lobby; no back-press dismiss |
 | `HapticManager.cs` | `HapticManager` | Thin shim forwarding calls to `Core.HapticManager` |
@@ -16,10 +17,12 @@
 | `InGameHUD.Init(int,int,Func<int>,int)` | method | stageId, totalColors, connectedCount getter, timeLimitSeconds (0=no timer); rebuilds wireframe HUD |
 | `InGameHUD.Refresh()` | method | updates objective counter text via connectedCount getter |
 | `InGameHUD.SetTimerDisplay(float)` | method | remaining seconds -> `MM:SS` (zero-padded); color -> urgent red when <= 10 s |
+| `InGameHUD.SetMoveDisplay(int,int)` | method | moves used / server move limit text |
+| `GameWireframeController.SetToolButtonsInteractable(bool)` | method | toggles generated shell button refs |
 | `CircularGauge.Show(Vector3,Color)` | method | positions at world pos, sets arc color, enables |
 | `CircularGauge.SetProgress(float)` | method | t in [0,1] draws arc (0=empty, 1=full circle) |
 | `CircularGauge.Hide()` | method | disables gauge |
-| `ClearPopup.Init(int,int)` | method | stageId, stars (0-3) |
+| `ClearPopup.Init(StageClearPopupModel)` | method | server-backed stage clear model; binds Next/Retry/Lobby buttons |
 | `PausePopup.Init(Action)` | method | onResume callback; back-press resumes |
 | `TimeoutPopup.Init(int)` | method | stageId only; OnBackPressed() is no-op |
 

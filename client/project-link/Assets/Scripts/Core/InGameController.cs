@@ -7,6 +7,7 @@ using ProjectLink.InGame.Camera;
 using ProjectLink.InGame.Input;
 using ProjectLink.InGame.Path;
 using ProjectLink.InGame.UI;
+using ProjectLink.Services;
 using ProjectLink.Utils;
 using UnityEngine.InputSystem;
 
@@ -26,6 +27,10 @@ namespace ProjectLink.Core
         TouchInputHandler _touchInput;
         InGameHUD         _hud;
         StageTimer        _timer;
+        IUiDataService    _uiData;
+        int               _moveLimit;
+        int               _movesUsed;
+        bool              _stageEndSubmitted;
 
         readonly Dictionary<PathModel, PathView> _pathViewMap = new();
         int     _activeGroupId;
@@ -40,6 +45,7 @@ namespace ProjectLink.Core
         void Start()
         {
             _stageId = GameContext.SelectedStageId;
+            _uiData = UiServiceLocator.UiData;
 
             var stageData = StageLoader.Load(_stageId);
             if (stageData == null) return;
@@ -73,6 +79,7 @@ namespace ProjectLink.Core
             _hud = hudGo.AddComponent<InGameHUD>();
             _hud.Init(_stageId, _board.GroupIds.Count, GetConnectedCount, stageData.TimeLimit);
             _hud.OnPausePressed = OpenPausePopup;
+            _hud.SetMoveDisplay(_movesUsed, _moveLimit);
 
             _timer = new StageTimer();
             _timer.OnTimeUp += HandleTimeUp;
@@ -83,6 +90,9 @@ namespace ProjectLink.Core
             _touchInput.OnDragMove       += HandleDragMove;
             _touchInput.OnDragEnd        += HandleDragEnd;
             _stateMachine.OnStateChanged += HandleStateChanged;
+
+            SetInputEnabled(false);
+            _uiData.StartStage(_stageId, HandleStageStarted);
         }
 
         void Update()
@@ -171,10 +181,12 @@ namespace ProjectLink.Core
         void HandleDragEnd(Vector2 worldPos)
         {
             _drawer.EndPath();
+            _movesUsed++;
             CleanupStalePathViews();
             _boardView.Refresh();
             foreach (var pv in _pathViewMap.Values) pv.Refresh();
             _hud?.Refresh();
+            _hud?.SetMoveDisplay(_movesUsed, _moveLimit);
         }
 
         // Destroys PathView GameObjects for PathModels no longer tracked by PathDrawer.
@@ -200,10 +212,71 @@ namespace ProjectLink.Core
             if (to == GameState.Completed)
             {
                 HapticManager.PlayConnected();
-                DataManager.Instance.ClearStage(_stageId, 3);
-                var popup = PopupManager.Instance.Open<ClearPopup>();
-                popup.Init(_stageId, 3);
+                SubmitStageEnd("success");
             }
+        }
+
+        void HandleStageStarted(ServiceResult<ProjectLink.Contracts.Stage.StageStartResponse> result)
+        {
+            if (!result.IsSuccess)
+            {
+                Debug.LogError($"Stage start failed: {result.ErrorCode} {result.ErrorMessage}");
+                return;
+            }
+
+            var response = result.Value;
+            _moveLimit = response.MoveLimit;
+            GameContext.SetStageSession(response.SessionToken, response.MoveLimit, response.TimeLimitSeconds);
+            _hud?.SetMoveDisplay(_movesUsed, _moveLimit);
+            SetInputEnabled(true);
+
+            if (response.TimeLimitSeconds > 0 && response.TimeLimitSeconds != _timer.Remaining)
+            {
+                _timer.Start(response.TimeLimitSeconds);
+                _hud?.SetTimerDisplay(response.TimeLimitSeconds);
+            }
+        }
+
+        void SubmitStageEnd(string result)
+        {
+            if (_stageEndSubmitted) return;
+            _stageEndSubmitted = true;
+            SetInputEnabled(false);
+            _timer?.Pause();
+
+            var elapsedMs = GameContext.StageStartedAtMs > 0
+                ? System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - GameContext.StageStartedAtMs
+                : 0L;
+
+            _uiData.EndStage(_stageId, GameContext.StageSessionToken, result, elapsedMs, _movesUsed, stageResult =>
+            {
+                if (!stageResult.IsSuccess)
+                {
+                    Debug.LogError($"Stage end failed: {stageResult.ErrorCode} {stageResult.ErrorMessage}");
+                    OpenClearPopup(new StageClearPopupModel(_stageId, 3, 0, 0, _movesUsed, _moveLimit, elapsedMs, 0, false, _stageId + 1, true));
+                    return;
+                }
+
+                var value = stageResult.Value;
+                DataManager.Instance.ClearStage(_stageId, value.Stars);
+                OpenClearPopup(new StageClearPopupModel(
+                    _stageId,
+                    value.Stars,
+                    value.SoftReward,
+                    value.SoftBalanceAfter,
+                    value.MovesUsed,
+                    value.MoveLimit,
+                    value.AdjustedElapsedMs,
+                    value.Score,
+                    value.IsBestRecord,
+                    value.NextStageId ?? _stageId + 1,
+                    value.NextStageUnlocked));
+            });
+        }
+
+        void OpenClearPopup(StageClearPopupModel model)
+        {
+            PopupManager.Request(PopupId.StageClear, model);
         }
 
         void HandleTimeUp()

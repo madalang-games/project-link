@@ -14,7 +14,7 @@
 | `DataManager.cs` | `DataManager` | PlayerPrefs persistence: progress, settings |
 | `SoundManager.cs` | `SoundManager` | BGM + SFX AudioSource management |
 | `HapticManager.cs` | `HapticManager` | Platform haptic feedback (static helpers) |
-| `NetworkManager.cs` | `NetworkManager` | HTTP GET/POST coroutines |
+| `NetworkManager.cs` | `NetworkManager` | HTTP GET/POST/PATCH coroutines with client/protocol/auth headers |
 | `PoolManager.cs` | `PoolManager` | Keyed GameObject pool |
 | `LocalizationManager.cs` | `LocalizationManager` | String table + language switching; fires LanguageChanged |
 | `FontRegistry.cs` | `FontRegistry` | ScriptableObject: LanguageCode → TMP_FontAsset pair |
@@ -23,6 +23,8 @@
 | symbol | kind | note |
 |---|---|---|
 | `GameContext.SelectedStageId` | prop | set before `SceneLoader.LoadScene("Game")` |
+| `GameContext.SetStageSession(string,int,int)` | method | stores server stage session token, move limit, time limit, start timestamp |
+| `GameContext.ClearStageSession()` | method | clears server stage-session state |
 | `GameState` | enum | Idle \| Drawing \| Completed |
 | `GameStateMachine.Current` | prop | read-only current state |
 | `GameStateMachine.TryTransition(GameState)` | method | returns false if transition invalid |
@@ -35,12 +37,18 @@
 | `InGameController.RefreshGroupViews(int)` | method | refreshes all PathViews for a given groupId |
 | `InGameController.GetConnectedCount()` | method | counts groups where all nodes are endpoints of complete paths (uses PathValidator.IsGroupConnected) |
 | `UIManager.GetLayer(UILayer)` | method | returns canvas Transform for named layer |
-| `PopupId` | enum | popup request ids: ReturnTitle, ExitGame, Settings, BuyItem, Energy |
+| `PopupId` | enum | popup request ids: ReturnTitle, ExitGame, Settings, BuyItem, Energy, DailyChallenge, Account, Reward, StageClear |
 | `PopupRequest` | struct | event payload: PopupId + optional object payload |
 | `PopupManager.Request(PopupId,object)` | method | static event-driven popup request entry point |
 | `PopupManager.Open<T>()` | method | code-instantiates legacy in-game popup T on Popup layer, pushes stack |
 | `PopupManager.CloseTop()` | method | destroys top popup, re-shows previous |
 | `PopupManager.HasPopup` | prop | true if any popup on stack |
+| `NetworkManager.SetAuthToken(string)` | method | sets Bearer token for authenticated API calls |
+| `NetworkManager.EnsureGuestAuth(Action<bool,string>)` | method | obtains `/api/auth/guest` mock token before authenticated UI calls |
+| `NetworkManager.ClearAuthToken()` | method | clears Bearer token |
+| `NetworkManager.Get(string,Action<bool,string>)` | method | sends GET with required version/protocol headers |
+| `NetworkManager.Post(string,string,Action<bool,string>)` | method | sends JSON POST with required version/protocol/auth headers |
+| `NetworkManager.Patch(string,string,Action<bool,string>)` | method | sends JSON PATCH with required version/protocol/auth headers |
 | `SceneLoader.LoadScene(string)` | method | fade-out → load → fade-in |
 | `DataManager.ClearStage(int,int)` | method | records clear + star rating |
 | `DataManager.IsStageUnlocked(int)` | method | stage 1 always unlocked; others need prev clear |

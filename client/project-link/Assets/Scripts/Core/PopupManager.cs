@@ -10,7 +10,11 @@ namespace ProjectLink.Core
         ExitGame,
         Settings,
         BuyItem,
-        Energy
+        Energy,
+        DailyChallenge,
+        Account,
+        Reward,
+        StageClear
     }
 
     public readonly struct PopupRequest
@@ -128,6 +132,23 @@ namespace ProjectLink.Core
                     break;
                 case PopupId.Energy:
                     OpenPrefab<ProjectLink.OutGame.UI.EnergyPopup>("Prefabs/UI/EnergyPopup")?.Init();
+                    break;
+                case PopupId.DailyChallenge:
+                    OpenPrefab<ProjectLink.OutGame.UI.DailyChallengePopup>("Prefabs/UI/DailyChallengePopup")?.Init();
+                    break;
+                case PopupId.Account:
+                    OpenPrefab<ProjectLink.OutGame.UI.AccountPopup>("Prefabs/UI/AccountPopup")?.Init();
+                    break;
+                case PopupId.Reward:
+                    OpenPrefab<ProjectLink.OutGame.UI.RewardPopup>("Prefabs/UI/RewardPopup")?.Init();
+                    break;
+                case PopupId.StageClear:
+                    var clearModel = request.Payload as ProjectLink.InGame.UI.StageClearPopupModel;
+                    var clearPopup = OpenPrefab<ProjectLink.InGame.UI.ClearPopup>("Prefabs/UI/ClearPopup");
+                    if (clearPopup != null)
+                        clearPopup.Init(clearModel);
+                    else
+                        Open<ProjectLink.InGame.UI.ClearPopup>().Init(clearModel);
                     break;
             }
         }

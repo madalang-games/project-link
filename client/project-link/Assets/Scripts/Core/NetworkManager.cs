@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using Newtonsoft.Json;
+using ProjectLink.Contracts.Account;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -9,14 +11,54 @@ namespace ProjectLink.Core
     {
         public static NetworkManager Instance { get; private set; }
 
-        // TODO: 서버 URL 설정
-        public string BaseUrl { get; set; }
+        [SerializeField] string baseUrl = "https://localhost:5001";
+        [SerializeField] string clientVersion = "1.0.0";
+        [SerializeField] string protocolVersion = "1";
+        [SerializeField] string metaHash = "";
+        [SerializeField] bool autoGuestLogin = true;
+        [SerializeField] string guestLoginEndpoint = "/api/auth/guest";
+
+        public string BaseUrl
+        {
+            get => baseUrl;
+            set => baseUrl = value;
+        }
+
+        public string AccessToken { get; private set; }
+        bool _authInFlight;
 
         void Awake()
         {
             if (Instance != null) { Destroy(gameObject); return; }
             Instance = this;
             DontDestroyOnLoad(gameObject);
+        }
+
+        public void SetAuthToken(string accessToken)
+        {
+            AccessToken = accessToken;
+        }
+
+        public void ClearAuthToken()
+        {
+            AccessToken = "";
+        }
+
+        public void EnsureGuestAuth(Action<bool, string> onComplete)
+        {
+            if (!autoGuestLogin || !string.IsNullOrEmpty(AccessToken))
+            {
+                onComplete?.Invoke(true, "");
+                return;
+            }
+
+            if (_authInFlight)
+            {
+                StartCoroutine(WaitForAuth(onComplete));
+                return;
+            }
+
+            StartCoroutine(SendGuestLogin(onComplete));
         }
 
         public void Get(string endpoint, Action<bool, string> onComplete)
@@ -26,42 +68,106 @@ namespace ProjectLink.Core
 
         public void Post(string endpoint, string jsonBody, Action<bool, string> onComplete)
         {
-            StartCoroutine(SendPost(endpoint, jsonBody, onComplete));
+            StartCoroutine(SendWithBody(endpoint, "POST", jsonBody, onComplete));
         }
 
-        private IEnumerator SendGet(string endpoint, Action<bool, string> onComplete)
+        public void Patch(string endpoint, string jsonBody, Action<bool, string> onComplete)
         {
-            // TODO: 인증 토큰 헤더 추가
-            using var req = UnityWebRequest.Get(BaseUrl + endpoint);
+            StartCoroutine(SendWithBody(endpoint, "PATCH", jsonBody, onComplete));
+        }
+
+        IEnumerator SendGet(string endpoint, Action<bool, string> onComplete)
+        {
+            using var req = UnityWebRequest.Get(BuildUrl(endpoint));
+            ApplyHeaders(req);
             yield return req.SendWebRequest();
-
-            if (req.result == UnityWebRequest.Result.Success)
-                onComplete?.Invoke(true, req.downloadHandler.text);
-            else
-                onComplete?.Invoke(false, req.error);
-
-            // TODO: 실패 시 재시도 로직
+            Complete(req, onComplete);
         }
 
-        private IEnumerator SendPost(string endpoint, string jsonBody, Action<bool, string> onComplete)
+        IEnumerator SendWithBody(string endpoint, string method, string jsonBody, Action<bool, string> onComplete)
         {
-            // TODO: 인증 토큰 헤더 추가
-            using var req = new UnityWebRequest(BaseUrl + endpoint, "POST");
-            var bodyBytes = System.Text.Encoding.UTF8.GetBytes(jsonBody);
+            using var req = new UnityWebRequest(BuildUrl(endpoint), method);
+            var bodyBytes = System.Text.Encoding.UTF8.GetBytes(string.IsNullOrEmpty(jsonBody) ? "{}" : jsonBody);
             req.uploadHandler = new UploadHandlerRaw(bodyBytes);
             req.downloadHandler = new DownloadHandlerBuffer();
             req.SetRequestHeader("Content-Type", "application/json");
+            ApplyHeaders(req);
+            yield return req.SendWebRequest();
+            Complete(req, onComplete);
+        }
+
+        IEnumerator SendGuestLogin(Action<bool, string> onComplete)
+        {
+            _authInFlight = true;
+            using var req = new UnityWebRequest(BuildUrl(guestLoginEndpoint), "POST");
+            var bodyBytes = System.Text.Encoding.UTF8.GetBytes("{}");
+            req.uploadHandler = new UploadHandlerRaw(bodyBytes);
+            req.downloadHandler = new DownloadHandlerBuffer();
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("X-Client-Version", clientVersion);
+            req.SetRequestHeader("X-Protocol-Version", protocolVersion);
+            if (!string.IsNullOrEmpty(metaHash))
+                req.SetRequestHeader("X-Meta-Hash", metaHash);
 
             yield return req.SendWebRequest();
 
+            var body = req.downloadHandler?.text ?? "";
             if (req.result == UnityWebRequest.Result.Success)
-                onComplete?.Invoke(true, req.downloadHandler.text);
+            {
+                try
+                {
+                    var response = JsonConvert.DeserializeObject<AuthResponse>(body);
+                    AccessToken = response?.AccessToken ?? "";
+                    _authInFlight = false;
+                    onComplete?.Invoke(!string.IsNullOrEmpty(AccessToken), string.IsNullOrEmpty(AccessToken) ? "AUTH_TOKEN_EMPTY" : "");
+                }
+                catch (Exception ex)
+                {
+                    _authInFlight = false;
+                    onComplete?.Invoke(false, ex.Message);
+                }
+            }
             else
-                onComplete?.Invoke(false, req.error);
-
-            // TODO: 실패 시 재시도 로직
+            {
+                _authInFlight = false;
+                onComplete?.Invoke(false, string.IsNullOrEmpty(body) ? req.error : body);
+            }
         }
 
-        // TODO: 요청 큐 (동시 요청 수 제한이 필요할 경우)
+        IEnumerator WaitForAuth(Action<bool, string> onComplete)
+        {
+            while (_authInFlight)
+                yield return null;
+
+            onComplete?.Invoke(!string.IsNullOrEmpty(AccessToken), string.IsNullOrEmpty(AccessToken) ? "AUTH_TOKEN_EMPTY" : "");
+        }
+
+        string BuildUrl(string endpoint)
+        {
+            if (string.IsNullOrEmpty(endpoint)) return baseUrl;
+            if (endpoint.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return endpoint;
+            return $"{baseUrl.TrimEnd('/')}/{endpoint.TrimStart('/')}";
+        }
+
+        void ApplyHeaders(UnityWebRequest req)
+        {
+            req.SetRequestHeader("X-Client-Version", clientVersion);
+            req.SetRequestHeader("X-Protocol-Version", protocolVersion);
+
+            if (!string.IsNullOrEmpty(metaHash))
+                req.SetRequestHeader("X-Meta-Hash", metaHash);
+
+            if (!string.IsNullOrEmpty(AccessToken))
+                req.SetRequestHeader("Authorization", $"Bearer {AccessToken}");
+        }
+
+        static void Complete(UnityWebRequest req, Action<bool, string> onComplete)
+        {
+            var body = req.downloadHandler?.text ?? "";
+            if (req.result == UnityWebRequest.Result.Success)
+                onComplete?.Invoke(true, body);
+            else
+                onComplete?.Invoke(false, string.IsNullOrEmpty(body) ? req.error : body);
+        }
     }
 }
