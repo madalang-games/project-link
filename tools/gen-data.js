@@ -359,4 +359,10 @@ function main() {
   console.log(`[gen-data] Done: ${csvFiles.length} file(s) processed.`);
 }
 
-main();
+try {
+  main();
+} catch (e) {
+  console.error('[gen-data] Unexpected error:', e.message);
+  if (e.stack) console.error(e.stack);
+  process.exit(1);
+}

@@ -22,6 +22,7 @@
 
 const fs   = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 const cfg  = require('./config-loader');
 
 // ── SQL type maps per DB ───────────────────────────────────────────────────────
@@ -234,13 +235,56 @@ async function tableExists(client, tableName, dbType) {
   return false;
 }
 
+// ── DB package bootstrap ───────────────────────────────────────────────────────
+const DB_PACKAGES = {
+  postgresql: 'pg',
+  mysql: 'mysql2',
+  sqlite: 'better-sqlite3',
+};
+
+function isMissingRequestedModule(error, request, pkg) {
+  if (error.code !== 'MODULE_NOT_FOUND') return false;
+  return error.message.includes(`'${request}'`)
+    || error.message.includes(`"${request}"`)
+    || error.message.includes(`'${pkg}'`)
+    || error.message.includes(`"${pkg}"`);
+}
+
+function installDbPackage(pkg) {
+  console.log(`[gen-orm] Installing missing package "${pkg}"...`);
+  try {
+    execFileSync('npm', ['install', '--no-save', '--package-lock=false', pkg], {
+      cwd: cfg.root,
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
+    });
+  } catch (e) {
+    e.genOrmInstallFailure = true;
+    e.genOrmPackage = pkg;
+    throw e;
+  }
+  console.log(`[gen-orm] Installed package "${pkg}".`);
+}
+
+function requireDbModule(dbType, request) {
+  const pkg = DB_PACKAGES[dbType];
+  try {
+    return require(request);
+  } catch (e) {
+    if (!pkg || !isMissingRequestedModule(e, request, pkg)) throw e;
+    installDbPackage(pkg);
+    return require(request);
+  }
+}
+
 // ── Connect to DB ──────────────────────────────────────────────────────────────
 async function connectDB(dbType) {
   const { host, port, name, user, password, file } = cfg.db;
+  const connectHost = host === 'localhost' ? '127.0.0.1' : host;
   try {
     if (dbType === 'postgresql') {
-      const { Client } = require('pg');
-      const client = new Client({ host, port, database: name, user, password });
+      const { Client } = requireDbModule(dbType, 'pg');
+      const client = new Client({ host: connectHost, port, database: name, user, password });
       await client.connect();
       return {
         query: (sql, params) => client.query(sql, params),
@@ -250,8 +294,8 @@ async function connectDB(dbType) {
       };
     }
     if (dbType === 'mysql') {
-      const mysql = require('mysql2/promise');
-      const conn  = await mysql.createConnection({ host, port, database: name, user, password });
+      const mysql = requireDbModule(dbType, 'mysql2/promise');
+      const conn  = await mysql.createConnection({ host: connectHost, port, database: name, user, password });
       return {
         query: (sql, params) => conn.query(sql, params),
         exec:  (sql) => conn.query(sql),
@@ -260,7 +304,7 @@ async function connectDB(dbType) {
       };
     }
     if (dbType === 'sqlite') {
-      const DB = require('better-sqlite3');
+      const DB = requireDbModule(dbType, 'better-sqlite3');
       const db = new DB(file || name + '.db');
       return {
         query:   () => { throw new Error('Use prepare().all() for SQLite'); },
@@ -272,12 +316,17 @@ async function connectDB(dbType) {
     }
     throw new Error(`Unsupported DB_TYPE "${dbType}". Supported: postgresql, mysql, sqlite`);
   } catch (e) {
-    if (e.code === 'MODULE_NOT_FOUND') {
-      const pkg = { postgresql: 'pg', mysql: 'mysql2', sqlite: 'better-sqlite3' }[dbType];
-      console.error(`[gen-orm] ERROR: Required package "${pkg}" not installed.`);
-      console.error(`  Run: npm install ${pkg}`);
+    if (e.genOrmInstallFailure) {
+      console.error(`[gen-orm] ERROR: Failed to install required package "${e.genOrmPackage}".`);
+      console.error(`  Command: npm install --no-save --package-lock=false ${e.genOrmPackage}`);
+      console.error(`  ${e.message}`);
+    } else if (e.code === 'MODULE_NOT_FOUND') {
+      const pkg = DB_PACKAGES[dbType];
+      console.error(`[gen-orm] ERROR: Required package "${pkg}" could not be loaded.`);
+      console.error(`  Tried automatic install: npm install --no-save --package-lock=false ${pkg}`);
     } else {
-      console.error(`[gen-orm] ERROR: DB connection failed (${dbType}://${host}:${port}/${name})`);
+      console.error(`[gen-orm] ERROR: DB connection failed (${dbType}://${connectHost}:${port}/${name})`);
+      if (connectHost !== host) console.error(`  Resolved host "${host}" -> "${connectHost}"`);
       console.error(`  ${e.message}`);
       console.error('  Check .env: DB_HOST/DB_PORT and POSTGRES_DB/POSTGRES_USER/POSTGRES_PASSWORD');
     }
@@ -402,5 +451,6 @@ async function main() {
 
 main().catch(e => {
   console.error('[gen-orm] Unexpected error:', e.message);
+  if (e.stack) console.error(e.stack);
   process.exit(1);
 });
