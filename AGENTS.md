@@ -8,6 +8,7 @@
 | `client/` | Client app - stack defined by user | -> `client/AGENTS.md` |
 | `server/` | Server app + DB schema - stack defined by user | -> `server/AGENTS.md` |
 | `TODO-List/` | Release TODO tracker - per-area task lists + progress summary | -> `TODO-List/AGENTS.md` |
+| `open-wsl-cli.bat` | Opens a WSL CLI window at the project root | |
 
 ## Pipeline
 ```
