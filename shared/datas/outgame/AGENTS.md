@@ -27,8 +27,9 @@
 
 **outgame_daily_challenge**
 - `configId` int32 PK — always 1
-- `playCountTarget` int32 NN — successful stage clears required per day
+- `playCountTarget` int32 NN — successful daily-stage clears required per day to unlock reward
 - `resetHourUtc` int32 NN — UTC hour of daily reset (0 = midnight)
+- `stagePickCount` int32 NN — number of stages randomly selected each day as today's daily set (date-seeded)
 
 **outgame_daily_reward**
 - `streakDay` int32 PK — 1..7 consecutive completion day

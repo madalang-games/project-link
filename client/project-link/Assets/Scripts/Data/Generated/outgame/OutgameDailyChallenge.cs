@@ -12,5 +12,6 @@ namespace ProjectLink.Data.Generated
         public int configId;
         public int playCountTarget;
         public int resetHourUtc;
+        public int stagePickCount;
     }
 }

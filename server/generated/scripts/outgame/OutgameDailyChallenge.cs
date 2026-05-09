@@ -8,5 +8,6 @@ namespace ProjectLink.Generated.Data
     public int configId { get; set; }
     public int playCountTarget { get; set; }
     public int resetHourUtc { get; set; }
+    public int stagePickCount { get; set; }
     }
 }

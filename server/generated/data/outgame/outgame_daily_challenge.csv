@@ -1,2 +1,2 @@
-configId,playCountTarget,resetHourUtc
-1,3,0
+configId,playCountTarget,resetHourUtc,stagePickCount
+1,3,0,3

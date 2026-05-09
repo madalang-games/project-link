@@ -149,10 +149,10 @@ public class StaticDataService : IStaticDataService
         return result;
     }
 
-    // outgame_daily_challenge: configId,playCountTarget,resetHourUtc
+    // outgame_daily_challenge: configId,playCountTarget,resetHourUtc,stagePickCount
     private static OutgameDailyChallengeData LoadDailyChallengeConfig(string path, ILogger logger)
     {
-        var fallback = new OutgameDailyChallengeData { ConfigId = 1, PlayCountTarget = 3, ResetHourUtc = 0 };
+        var fallback = new OutgameDailyChallengeData { ConfigId = 1, PlayCountTarget = 3, ResetHourUtc = 0, StagePickCount = 3 };
         if (!File.Exists(path)) { logger.LogWarning("outgame_daily_challenge.csv not found at {Path}", path); return fallback; }
 
         using var reader = new StreamReader(path);
@@ -165,6 +165,7 @@ public class StaticDataService : IStaticDataService
             ConfigId        = int.Parse(cols[0]),
             PlayCountTarget = int.Parse(cols[1]),
             ResetHourUtc    = int.Parse(cols[2]),
+            StagePickCount  = cols.Length > 3 ? int.Parse(cols[3]) : 3,
         };
     }
 
