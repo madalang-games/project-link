@@ -26,7 +26,6 @@ namespace ProjectLink.Services
         static readonly JsonSerializerSettings JsonSettings = new()
         {
             DateParseHandling = DateParseHandling.None,
-            ObjectCreationHandling = ObjectCreationHandling.Replace,
         };
 
         readonly Dictionary<string, CacheEntry> _cache = new();

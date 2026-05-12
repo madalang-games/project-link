@@ -19,6 +19,7 @@ namespace ProjectLink.OutGame.UI
 
         int _stageId;
         bool _initialized;
+        RectTransform _myRankPanel;
 
         public void Init(int stageId = 0)
         {
@@ -40,7 +41,7 @@ namespace ProjectLink.OutGame.UI
                 btnPlay.onClick.AddListener(OnPlay);
 
             SetText(txtBest, $"Stage {_stageId}");
-            SetText(txtMyRank, "-");
+            SetText(txtMyRank, "My Ranking");
             UiServiceLocator.UiData.GetProgress(ApplyProgress);
             UiServiceLocator.UiData.GetRanking($"stage:{_stageId}", ApplyRanking);
         }
@@ -74,24 +75,68 @@ namespace ProjectLink.OutGame.UI
         void ApplyRanking(ServiceResult<RankingListResponse> result)
         {
             ClearChildren(rankContent);
+            ClearChildren(_myRankPanel);
+
             if (!result.IsSuccess || result.Value == null)
             {
-                SetText(txtMyRank, result.ErrorCode);
+                AddMyRankRow(null, result.ErrorCode);
                 return;
             }
 
             var ranking = result.Value;
-            SetText(txtMyRank, ranking.MyRank == null
-                ? "-"
-                : $"#{ranking.MyRank.Rank} {FormatRankValue(ranking.MyRank.Value, ranking.Category)}");
 
             int count = Mathf.Min(10, ranking.Entries.Count);
             for (int i = 0; i < count; i++)
             {
                 var entry = ranking.Entries[i];
                 AddRankRow($"#{entry.Rank}", string.IsNullOrEmpty(entry.DisplayName) ? "Guest" : entry.DisplayName,
-                    FormatRankValue(entry.Value, ranking.Category), entry.IsMe);
+                    FormatScore(entry.Value), entry.IsMe);
             }
+
+            AddMyRankRow(ranking.MyRank, null);
+        }
+
+        void AddMyRankRow(RankingEntry myRank, string errorText)
+        {
+            if (_myRankPanel == null) return;
+
+            string rankStr, scoreStr;
+            bool hasRank;
+
+            if (!string.IsNullOrEmpty(errorText))
+            {
+                rankStr = errorText;
+                scoreStr = "";
+                hasRank = false;
+            }
+            else if (myRank != null)
+            {
+                rankStr = $"#{myRank.Rank}";
+                scoreStr = FormatScore(myRank.Value);
+                hasRank = true;
+            }
+            else
+            {
+                rankStr = "-";
+                scoreStr = "-";
+                hasRank = false;
+            }
+
+            var row = new GameObject("MyRankRow", typeof(RectTransform), typeof(Image), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
+            row.transform.SetParent(_myRankPanel, false);
+            row.GetComponent<Image>().color = hasRank
+                ? new Color(0.12f, 0.45f, 0.9f, 0.85f)
+                : new Color(1f, 1f, 1f, 0.06f);
+            row.GetComponent<LayoutElement>().preferredHeight = 60f;
+            var layout = row.GetComponent<HorizontalLayoutGroup>();
+            layout.padding = new RectOffset(14, 14, 8, 8);
+            layout.spacing = 12f;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+
+            AddLabel(row.transform, rankStr, 0.35f, TextAlignmentOptions.MidlineLeft);
+            if (!string.IsNullOrEmpty(scoreStr))
+                AddLabel(row.transform, scoreStr, 1f, TextAlignmentOptions.MidlineRight);
         }
 
         void EnsureRankingContent()
@@ -107,7 +152,7 @@ namespace ProjectLink.OutGame.UI
             scroll.transform.SetParent(parent, false);
             scroll.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.06f);
             scroll.GetComponent<Mask>().showMaskGraphic = false;
-            scroll.GetComponent<LayoutElement>().preferredHeight = 360f;
+            scroll.GetComponent<LayoutElement>().preferredHeight = 320f;
 
             var content = new GameObject("RankContent", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
             content.transform.SetParent(scroll.transform, false);
@@ -132,6 +177,16 @@ namespace ProjectLink.OutGame.UI
             scrollRect.content = rankContent;
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
             scrollRect.horizontal = false;
+
+            // MyRank panel below the scroll
+            var myRankContainer = new GameObject("MyRankPanel", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(LayoutElement));
+            myRankContainer.transform.SetParent(parent, false);
+            myRankContainer.GetComponent<LayoutElement>().minHeight = 64f;
+            var myLayout = myRankContainer.GetComponent<VerticalLayoutGroup>();
+            myLayout.padding = new RectOffset(0, 0, 4, 0);
+            myLayout.childControlWidth = true;
+            myLayout.childControlHeight = true;
+            _myRankPanel = myRankContainer.GetComponent<RectTransform>();
         }
 
         void AddStar(bool filled)
@@ -213,11 +268,7 @@ namespace ProjectLink.OutGame.UI
                 Destroy(parent.GetChild(i).gameObject);
         }
 
-        static string FormatRankValue(long value, string category)
-        {
-            if (category == "STAGE_TIME")
-                return $"{value / 100f:0.00}s";
-            return value.ToString("N0", CultureInfo.InvariantCulture);
-        }
+        static string FormatScore(long value)
+            => value.ToString("N0", CultureInfo.InvariantCulture);
     }
 }

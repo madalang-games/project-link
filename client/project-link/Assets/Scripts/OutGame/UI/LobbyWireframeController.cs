@@ -220,13 +220,23 @@ namespace ProjectLink.OutGame.UI
             _selectedStageId = Mathf.Clamp(_selectedStageId <= 0 ? 1 : _selectedStageId, 1, _maxSelectableStageId);
             GameContext.SelectedStageId = _selectedStageId;
             SetText(stageNumberText, _selectedStageId.ToString(CultureInfo.InvariantCulture));
-            SetText(previousStageNumberText, _selectedStageId > 1 ? (_selectedStageId - 1).ToString(CultureInfo.InvariantCulture) : "");
-            SetText(nextStageNumberText, _selectedStageId < _maxSelectableStageId ? (_selectedStageId + 1).ToString(CultureInfo.InvariantCulture) : "");
+
+            bool hasPrev = _selectedStageId > 1;
+            bool hasNext = _selectedStageId < _maxSelectableStageId;
+
+            SetText(previousStageNumberText, hasPrev ? (_selectedStageId - 1).ToString(CultureInfo.InvariantCulture) : "");
+            SetText(nextStageNumberText,     hasNext ? (_selectedStageId + 1).ToString(CultureInfo.InvariantCulture) : "");
 
             if (previousStageButton != null)
-                previousStageButton.interactable = _selectedStageId > 1;
+                previousStageButton.interactable = hasPrev;
             if (nextStageButton != null)
-                nextStageButton.interactable = _selectedStageId < _maxSelectableStageId;
+                nextStageButton.interactable = hasNext;
+
+            if (_previousStageNode != null)
+                _previousStageNode.gameObject.SetActive(hasPrev);
+            if (_nextStageNode != null)
+                _nextStageNode.gameObject.SetActive(hasNext);
+
             StartStageSwitchAnimation();
         }
 
@@ -261,6 +271,19 @@ namespace ProjectLink.OutGame.UI
             var track = center != null ? center.parent as RectTransform : null;
             if (center == null || track == null)
                 return;
+
+            // Reduce spacing and allow track to overflow its container
+            var trackLayout = track.GetComponent<HorizontalLayoutGroup>();
+            if (trackLayout != null)
+            {
+                trackLayout.spacing = 16f;
+                trackLayout.childAlignment = TextAnchor.MiddleCenter;
+                trackLayout.childForceExpandWidth = false;
+            }
+            var trackFitter = track.GetComponent<ContentSizeFitter>();
+            if (trackFitter == null)
+                trackFitter = track.gameObject.AddComponent<ContentSizeFitter>();
+            trackFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             var prev = FindOrCloneNode(track, center, "StageNode_Prev", 0);
             var next = FindOrCloneNode(track, center, "StageNode_Next", 2);

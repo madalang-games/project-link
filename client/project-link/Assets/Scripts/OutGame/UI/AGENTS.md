@@ -63,7 +63,7 @@
 | `SessionExpiredPopup.Init()` | method | confirm -> Title |
 | `ForceUpdatePopup.Init()` | method | binds Btn_OpenStore click -> platform app store URL |
 | `MaintenancePopup.Init(string)` | method | sets Txt_Body text from server maintenance message |
-| `StageDetailPopup.Init(int)` | method | binds Btn_Close/Btn_Play, renders stars and top-10 stage ranking |
+| `StageDetailPopup.Init(int)` | method | binds Btn_Close/Btn_Play, renders stars and top-10 stage ranking (score, descending); adds MyRankPanel below scroll showing `#{rank} {score}` or `-` |
 
 ## Cross-refs
 - Consumed by: client `Core.PopupManager`
