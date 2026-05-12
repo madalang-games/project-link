@@ -27,7 +27,7 @@ public class AppDbContext : DbContext
         {
             e.ToTable("sessions");
             e.HasKey(x => x.Id);
-            e.Property(x => x.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            e.Property(x => x.Id).HasColumnName("id").ValueGeneratedOnAdd();
             e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
             e.Property(x => x.SessionId).HasColumnName("session_id").HasMaxLength(36);
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
@@ -69,7 +69,7 @@ public class AppDbContext : DbContext
         {
             e.ToTable("currency_logs");
             e.HasKey(x => x.Id);
-            e.Property(x => x.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            e.Property(x => x.Id).HasColumnName("id").ValueGeneratedOnAdd();
             e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
             e.Property(x => x.TransactionId).HasColumnName("transaction_id").HasMaxLength(36);
             e.Property(x => x.CurrencyType).HasColumnName("currency_type").HasMaxLength(32);
@@ -163,7 +163,7 @@ public class AppDbContext : DbContext
         {
             e.ToTable("action_logs");
             e.HasKey(x => x.Id);
-            e.Property(x => x.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            e.Property(x => x.Id).HasColumnName("id").ValueGeneratedOnAdd();
             e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
             e.Property(x => x.ActionType).HasColumnName("action_type").HasMaxLength(64);
             e.Property(x => x.Payload).HasColumnName("payload").HasColumnType("json");
