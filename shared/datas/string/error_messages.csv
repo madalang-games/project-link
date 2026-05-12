@@ -2,6 +2,22 @@ errorCode,ko,en
 C,C,C
 string(64),string(256),string(256)
 PK,NN,NN
+NETWORK_UNAVAILABLE,Network is not initialized.,Network is not initialized.
+HTTP_FAILED,Network request failed.,Network request failed.
+DESERIALIZE_FAILED,Server response could not be read.,Server response could not be read.
+AUTH_FAILED,Authentication failed.,Authentication failed.
+SESSION_EXPIRED,Your session has expired.,Your session has expired.
+AUTH_PROVIDER_TOKEN_MISSING,Provider sign-in token is missing.,Provider sign-in token is missing.
+PROVIDER_UNAVAILABLE,This sign-in provider is not available yet.,This sign-in provider is not available yet.
+INVALID_REQUEST,Invalid authentication request.,Invalid authentication request.
+INVALID_CREDENTIALS,Invalid credentials.,Invalid credentials.
+TOKEN_EXPIRED,Your session has expired.,Your session has expired.
+TOKEN_REVOKED,Your session has been revoked.,Your session has been revoked.
+TOKEN_REUSE_DETECTED,Please sign in again.,Please sign in again.
+ACCOUNT_LOCKED,This account is locked.,This account is locked.
+ACCOUNT_BANNED,This account is banned.,This account is banned.
+PROVIDER_TOKEN_INVALID,Provider sign-in failed.,Provider sign-in failed.
+SIGNING_KEY_UNAVAILABLE,Authentication is temporarily unavailable.,Authentication is temporarily unavailable.
 INSUFFICIENT_STAMINA,스태미나가 부족합니다.,Insufficient stamina.
 INSUFFICIENT_FUNDS,재화가 부족합니다.,Insufficient currency.
 INSUFFICIENT_INVENTORY,아이템 보유 수량이 부족합니다.,Insufficient item quantity.

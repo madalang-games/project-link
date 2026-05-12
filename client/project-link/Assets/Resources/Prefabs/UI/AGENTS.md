@@ -3,10 +3,21 @@
 ## Files
 | file | class | role |
 |---|---|---|
-| `SettingPopup.prefab` | `SettingPopup` | Generated prefab with `UI/SettingPopup` image and button hotspots |
-| `BuyItemPopup.prefab` | `BuyItemPopup` | Generated prefab with `UI/BuyItemPopup` image and button hotspots |
-| `EnergyPopup.prefab` | `EnergyPopup` | Generated prefab with `UI/EnergyPopup` image and button hotspots |
-| `ClearPopup.prefab` | `ClearPopup` | Generated prefab with stage-clear result labels and Next/Retry/Lobby hotspots |
+| `SettingPopup.prefab` | `SettingPopup` | Generated settings popup with toggle/dropdown/save hotspots |
+| `BuyItemPopup.prefab` | `BuyItemPopup` | Generated item purchase popup |
+| `EnergyPopup.prefab` | `EnergyPopup` | Generated stamina/ad/refill popup |
+| `DailyChallengePopup.prefab` | `DailyChallengePopup` | Generated daily challenge popup |
+| `AccountPopup.prefab` | `AccountPopup` | Generated account/profile popup |
+| `RewardPopup.prefab` | `RewardPopup` | Generated reward claim popup |
+| `ClearPopup.prefab` | `ClearPopup` | Generated stage-clear result popup |
+| `PausePopup.prefab` | `PausePopup` | Generated in-game pause popup |
+| `TimeoutPopup.prefab` | `TimeoutPopup` | Generated non-dismissible timeout popup |
+| `ReturnTitlePopup.prefab` | `ReturnTitlePopup` | Generated title-return confirmation popup |
+| `ExitGamePopup.prefab` | `ExitGamePopup` | Generated app-exit confirmation popup |
+| `SessionExpiredPopup.prefab` | `SessionExpiredPopup` | Generated non-dismissible session-expired popup |
+| `ForceUpdatePopup.prefab` | `ForceUpdatePopup` | Generated non-dismissible force-update popup |
+| `MaintenancePopup.prefab` | `MaintenancePopup` | Generated non-dismissible maintenance popup |
+| `StageDetailPopup.prefab` | `StageDetailPopup` | Generated stage detail/start popup |
 
 ## Symbols
 | symbol | kind | note |
@@ -14,7 +25,15 @@
 | `Prefabs/UI/SettingPopup` | Resources path | loaded by `PopupManager` for `PopupId.Settings` |
 | `Prefabs/UI/BuyItemPopup` | Resources path | loaded by `PopupManager` for `PopupId.BuyItem` |
 | `Prefabs/UI/EnergyPopup` | Resources path | loaded by `PopupManager` for `PopupId.Energy` |
+| `Prefabs/UI/DailyChallengePopup` | Resources path | loaded by `PopupManager` for `PopupId.DailyChallenge` |
+| `Prefabs/UI/AccountPopup` | Resources path | loaded by `PopupManager` for `PopupId.Account` |
+| `Prefabs/UI/RewardPopup` | Resources path | loaded by `PopupManager` for `PopupId.Reward` |
 | `Prefabs/UI/ClearPopup` | Resources path | loaded by `PopupManager` for `PopupId.StageClear` |
+| `Prefabs/UI/PausePopup` | Resources path | loaded by `PopupManager` for `PopupId.Pause` |
+| `Prefabs/UI/SessionExpiredPopup` | Resources path | generated session-expired prefab; current fallback may build code-only popup |
+| `Prefabs/UI/ForceUpdatePopup` | Resources path | loaded by `PopupManager` for `PopupId.ForceUpdate` |
+| `Prefabs/UI/MaintenancePopup` | Resources path | loaded by `PopupManager` for `PopupId.Maintenance` |
+| `Prefabs/UI/StageDetailPopup` | Resources path | loaded by `PopupManager` when stage detail flow is wired |
 
 ## Rules
 - Regenerate via `Tools/Project Link/UI Build/Build Popup Prefabs`.

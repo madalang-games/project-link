@@ -15,7 +15,10 @@ namespace ProjectLink.Core
         Account,
         Reward,
         StageClear,
-        SessionExpired
+        SessionExpired,
+        Pause,
+        ForceUpdate,
+        Maintenance
     }
 
     public readonly struct PopupRequest
@@ -153,6 +156,15 @@ namespace ProjectLink.Core
                     break;
                 case PopupId.SessionExpired:
                     Open<ProjectLink.OutGame.UI.SessionExpiredPopup>().Init();
+                    break;
+                case PopupId.Pause:
+                    OpenPrefab<ProjectLink.InGame.UI.PausePopup>("Prefabs/UI/PausePopup")?.Init();
+                    break;
+                case PopupId.ForceUpdate:
+                    OpenPrefab<ProjectLink.OutGame.UI.ForceUpdatePopup>("Prefabs/UI/ForceUpdatePopup")?.Init();
+                    break;
+                case PopupId.Maintenance:
+                    OpenPrefab<ProjectLink.OutGame.UI.MaintenancePopup>("Prefabs/UI/MaintenancePopup")?.Init(request.Payload as string);
                     break;
             }
         }

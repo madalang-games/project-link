@@ -11,6 +11,8 @@ namespace ProjectLink.InGame.UI
     {
         Action _onResume;
 
+        public void Init() => Init(null);
+
         public void Init(Action onResume)
         {
             _onResume = onResume;

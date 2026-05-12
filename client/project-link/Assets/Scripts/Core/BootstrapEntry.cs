@@ -12,12 +12,10 @@ namespace ProjectLink.Core
             CreateManager<HapticManager>("HapticManager");
             CreateManager<UIManager>("UIManager");
             CreateManager<PopupManager>("PopupManager");
+            CreateManager<ToastPresenter>("ToastPresenter");
             CreateManager<NetworkManager>("NetworkManager");
-            NetworkManager.Instance.AuthService = new MockAuthService();
             CreateManager<PoolManager>("PoolManager");
             CreateManager<SceneLoader>("SceneLoader");
-
-            SceneLoader.Instance.LoadScene("Title");
         }
 
         private static void CreateManager<T>(string goName) where T : MonoBehaviour

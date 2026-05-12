@@ -121,7 +121,7 @@ namespace ProjectLink.Core
             if (_touchInput != null) _touchInput.enabled = enabled;
         }
 
-        void OpenPausePopup()
+        public void OpenPausePopup()
         {
             if (PopupManager.Instance == null || PopupManager.Instance.HasPopup) return;
 

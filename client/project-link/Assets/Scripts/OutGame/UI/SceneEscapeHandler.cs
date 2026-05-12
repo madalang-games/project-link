@@ -10,7 +10,8 @@ namespace ProjectLink.OutGame.UI
         {
             None,
             ReturnToTitle,
-            ExitGame
+            ExitGame,
+            OpenPauseMenu
         }
 
         [SerializeField] EscapeAction action;
@@ -34,6 +35,9 @@ namespace ProjectLink.OutGame.UI
                     break;
                 case EscapeAction.ExitGame:
                     navigation?.OpenExitGamePopup();
+                    break;
+                case EscapeAction.OpenPauseMenu:
+                    navigation?.OpenPausePopup();
                     break;
             }
         }

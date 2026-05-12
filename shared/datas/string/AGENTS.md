@@ -35,7 +35,14 @@ PK,NN,NN,NN,NN,NN
 | `popup_` | Shared popup UI |
 | `language_` | Language selector labels |
 | `country_` | Country/region labels |
+| `common.` | Generated UI shared controls |
+| `hud.` | Generated HUD/dropdown labels |
+| `tab.` | Generated tab labels |
+| `home.` | Generated Home tab labels |
+| `shop.` | Generated Shop tab labels |
+| `rank.` | Generated Ranking tab labels |
+| `popup.` | Generated popup labels |
 
 ## Cross-refs
-- Gen output: `client/generated/data/string/clientstring.csv` (via `npm run gen:data`)
-- Consumed by: client `Data.Generated.Clientstring` (generated model), client `Utils.LocalizedText` (runtime string lookup via `LocalizationManager`)
+- Gen output: `client/generated/data/string/clientstring.csv`, `client/generated/data/string/error_messages.csv` (via `npm run gen:data`)
+- Consumed by: client `Data.Generated.Clientstring`, client `Data.Generated.ErrorMessages`, client `OutGame.UI.LocalizedText`, client `Core.LocalizationManager`

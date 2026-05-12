@@ -2,6 +2,71 @@ stringId,EN,KO,ZH_CN,ZH_TW,TH
 C,C,C,C,C,C
 string(64),string(512),string(512),string(512),string(512),string(512)
 PK,NN,NN,NN,NN,NN
+common.retry,Retry,Retry,Retry,Retry,Retry
+common.confirm,Confirm,Confirm,Confirm,Confirm,Confirm
+common.cancel,Cancel,Cancel,Cancel,Cancel,Cancel
+common.save,Save,Save,Save,Save,Save
+common.play,Play,Play,Play,Play,Play
+common.complete,Complete,Complete,Complete,Complete,Complete
+common.claim,Claim,Claim,Claim,Claim,Claim
+common.lobby,Lobby,Lobby,Lobby,Lobby,Lobby
+common.next,Next,Next,Next,Next,Next
+common.resume,Resume,Resume,Resume,Resume,Resume
+bootstrap.loading,Loading...,Loading...,Loading...,Loading...,Loading...
+bootstrap.ready,Ready,Ready,Ready,Ready,Ready
+bootstrap.network_error,Network error. Please try again.,Network error. Please try again.,Network error. Please try again.,Network error. Please try again.,Network error. Please try again.
+title.tap_to_start,TAP TO START,TAP TO START,TAP TO START,TAP TO START,TAP TO START
+title.continue_google,Continue with Google,Continue with Google,Continue with Google,Continue with Google,Continue with Google
+title.continue_apple,Continue with Apple,Continue with Apple,Continue with Apple,Continue with Apple,Continue with Apple
+hud.settings,Settings,Settings,Settings,Settings,Settings
+hud.language,Language,Language,Language,Language,Language
+status.energy_empty,Energy 0,Energy 0,Energy 0,Energy 0,Energy 0
+tab.shop,Shop,Shop,Shop,Shop,Shop
+tab.home,Home,Home,Home,Home,Home
+tab.ranking,Ranking,Ranking,Ranking,Ranking,Ranking
+home.stage_play,Play Stage,Play Stage,Play Stage,Play Stage,Play Stage
+home.daily_title,Daily Challenge,Daily Challenge,Daily Challenge,Daily Challenge,Daily Challenge
+home.daily_streak_fmt,Daily streak,Daily streak,Daily streak,Daily streak,Daily streak
+shop.balance_label,Balance,Balance,Balance,Balance,Balance
+shop.section_stamina,Stamina,Stamina,Stamina,Stamina,Stamina
+rank.tab_clear,Stages Cleared,Stages Cleared,Stages Cleared,Stages Cleared,Stages Cleared
+rank.tab_score,Total Score,Total Score,Total Score,Total Score,Total Score
+rank.you,You,You,You,You,You
+popup.force_update.title,Update Required,Update Required,Update Required,Update Required,Update Required
+popup.force_update.body,A new version is required to continue.,A new version is required to continue.,A new version is required to continue.,A new version is required to continue.,A new version is required to continue.
+popup.force_update.cta,Update Now,Update Now,Update Now,Update Now,Update Now
+popup.maintenance.title,Maintenance,Maintenance,Maintenance,Maintenance,Maintenance
+popup.maintenance.body,The service is currently under maintenance.,The service is currently under maintenance.,The service is currently under maintenance.,The service is currently under maintenance.,The service is currently under maintenance.
+popup.session.title,Session Expired,Session Expired,Session Expired,Session Expired,Session Expired
+popup.session.body,Please return to the title screen and sign in again.,Please return to the title screen and sign in again.,Please return to the title screen and sign in again.,Please return to the title screen and sign in again.,Please return to the title screen and sign in again.
+popup.settings.title,Settings,Settings,Settings,Settings,Settings
+popup.settings.bgm,BGM,BGM,BGM,BGM,BGM
+popup.settings.sfx,SFX,SFX,SFX,SFX,SFX
+popup.settings.haptics,Haptics,Haptics,Haptics,Haptics,Haptics
+popup.settings.notif,Notifications,Notifications,Notifications,Notifications,Notifications
+popup.energy.title,Energy,Energy,Energy,Energy,Energy
+popup.energy.full_in_fmt,Full recharge soon,Full recharge soon,Full recharge soon,Full recharge soon,Full recharge soon
+popup.energy.watch_ad_fmt,Watch Ad,Watch Ad,Watch Ad,Watch Ad,Watch Ad
+popup.energy.refill_fmt,Refill,Refill,Refill,Refill,Refill
+popup.stage.title_fmt,Stage Detail,Stage Detail,Stage Detail,Stage Detail,Stage Detail
+popup.stage.best_fmt,Best Score,Best Score,Best Score,Best Score,Best Score
+popup.stage.my_rank_fmt,My Rank,My Rank,My Rank,My Rank,My Rank
+popup.daily.title,Daily Challenge,Daily Challenge,Daily Challenge,Daily Challenge,Daily Challenge
+popup.daily.today_fmt,Today's progress,Today's progress,Today's progress,Today's progress,Today's progress
+popup.daily.reward_fmt,Reward,Reward,Reward,Reward,Reward
+popup.reward.title,Reward,Reward,Reward,Reward,Reward
+popup.reward.x2,Claim x2,Claim x2,Claim x2,Claim x2,Claim x2
+popup.account.title,Account,Account,Account,Account,Account
+popup.account.joined_fmt,Joined,Joined,Joined,Joined,Joined
+popup.clear.title,Stage Clear,Stage Clear,Stage Clear,Stage Clear,Stage Clear
+popup.clear.retry,Retry,Retry,Retry,Retry,Retry
+popup.pause.title,Paused,Paused,Paused,Paused,Paused
+popup.pause.retry,Retry,Retry,Retry,Retry,Retry
+popup.timeout.title,Time's Up,Time's Up,Time's Up,Time's Up,Time's Up
+popup.return_title.title,Return to Title,Return to Title,Return to Title,Return to Title,Return to Title
+popup.return_title.body,Go back to the title screen?,Go back to the title screen?,Go back to the title screen?,Go back to the title screen?,Go back to the title screen?
+popup.exit_game.title,Exit Game,Exit Game,Exit Game,Exit Game,Exit Game
+popup.exit_game.body,Close Project Link?,Close Project Link?,Close Project Link?,Close Project Link?,Close Project Link?
 app_title,PROJECT LINK,프로젝트 링크,项目连接,專案連線,โปรเจกต์ลิงก์
 bootstrap_syncing_puzzle_data,SYNCING PUZZLE DATA,퍼즐 데이터 동기화 중,正在同步拼图数据,正在同步拼圖資料,กำลังซิงก์ข้อมูลปริศนา
 status_data,DATA,데이터,数据,資料,ข้อมูล

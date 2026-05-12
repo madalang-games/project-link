@@ -116,7 +116,15 @@ namespace ProjectLink.Services
             if (TryServeCache(endpoint, onComplete))
                 return;
 
-            void Send() => network.Get(endpoint, (ok, payload) => Complete(ok, payload, onComplete, endpoint));
+            void Send()
+            {
+                UiEventBus.Publish(new UiBusyChanged(endpoint, true));
+                network.Get(endpoint, (ok, payload) =>
+                {
+                    UiEventBus.Publish(new UiBusyChanged(endpoint, false));
+                    Complete(ok, payload, onComplete, endpoint);
+                });
+            }
 
             if (requiresAuth)
                 network.EnsureGuestAuth((ok, error) =>
@@ -133,22 +141,28 @@ namespace ProjectLink.Services
         void Post<T>(string endpoint, object body, Action<ServiceResult<T>> onComplete, Action onSuccess = null)
         {
             if (!TryGetNetwork(out var network, onComplete)) return;
+            UiEventBus.Publish(new UiBusyChanged(endpoint, true));
             network.EnsureGuestAuth((authOk, authError) =>
             {
                 if (!authOk)
                 {
+                    UiEventBus.Publish(new UiBusyChanged(endpoint, false));
                     if (authError == "SESSION_EXPIRED")
                         PopupManager.Request(PopupId.SessionExpired);
                     onComplete?.Invoke(new ServiceResult<T>(authError, authError));
                     return;
                 }
 
-                network.Post(endpoint, JsonConvert.SerializeObject(body), (ok, payload) => Complete<T>(ok, payload, result =>
+                network.Post(endpoint, JsonConvert.SerializeObject(body), (ok, payload) =>
                 {
-                    if (result.IsSuccess)
-                        onSuccess?.Invoke();
-                    onComplete?.Invoke(result);
-                }));
+                    UiEventBus.Publish(new UiBusyChanged(endpoint, false));
+                    Complete<T>(ok, payload, result =>
+                    {
+                        if (result.IsSuccess)
+                            onSuccess?.Invoke();
+                        onComplete?.Invoke(result);
+                    });
+                });
             });
         }
 
@@ -165,7 +179,9 @@ namespace ProjectLink.Services
         {
             if (!ok)
             {
-                onComplete?.Invoke(ParseError<T>(payload));
+                var result = ParseError<T>(payload);
+                UiEventBus.Publish(new UiErrorRaised(cacheKey ?? "", result.ErrorCode, result.ErrorMessage));
+                onComplete?.Invoke(result);
                 return;
             }
 
@@ -184,12 +200,17 @@ namespace ProjectLink.Services
             }
             catch (Exception ex)
             {
-                onComplete?.Invoke(new ServiceResult<T>("DESERIALIZE_FAILED", ex.Message));
+                var result = new ServiceResult<T>("DESERIALIZE_FAILED", ex.Message);
+                UiEventBus.Publish(new UiErrorRaised(cacheKey ?? "", result.ErrorCode, result.ErrorMessage));
+                onComplete?.Invoke(result);
             }
         }
 
         static ServiceResult<T> ParseError<T>(string payload)
         {
+            if (payload == "SESSION_EXPIRED")
+                return new ServiceResult<T>("SESSION_EXPIRED", payload);
+
             try
             {
                 var error = JsonConvert.DeserializeObject<ErrorResponse>(payload);

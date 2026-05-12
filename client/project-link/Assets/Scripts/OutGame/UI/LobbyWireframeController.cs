@@ -1,6 +1,6 @@
 using System.Globalization;
-using ProjectLink.Contracts.Lobby;
 using ProjectLink.Contracts.Ranking;
+using ProjectLink.Core;
 using ProjectLink.Services;
 using TMPro;
 using UnityEngine;
@@ -28,96 +28,89 @@ namespace ProjectLink.OutGame.UI
 
         IStaticCatalogService _catalog;
         IUiDataService _uiData;
+        LobbyViewModel _viewModel;
 
         void Awake()
         {
             ResolveMissingReferences();
             _catalog = UiServiceLocator.Catalog;
             _uiData = UiServiceLocator.UiData;
+            _viewModel = new LobbyViewModel(_uiData, _catalog);
+            _viewModel.Changed += Render;
         }
 
         void Start()
         {
-            RefreshLobby();
-            RefreshShop();
-            RefreshRanking("global_stages");
+            _viewModel.LoadLobby();
+            _viewModel.LoadShop();
+            _viewModel.LoadRanking("global_stages");
+        }
+
+        void OnDestroy()
+        {
+            if (_viewModel != null)
+                _viewModel.Changed -= Render;
         }
 
         public void RefreshRanking(string category)
         {
             ClearChildren(rankingContent);
             SetText(rankingErrorText, "");
-
-            _uiData.GetRanking(category, result =>
-            {
-                if (!result.IsSuccess)
-                {
-                    SetText(rankingErrorText, result.ErrorCode);
-                    return;
-                }
-
-                ApplyRanking(result.Value);
-            });
+            _viewModel.LoadRanking(category);
         }
 
-        void RefreshLobby()
+        void Render()
         {
-            _uiData.GetLobbyState(result =>
-            {
-                if (!result.IsSuccess)
-                {
-                    SetText(playDisabledReasonText, result.ErrorCode);
-                    if (playButton != null) playButton.interactable = false;
-                    return;
-                }
+            if (_viewModel == null) return;
 
-                ApplyLobby(result.Value);
-            });
+            if (!string.IsNullOrEmpty(_viewModel.ErrorCode))
+            {
+                SetText(playDisabledReasonText, LocalizationManager.GetError(_viewModel.ErrorCode));
+                UiEventBus.Publish(new UiErrorRaised("lobby", _viewModel.ErrorCode, _viewModel.ErrorMessage));
+            }
+
+            if (_viewModel.Lobby != null)
+                ApplyLobby(_viewModel.Lobby);
+
+            if (_viewModel.Shop != null)
+                ApplyShop(_viewModel.Shop);
+
+            if (_viewModel.Ranking != null)
+                ApplyRanking(_viewModel.Ranking);
         }
 
-        void RefreshShop()
+        void ApplyShop(ShopScreenModel model)
         {
             ClearChildren(shopContent);
-            _uiData.GetShopCatalog(result =>
+            SetText(shopBalanceText, FormatNumber(model.SoftBalance));
+
+            foreach (var product in model.Products)
             {
-                if (!result.IsSuccess)
-                {
-                    AddRow(shopContent, "ShopErrorRow", result.ErrorCode, "", false);
-                    return;
-                }
-
-                var model = UiViewModelMapper.ToShopScreen(result.Value, _catalog);
-                SetText(shopBalanceText, FormatNumber(model.SoftBalance));
-
-                foreach (var product in model.Products)
-                {
-                    string title = string.IsNullOrEmpty(product.ItemName) ? product.Name : product.ItemName;
-                    string price = product.IsIapProduct ? product.PriceIapSku : FormatNumber(product.PriceSoft);
-                    AddRow(shopContent, $"Product_{product.ProductId}", title, price, true);
-                }
-            });
+                string title = string.IsNullOrEmpty(product.ItemName) ? product.Name : product.ItemName;
+                string price = product.IsIapProduct ? product.PriceIapSku : FormatNumber(product.PriceSoft);
+                AddRow(shopContent, $"Product_{product.ProductId}", title, price, true);
+            }
         }
 
-        void ApplyLobby(LobbyStateResponse lobby)
+        void ApplyLobby(LobbyScreenModel lobby)
         {
-            int currentStageId = lobby.ProgressSummary.NextUnlockedStageId > 0
-                ? lobby.ProgressSummary.NextUnlockedStageId
-                : Mathf.Max(1, lobby.ProgressSummary.HighestStageId);
+            int currentStageId = lobby.NextUnlockedStageId > 0
+                ? lobby.NextUnlockedStageId
+                : Mathf.Max(1, lobby.HighestStageId);
 
-            SetText(profileNameText, lobby.Profile.DisplayName);
-            SetText(energyText, $"{lobby.Stamina.Current}/{lobby.Stamina.Max}");
-            SetText(coinText, FormatNumber(lobby.Currency.SoftAmount));
+            SetText(profileNameText, lobby.DisplayName);
+            SetText(energyText, $"{lobby.StaminaCurrent}/{lobby.StaminaMax}");
+            SetText(coinText, FormatNumber(lobby.SoftCurrency));
             SetText(stageNumberText, currentStageId.ToString(CultureInfo.InvariantCulture));
-            SetText(starsText, lobby.ProgressSummary.TotalStarsEarned.ToString(CultureInfo.InvariantCulture));
+            SetText(starsText, lobby.TotalStarsEarned.ToString(CultureInfo.InvariantCulture));
             SetText(dailyProgressText, $"{lobby.DailyChallenge.PlayCountToday}/{lobby.DailyChallenge.PlayCountTarget}");
             SetText(colorCupTimerText, lobby.SeasonEvent?.EndAt ?? "");
 
-            bool canPlay = lobby.Stamina.Current > 0;
             if (playButton != null)
-                playButton.interactable = canPlay;
+                playButton.interactable = lobby.CanPlay;
             if (refillButton != null)
-                refillButton.gameObject.SetActive(!canPlay);
-            SetText(playDisabledReasonText, canPlay ? "" : "Energy 0");
+                refillButton.gameObject.SetActive(!lobby.CanPlay);
+            SetText(playDisabledReasonText, lobby.CanPlay ? "" : LocalizationManager.Get("status.energy_empty"));
         }
 
         void ApplyRanking(RankingListResponse ranking)
@@ -142,21 +135,21 @@ namespace ProjectLink.OutGame.UI
 
         void ResolveMissingReferences()
         {
-            profileNameText ??= FindText("ProfileNameText");
-            energyText ??= FindText("EnergyValueText");
-            coinText ??= FindText("CoinValueText");
-            stageNumberText ??= FindText("CurrentStageNumberText");
-            starsText ??= FindText("StageStarsValueText");
-            dailyProgressText ??= FindText("DailyProgressText");
-            colorCupTimerText ??= FindText("ColorCupTimerText");
-            playDisabledReasonText ??= FindText("PlayDisabledReasonText");
-            shopBalanceText ??= FindText("ShopBalanceText");
-            rankingMetricText ??= FindText("RankingMetricText");
-            rankingErrorText ??= FindText("RankingErrorText");
-            shopContent ??= FindRect("ShopContent");
-            rankingContent ??= FindRect("RankingContent");
-            playButton ??= FindButton("PlayButton");
-            refillButton ??= FindButton("RefillCTAButton");
+            profileNameText ??= FindText("Txt_Nickname");
+            energyText ??= FindText("Txt_StaminaCount");
+            coinText ??= FindText("Txt_CurrencyCount");
+            stageNumberText ??= FindText("Txt_StageNum");
+            starsText ??= FindText("Txt_Stars");
+            dailyProgressText ??= FindText("Txt_Frac");
+            colorCupTimerText ??= FindText("Txt_Ends");
+            playDisabledReasonText ??= FindText("Txt_PlayDisabled");
+            shopBalanceText ??= FindText("Txt_Balance");
+            rankingMetricText ??= FindText("Txt_Score");
+            rankingErrorText ??= FindText("Txt_RankError");
+            shopContent ??= FindRect("Content");
+            rankingContent ??= FindRect("Content");
+            playButton ??= FindButton("Btn_Play");
+            refillButton ??= FindButton("Btn_Refill");
         }
 
         TextMeshProUGUI FindText(string childName)

@@ -70,6 +70,17 @@ namespace ProjectLink.OutGame.UI
             PopupManager.Request(PopupId.Reward);
         }
 
+        public void OpenPausePopup()
+        {
+            if (Core.InGameController.Instance != null)
+            {
+                Core.InGameController.Instance.OpenPausePopup();
+                return;
+            }
+            if (PopupManager.Instance == null) return;
+            PopupManager.Request(PopupId.Pause);
+        }
+
         public void OpenBuyItemPopup()
         {
             if (PopupManager.Instance == null)

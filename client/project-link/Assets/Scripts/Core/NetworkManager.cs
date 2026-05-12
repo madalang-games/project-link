@@ -15,9 +15,12 @@ namespace ProjectLink.Core
         [SerializeField] string metaHash = "";
 
         string _baseUrl;
+        string _authBaseUrl;
         IAuthService _authService;
 
         public string BaseUrl { get => _baseUrl; set => _baseUrl = value; }
+        public string AuthBaseUrl => _authBaseUrl;
+        public AppEnvironment Environment => environment;
 
         public IAuthService AuthService
         {
@@ -32,16 +35,32 @@ namespace ProjectLink.Core
             if (Instance != null) { Destroy(gameObject); return; }
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            _baseUrl = environment == AppEnvironment.Prod ? AppConfig.ProdGameServerUrl : AppConfig.DevGameServerUrl;
-            _authService ??= new MockAuthService();
+            ApplyEnvironment();
+            _authService ??= new PlatformAuthService(this, _authBaseUrl, clientVersion, protocolVersion);
         }
 
         public void SetAuthToken(string accessToken) => _authService?.SetToken(accessToken);
 
         public void ClearAuthToken() => _authService?.ClearToken();
 
+        public bool HasStoredAuthSession => _authService?.HasStoredSession ?? false;
+
+        public string AuthProvider => _authService?.Provider ?? "";
+
         public void EnsureGuestAuth(Action<bool, string> onComplete)
             => _authService.EnsureAuth(onComplete);
+
+        public void LoginGuest(Action<bool, string> onComplete)
+            => _authService.LoginGuest(onComplete);
+
+        public void LoginGoogle(string idToken, string nonce, Action<bool, string> onComplete)
+            => _authService.LoginGoogle(idToken, nonce, onComplete);
+
+        public void RefreshAuth(Action<bool, string> onComplete)
+            => _authService.Refresh(onComplete);
+
+        public void Logout(Action<bool, string> onComplete)
+            => _authService.Logout(onComplete);
 
         public void Get(string endpoint, Action<bool, string> onComplete)
             => StartCoroutine(SendGet(endpoint, onComplete));
@@ -102,9 +121,19 @@ namespace ProjectLink.Core
             }
 
             if (req.responseCode == 401)
+            {
                 _authService?.ClearToken();
+                onComplete?.Invoke(false, "SESSION_EXPIRED");
+                return;
+            }
 
             onComplete?.Invoke(false, string.IsNullOrEmpty(body) ? req.error : body);
+        }
+
+        void ApplyEnvironment()
+        {
+            _baseUrl = environment == AppEnvironment.Prod ? AppConfig.ProdGameServerUrl : AppConfig.DevGameServerUrl;
+            _authBaseUrl = environment == AppEnvironment.Prod ? AppConfig.ProdPlatformAuthUrl : AppConfig.DevPlatformAuthUrl;
         }
     }
 }

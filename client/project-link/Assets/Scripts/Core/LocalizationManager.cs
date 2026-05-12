@@ -36,6 +36,7 @@ namespace ProjectLink.Core
         };
 
         readonly Dictionary<LanguageCode, Dictionary<string, string>> _strings = new();
+        readonly Dictionary<string, (string en, string ko)> _errors = new();
 
         public static LocalizationManager Instance { get; private set; }
         public static event Action LanguageChanged;
@@ -60,6 +61,17 @@ namespace ProjectLink.Core
             return Instance.GetText(stringId);
         }
 
+        public static string GetError(string errorCode)
+        {
+            if (string.IsNullOrEmpty(errorCode))
+                return "";
+
+            if (Instance == null)
+                return errorCode;
+
+            return Instance.GetErrorText(errorCode);
+        }
+
         public static void SetLanguage(LanguageCode language)
         {
             if (Instance == null)
@@ -82,6 +94,16 @@ namespace ProjectLink.Core
                 return text;
 
             return stringId;
+        }
+
+        public string GetErrorText(string errorCode)
+        {
+            if (!_errors.TryGetValue(errorCode, out var row))
+                return errorCode;
+
+            return CurrentLanguage == LanguageCode.KO && !string.IsNullOrEmpty(row.ko)
+                ? row.ko
+                : !string.IsNullOrEmpty(row.en) ? row.en : errorCode;
         }
 
         public void ApplyLanguage(LanguageCode language)
@@ -116,6 +138,15 @@ namespace ProjectLink.Core
                 _strings[LanguageCode.ZH_CN][row.stringId] = row.ZH_CN;
                 _strings[LanguageCode.ZH_TW][row.stringId] = row.ZH_TW;
                 _strings[LanguageCode.TH][row.stringId]    = row.TH;
+            }
+
+            _errors.Clear();
+            var errors = CsvLoader.Load<ErrorMessages>(ErrorMessages.ResourcePath);
+            for (int i = 0; i < errors.Length; i++)
+            {
+                var row = errors[i];
+                if (!string.IsNullOrEmpty(row.errorCode))
+                    _errors[row.errorCode] = (row.en, row.ko);
             }
         }
 
