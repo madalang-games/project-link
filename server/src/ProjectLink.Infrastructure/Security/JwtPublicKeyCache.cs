@@ -30,7 +30,22 @@ public class JwtPublicKeyCache : IHostedService, IDisposable
     public async Task StartAsync(CancellationToken ct)
     {
         await RefreshAsync();
-        _timer = new Timer(_ => _ = RefreshAsync(), null, TimeSpan.FromHours(24), TimeSpan.FromHours(24));
+        // Retry every 30 s until keys are loaded (handles startup race with platform-auth),
+        // then settle into 24-hour rotation refresh.
+        var initial = _keys.Count > 0 ? TimeSpan.FromHours(24) : TimeSpan.FromSeconds(30);
+        _timer = new Timer(OnTick, null, initial, TimeSpan.FromSeconds(30));
+    }
+
+    private void OnTick(object? _)
+    {
+        _ = RefreshAndRescheduleAsync();
+    }
+
+    private async Task RefreshAndRescheduleAsync()
+    {
+        await RefreshAsync();
+        if (_keys.Count > 0)
+            _timer?.Change(TimeSpan.FromHours(24), TimeSpan.FromHours(24));
     }
 
     public Task StopAsync(CancellationToken ct)
