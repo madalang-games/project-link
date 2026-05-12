@@ -139,6 +139,7 @@ namespace ProjectLink.Services
         {
             EnterLobbyRequested = false;
             ClearError();
+            bool suppressSilentLogin = GameContext.ConsumeTitleSilentLoginSuppression();
             SetLoading(true);
 
             _uiData.GetBootstrapConfig(result =>
@@ -157,7 +158,7 @@ namespace ProjectLink.Services
                 IsMaintenance = _bootstrap.Maintenance;
                 MaintenanceMessage = _bootstrap.MaintenanceMessage ?? "";
 
-                if (RequiresForceUpdate || _network == null || !_network.HasStoredAuthSession)
+                if (RequiresForceUpdate || suppressSilentLogin || _network == null || !_network.HasStoredAuthSession)
                 {
                     TitleControlsVisible = true;
                     SetLoading(false);

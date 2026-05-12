@@ -25,6 +25,9 @@ namespace ProjectLink.Services
 
         public static string Ranking(string category)
         {
+            if (!string.IsNullOrEmpty(category) && category.StartsWith("stage:") && int.TryParse(category[6..], out var stageId))
+                return RankingStage(stageId);
+
             return category switch
             {
                 "global_stages" => RankingGlobalStages,

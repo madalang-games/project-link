@@ -80,9 +80,6 @@ namespace ProjectLink.OutGame.UI
                 return;
             }
 
-            if (!string.IsNullOrEmpty(_viewModel.ErrorCode))
-                UiEventBus.Publish(new UiErrorRaised("title", _viewModel.ErrorCode, _viewModel.ErrorMessage));
-
             if (_viewModel.EnterLobbyRequested && !_lobbyLoadRequested)
             {
                 _lobbyLoadRequested = true;

@@ -159,11 +159,7 @@ namespace ProjectLink.OutGame.UI
                 button.onClick.AddListener(() =>
                 {
                     if (!unlocked) return;
-                    GameContext.SelectedStageId = stageId;
-                    if (SceneLoader.Instance != null)
-                        SceneLoader.Instance.LoadScene("Game");
-                    else
-                        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+                    RuntimeNavigationButtons.EnterStage(stageId);
                 });
             }
         }

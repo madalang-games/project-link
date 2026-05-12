@@ -19,7 +19,8 @@ namespace ProjectLink.Core
         SessionExpired,
         Pause,
         ForceUpdate,
-        Maintenance
+        Maintenance,
+        StageDetail
     }
 
     public readonly struct PopupRequest
@@ -178,6 +179,10 @@ namespace ProjectLink.Core
                     break;
                 case PopupId.Maintenance:
                     OpenPrefab<ProjectLink.OutGame.UI.MaintenancePopup>("Prefabs/UI/MaintenancePopup")?.Init(request.Payload as string);
+                    break;
+                case PopupId.StageDetail:
+                    var stageId = request.Payload is int id ? id : GameContext.SelectedStageId;
+                    OpenPrefab<ProjectLink.OutGame.UI.StageDetailPopup>("Prefabs/UI/StageDetailPopup")?.Init(stageId);
                     break;
             }
         }

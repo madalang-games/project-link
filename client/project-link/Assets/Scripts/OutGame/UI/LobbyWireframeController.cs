@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Globalization;
 using ProjectLink.Contracts.Ranking;
 using ProjectLink.Core;
@@ -12,8 +14,11 @@ namespace ProjectLink.OutGame.UI
     {
         [SerializeField] TextMeshProUGUI profileNameText;
         [SerializeField] TextMeshProUGUI energyText;
+        [SerializeField] TextMeshProUGUI staminaTimerText;
         [SerializeField] TextMeshProUGUI coinText;
         [SerializeField] TextMeshProUGUI stageNumberText;
+        [SerializeField] TextMeshProUGUI previousStageNumberText;
+        [SerializeField] TextMeshProUGUI nextStageNumberText;
         [SerializeField] TextMeshProUGUI starsText;
         [SerializeField] TextMeshProUGUI dailyProgressText;
         [SerializeField] TextMeshProUGUI colorCupTimerText;
@@ -25,10 +30,20 @@ namespace ProjectLink.OutGame.UI
         [SerializeField] RectTransform rankingContent;
         [SerializeField] Button playButton;
         [SerializeField] Button refillButton;
+        [SerializeField] Button previousStageButton;
+        [SerializeField] Button nextStageButton;
 
         IStaticCatalogService _catalog;
         IUiDataService _uiData;
         LobbyViewModel _viewModel;
+        int _selectedStageId;
+        int _maxSelectableStageId = 1;
+        DateTimeOffset? _nextRechargeAt;
+        float _nextTimerRefreshAt;
+        RectTransform _centerStageNode;
+        RectTransform _previousStageNode;
+        RectTransform _nextStageNode;
+        Coroutine _stageAnimation;
 
         void Awake()
         {
@@ -37,6 +52,7 @@ namespace ProjectLink.OutGame.UI
             _uiData = UiServiceLocator.UiData;
             _viewModel = new LobbyViewModel(_uiData, _catalog);
             _viewModel.Changed += Render;
+            BindStageNavigation();
         }
 
         void Start()
@@ -52,6 +68,15 @@ namespace ProjectLink.OutGame.UI
                 _viewModel.Changed -= Render;
         }
 
+        void Update()
+        {
+            if (_nextRechargeAt == null || Time.unscaledTime < _nextTimerRefreshAt)
+                return;
+
+            _nextTimerRefreshAt = Time.unscaledTime + 1f;
+            RefreshStaminaTimer();
+        }
+
         public void RefreshRanking(string category)
         {
             ClearChildren(rankingContent);
@@ -64,10 +89,7 @@ namespace ProjectLink.OutGame.UI
             if (_viewModel == null) return;
 
             if (!string.IsNullOrEmpty(_viewModel.ErrorCode))
-            {
                 SetText(playDisabledReasonText, LocalizationManager.GetError(_viewModel.ErrorCode));
-                UiEventBus.Publish(new UiErrorRaised("lobby", _viewModel.ErrorCode, _viewModel.ErrorMessage));
-            }
 
             if (_viewModel.Lobby != null)
                 ApplyLobby(_viewModel.Lobby);
@@ -94,20 +116,28 @@ namespace ProjectLink.OutGame.UI
 
         void ApplyLobby(LobbyScreenModel lobby)
         {
-            int currentStageId = lobby.NextUnlockedStageId > 0
-                ? lobby.NextUnlockedStageId
-                : Mathf.Max(1, lobby.HighestStageId);
+            int currentStageId = Mathf.Max(1, lobby.NextUnlockedStageId);
+            if (lobby.HighestStageId > 0)
+                currentStageId = Mathf.Max(currentStageId, lobby.HighestStageId + 1);
 
-            SetText(profileNameText, lobby.DisplayName);
+            _maxSelectableStageId = currentStageId;
+            if (_selectedStageId <= 0 || _selectedStageId > _maxSelectableStageId)
+                _selectedStageId = currentStageId;
+            _selectedStageId = Mathf.Clamp(_selectedStageId, 1, _maxSelectableStageId);
+            GameContext.SelectedStageId = _selectedStageId;
+            _nextRechargeAt = ParseDateTime(lobby.NextRechargeAt);
+
+            SetText(profileNameText, string.IsNullOrEmpty(lobby.DisplayName) ? "Guest" : lobby.DisplayName);
             SetText(energyText, $"{lobby.StaminaCurrent}/{lobby.StaminaMax}");
+            RefreshStaminaTimer();
             SetText(coinText, FormatNumber(lobby.SoftCurrency));
-            SetText(stageNumberText, currentStageId.ToString(CultureInfo.InvariantCulture));
+            RefreshStageCarousel();
             SetText(starsText, lobby.TotalStarsEarned.ToString(CultureInfo.InvariantCulture));
             SetText(dailyProgressText, $"{lobby.DailyChallenge.PlayCountToday}/{lobby.DailyChallenge.PlayCountTarget}");
             SetText(colorCupTimerText, lobby.SeasonEvent?.EndAt ?? "");
 
             if (playButton != null)
-                playButton.interactable = lobby.CanPlay;
+                playButton.interactable = lobby.CanPlay && _selectedStageId <= _maxSelectableStageId;
             if (refillButton != null)
                 refillButton.gameObject.SetActive(!lobby.CanPlay);
             SetText(playDisabledReasonText, lobby.CanPlay ? "" : LocalizationManager.Get("status.energy_empty"));
@@ -137,6 +167,7 @@ namespace ProjectLink.OutGame.UI
         {
             profileNameText ??= FindText("Txt_Nickname");
             energyText ??= FindText("Txt_StaminaCount");
+            staminaTimerText ??= FindText("Txt_StaminaTimer");
             coinText ??= FindText("Txt_CurrencyCount");
             stageNumberText ??= FindText("Txt_StageNum");
             starsText ??= FindText("Txt_Stars");
@@ -150,6 +181,165 @@ namespace ProjectLink.OutGame.UI
             rankingContent ??= FindRect("Content");
             playButton ??= FindButton("Btn_Play");
             refillButton ??= FindButton("Btn_Refill");
+            previousStageButton ??= FindButton("Btn_Prev");
+            nextStageButton ??= FindButton("Btn_Next");
+            EnsureSideStageNodes();
+        }
+
+        void BindStageNavigation()
+        {
+            if (previousStageButton != null)
+            {
+                previousStageButton.onClick.AddListener(SelectPreviousStage);
+                AddRepeat(previousStageButton).Repeated.AddListener(SelectPreviousStage);
+            }
+
+            if (nextStageButton != null)
+            {
+                nextStageButton.onClick.AddListener(SelectNextStage);
+                AddRepeat(nextStageButton).Repeated.AddListener(SelectNextStage);
+            }
+        }
+
+        void SelectPreviousStage()
+        {
+            if (_selectedStageId <= 1) return;
+            _selectedStageId--;
+            RefreshStageCarousel();
+        }
+
+        void SelectNextStage()
+        {
+            if (_selectedStageId >= _maxSelectableStageId) return;
+            _selectedStageId++;
+            RefreshStageCarousel();
+        }
+
+        void RefreshStageCarousel()
+        {
+            _selectedStageId = Mathf.Clamp(_selectedStageId <= 0 ? 1 : _selectedStageId, 1, _maxSelectableStageId);
+            GameContext.SelectedStageId = _selectedStageId;
+            SetText(stageNumberText, _selectedStageId.ToString(CultureInfo.InvariantCulture));
+            SetText(previousStageNumberText, _selectedStageId > 1 ? (_selectedStageId - 1).ToString(CultureInfo.InvariantCulture) : "");
+            SetText(nextStageNumberText, _selectedStageId < _maxSelectableStageId ? (_selectedStageId + 1).ToString(CultureInfo.InvariantCulture) : "");
+
+            if (previousStageButton != null)
+                previousStageButton.interactable = _selectedStageId > 1;
+            if (nextStageButton != null)
+                nextStageButton.interactable = _selectedStageId < _maxSelectableStageId;
+            StartStageSwitchAnimation();
+        }
+
+        void RefreshStaminaTimer()
+        {
+            if (staminaTimerText == null)
+                return;
+
+            if (_nextRechargeAt == null)
+            {
+                staminaTimerText.text = "";
+                return;
+            }
+
+            var remaining = _nextRechargeAt.Value - DateTimeOffset.UtcNow;
+            if (remaining <= TimeSpan.Zero)
+            {
+                staminaTimerText.text = "00:00";
+                return;
+            }
+
+            int totalSeconds = Mathf.CeilToInt((float)remaining.TotalSeconds);
+            staminaTimerText.text = $"{totalSeconds / 60:D2}:{totalSeconds % 60:D2}";
+        }
+
+        void EnsureSideStageNodes()
+        {
+            if (stageNumberText == null || (previousStageNumberText != null && nextStageNumberText != null))
+                return;
+
+            var center = stageNumberText.transform.parent as RectTransform;
+            var track = center != null ? center.parent as RectTransform : null;
+            if (center == null || track == null)
+                return;
+
+            var prev = FindOrCloneNode(track, center, "StageNode_Prev", 0);
+            var next = FindOrCloneNode(track, center, "StageNode_Next", 2);
+            center.SetSiblingIndex(1);
+            _centerStageNode = center;
+            _previousStageNode = prev;
+            _nextStageNode = next;
+            previousStageNumberText ??= prev?.transform.Find("Txt_StageNum")?.GetComponent<TextMeshProUGUI>();
+            nextStageNumberText ??= next?.transform.Find("Txt_StageNum")?.GetComponent<TextMeshProUGUI>();
+        }
+
+        void StartStageSwitchAnimation()
+        {
+            if (!isActiveAndEnabled || _centerStageNode == null)
+                return;
+
+            if (_stageAnimation != null)
+                StopCoroutine(_stageAnimation);
+            _stageAnimation = StartCoroutine(StageSwitchAnimation());
+        }
+
+        IEnumerator StageSwitchAnimation()
+        {
+            const float duration = 0.18f;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                float eased = 1f - Mathf.Pow(1f - t, 2f);
+                if (_centerStageNode != null)
+                    _centerStageNode.localScale = Vector3.one * Mathf.Lerp(0.9f, 1f, eased);
+                if (_previousStageNode != null)
+                    _previousStageNode.localScale = Vector3.one * Mathf.Lerp(0.62f, 0.72f, eased);
+                if (_nextStageNode != null)
+                    _nextStageNode.localScale = Vector3.one * Mathf.Lerp(0.62f, 0.72f, eased);
+                yield return null;
+            }
+
+            if (_centerStageNode != null)
+                _centerStageNode.localScale = Vector3.one;
+            if (_previousStageNode != null)
+                _previousStageNode.localScale = Vector3.one * 0.72f;
+            if (_nextStageNode != null)
+                _nextStageNode.localScale = Vector3.one * 0.72f;
+            _stageAnimation = null;
+        }
+
+        static RectTransform FindOrCloneNode(RectTransform track, RectTransform center, string name, int siblingIndex)
+        {
+            var existing = track.Find(name) as RectTransform;
+            if (existing == null)
+            {
+                var clone = Instantiate(center.gameObject, track, false);
+                clone.name = name;
+                existing = clone.GetComponent<RectTransform>();
+                foreach (var button in clone.GetComponentsInChildren<Button>(true))
+                    button.interactable = false;
+            }
+
+            existing.SetSiblingIndex(siblingIndex);
+            existing.localScale = Vector3.one * 0.72f;
+            var image = existing.GetComponent<Image>();
+            if (image != null)
+                image.color = new Color(image.color.r, image.color.g, image.color.b, 0.55f);
+            return existing;
+        }
+
+        static RepeatButton AddRepeat(Button button)
+        {
+            var repeat = button.GetComponent<RepeatButton>();
+            return repeat != null ? repeat : button.gameObject.AddComponent<RepeatButton>();
+        }
+
+        static DateTimeOffset? ParseDateTime(string value)
+        {
+            return DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed)
+                ? parsed.ToUniversalTime()
+                : null;
         }
 
         TextMeshProUGUI FindText(string childName)

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ProjectLink.Core;
 using ProjectLink.Contracts.Daily;
 using ProjectLink.Services;
@@ -18,6 +19,7 @@ namespace ProjectLink.OutGame.UI
 
         bool _initialized;
         int _stageIdToPlay = 1;
+        readonly List<int> _todayStageIds = new();
 
         public void Init()
         {
@@ -42,6 +44,13 @@ namespace ProjectLink.OutGame.UI
             }
 
             var value = result.Value;
+            _todayStageIds.Clear();
+            for (int i = 0; i < value.TodayStageIds.Count; i++)
+            {
+                if (value.TodayStageIds[i] > 0)
+                    _todayStageIds.Add(value.TodayStageIds[i]);
+            }
+
             if (value.TodayStageIds.Count > 0)
                 _stageIdToPlay = Mathf.Max(1, value.TodayStageIds[0]);
             SetText(countdownText, value.ResetAt);
@@ -66,9 +75,8 @@ namespace ProjectLink.OutGame.UI
         {
             if (PopupManager.Instance != null)
                 PopupManager.Instance.CloseTop();
-            GameContext.SelectedStageId = _stageIdToPlay;
-            if (SceneLoader.Instance != null)
-                SceneLoader.Instance.LoadScene("Game");
+            GameContext.SetDailyChallengeRun(_todayStageIds, 0);
+            RuntimeNavigationButtons.EnterStage(_stageIdToPlay);
         }
 
         void ResolveMissingReferences()

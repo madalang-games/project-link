@@ -33,9 +33,10 @@ namespace ProjectLink.Core
             if (error.Blocking || string.IsNullOrEmpty(error.ErrorCode))
                 return;
 
-            Show(string.IsNullOrEmpty(error.Message)
-                ? LocalizationManager.GetError(error.ErrorCode)
-                : LocalizationManager.GetError(error.ErrorCode));
+            var localized = LocalizationManager.GetError(error.ErrorCode);
+            Show(localized == error.ErrorCode && !string.IsNullOrEmpty(error.Message)
+                ? error.Message
+                : localized);
         }
 
         void Show(string message)
@@ -107,8 +108,21 @@ namespace ProjectLink.Core
             tmp.fontSizeMin = 18f;
             tmp.fontSizeMax = 28f;
             tmp.raycastTarget = false;
+            ApplyFont(tmp);
 
             return go;
+        }
+
+        static void ApplyFont(TextMeshProUGUI label)
+        {
+            var registry = FontRegistry.Instance;
+            if (registry == null || LocalizationManager.Instance == null)
+                return;
+
+            bool isBold = (label.fontStyle & FontStyles.Bold) != 0;
+            var lang = LocalizationManager.Instance.CurrentLanguage;
+            if (registry.TryGetFonts(lang, out var regular, out var bold))
+                label.font = isBold ? bold ?? regular ?? label.font : regular ?? bold ?? label.font;
         }
     }
 }

@@ -13,6 +13,7 @@
 | `SceneEscapeHandler.cs` | `SceneEscapeHandler` | Escape key EscapeAction (None/ReturnToTitle/ExitGame/OpenPauseMenu) |
 | `SafeAreaFitter.cs` | `SafeAreaFitter` | Adjusts RectTransform anchors to device safe area in Awake |
 | `ModernUI.cs` | `ModernUI` | Shared code-created glossy UI helper methods/colors |
+| `RepeatButton.cs` | `RepeatButton` | Pointer hold helper that repeats button actions for carousel navigation |
 | `LobbyStageMapView.cs` | `LobbyStageMapView` | Paginated stage button grid |
 | `ConfirmPopupBase.cs` | `ConfirmPopupBase` | Abstract base; provides panel/button/label builder helpers |
 | `ExitGamePopup.cs` | `ExitGamePopup` | Prefab controller; binds cancel/confirm hotspots for quit |
@@ -33,6 +34,8 @@
 |---|---|---|
 | `LocalizedText.SetStringId(string)` | method | changes key + immediate refresh via LocalizationManager.Get |
 | `RuntimeNavigationButtons.LoadGame()` | method | uses `defaultStageId` field; sets GameContext, loads Game |
+| `RuntimeNavigationButtons.OpenStageDetail(int)` | method | opens StageDetail popup for lobby stage selection |
+| `RuntimeNavigationButtons.EnterStage(int)` | method | server stage-start guard; returns Lobby and opens Energy popup on insufficient stamina |
 | `RuntimeNavigationButtons.OpenSettingsPopup()` | method | requests `PopupId.Settings` |
 | `RuntimeNavigationButtons.OpenEnergyPopup()` | method | requests `PopupId.Energy` |
 | `RuntimeNavigationButtons.OpenAccountPopup()` | method | requests `PopupId.Account` |
@@ -45,6 +48,7 @@
 | `LobbyTabController.Configure(...)` | method | assigns tab buttons and tab panels from generated UI builder |
 | `LobbyWireframeController.RefreshRanking(string)` | method | requests ranking segment through `LobbyViewModel` |
 | `LobbyWireframeController.Render()` | method | renders Lobby/Shop/Ranking viewmodel state and localized errors |
+| `RepeatButton.Repeated` | event | fires after long-press delay at repeat interval while button remains pressed |
 | `ConfirmPopupBase.Build(...)` | method | legacy title/message/confirmLabel/accent/onConfirm builder |
 | `LobbyStageMapView.Build()` | method | instantiates/pools all stage node buttons |
 | `SceneEscapeHandler.action` | field | `[SerializeField]` EscapeAction enum |
@@ -59,7 +63,7 @@
 | `SessionExpiredPopup.Init()` | method | confirm -> Title |
 | `ForceUpdatePopup.Init()` | method | binds Btn_OpenStore click -> platform app store URL |
 | `MaintenancePopup.Init(string)` | method | sets Txt_Body text from server maintenance message |
-| `StageDetailPopup.Init(int)` | method | binds Btn_Close/Btn_Play |
+| `StageDetailPopup.Init(int)` | method | binds Btn_Close/Btn_Play, renders stars and top-10 stage ranking |
 
 ## Cross-refs
 - Consumed by: client `Core.PopupManager`

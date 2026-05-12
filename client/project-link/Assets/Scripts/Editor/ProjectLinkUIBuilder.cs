@@ -143,7 +143,7 @@ namespace ProjectLink.EditorTools
             EnsureEventSystem();
             DestroyExistingRoots(sceneName);
 
-            var (canvas, safe) = CreateSceneCanvas(sceneName + "Canvas");
+            var (canvas, safe) = CreateSceneCanvas(sceneName + "Canvas", sceneName != "Game");
             var router = canvas.AddComponent<RuntimeNavigationButtons>();
             ConfigureEscapeHandler(canvas, sceneName, router);
 
@@ -157,6 +157,8 @@ namespace ProjectLink.EditorTools
                     Debug.LogWarning($"No UI builder registered for scene '{sceneName}'.");
                     break;
             }
+
+            NormalizeLayoutText(canvas);
         }
 
         // ─── Bootstrap ────────────────────────────────────────────────────
@@ -1460,13 +1462,14 @@ namespace ProjectLink.EditorTools
 
         static void SavePopupPrefab(GameObject root, string prefabName)
         {
+            NormalizeLayoutText(root);
             PrefabUtility.SaveAsPrefabAsset(root, $"{PopupPrefabRoot}/{prefabName}.prefab");
             Object.DestroyImmediate(root);
         }
 
         // ─── Shared canvas / layer helpers ───────────────────────────────
 
-        static (GameObject canvas, RectTransform safe) CreateSceneCanvas(string canvasName)
+        static (GameObject canvas, RectTransform safe) CreateSceneCanvas(string canvasName, bool includeBackground = true)
         {
             var root = new GameObject(canvasName,
                 typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -1483,12 +1486,14 @@ namespace ProjectLink.EditorTools
             scaler.matchWidthOrHeight = 0.5f;
             scaler.referencePixelsPerUnit = 100;
 
-            // Panel_Background
-            var bg = new GameObject("Panel_Background", typeof(RectTransform), typeof(Image));
-            bg.transform.SetParent(root.transform, false);
-            Stretch(bg.GetComponent<RectTransform>());
-            bg.GetComponent<Image>().color = BgPrimary;
-            bg.GetComponent<Image>().raycastTarget = false;
+            if (includeBackground)
+            {
+                var bg = new GameObject("Panel_Background", typeof(RectTransform), typeof(Image));
+                bg.transform.SetParent(root.transform, false);
+                Stretch(bg.GetComponent<RectTransform>());
+                bg.GetComponent<Image>().color = BgPrimary;
+                bg.GetComponent<Image>().raycastTarget = false;
+            }
 
             // SafeArea
             var safeGo = new GameObject("SafeArea", typeof(RectTransform), typeof(SafeAreaFitter));
@@ -1641,6 +1646,36 @@ namespace ProjectLink.EditorTools
         }
 
         // ─── RectTransform helpers ────────────────────────────────────────
+
+        static void NormalizeLayoutText(GameObject root)
+        {
+            foreach (var tmp in root.GetComponentsInChildren<TextMeshProUGUI>(true))
+            {
+                if (tmp.transform.parent == null || tmp.transform.parent.GetComponent<LayoutGroup>() == null)
+                    continue;
+
+                var rect = tmp.rectTransform;
+                if (Mathf.Approximately(rect.sizeDelta.x, 0f))
+                    rect.sizeDelta = new Vector2(EstimateTextWidth(tmp), rect.sizeDelta.y);
+
+                var element = tmp.GetComponent<LayoutElement>();
+                if (element == null)
+                    element = tmp.gameObject.AddComponent<LayoutElement>();
+
+                if (element.preferredWidth <= 0f)
+                    element.preferredWidth = EstimateTextWidth(tmp);
+
+                if (element.flexibleWidth <= 0f)
+                    element.flexibleWidth = 1f;
+            }
+        }
+
+        static float EstimateTextWidth(TextMeshProUGUI tmp)
+        {
+            string text = string.IsNullOrEmpty(tmp.text) ? "Text" : tmp.text;
+            float fontSize = tmp.fontSize > 0f ? tmp.fontSize : 28f;
+            return Mathf.Clamp(text.Length * fontSize * 0.6f, 80f, 420f);
+        }
 
         static void ApplyAnchorPreset(RectTransform rect, AnchorPreset preset)
         {

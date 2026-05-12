@@ -63,6 +63,7 @@ namespace ProjectLink.OutGame.UI
         static void ReturnToTitle()
         {
             PopupManager.Instance?.CloseAll();
+            GameContext.SuppressNextTitleSilentLogin();
             if (SceneLoader.Instance != null)
                 SceneLoader.Instance.LoadScene("Title");
             else

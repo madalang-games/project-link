@@ -1,4 +1,5 @@
 using ProjectLink.Core;
+using ProjectLink.Services;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -16,6 +17,8 @@ namespace ProjectLink.OutGame.UI
 
         public void LoadTitle()
         {
+            GameContext.SuppressNextTitleSilentLogin();
+            GameContext.ClearDailyChallengeRun();
             LoadScene(TitleSceneName);
         }
 
@@ -99,18 +102,61 @@ namespace ProjectLink.OutGame.UI
 
         public void LoadLobby()
         {
+            GameContext.ClearDailyChallengeRun();
             LoadScene(LobbySceneName);
         }
 
         public void LoadGame()
         {
-            LoadGameWithStage(defaultStageId);
+            OpenStageDetail(GameContext.SelectedStageId > 0 ? GameContext.SelectedStageId : defaultStageId);
         }
 
         public void LoadGameWithStage(int stageId)
         {
-            GameContext.SelectedStageId = Mathf.Max(1, stageId);
-            LoadScene(GameSceneName);
+            OpenStageDetail(stageId);
+        }
+
+        public static void OpenStageDetail(int stageId)
+        {
+            stageId = Mathf.Max(1, stageId);
+            GameContext.SelectedStageId = stageId;
+
+            if (PopupManager.Instance != null)
+            {
+                PopupManager.Request(PopupId.StageDetail, stageId);
+                return;
+            }
+
+            EnterStage(stageId);
+        }
+
+        public static void EnterStage(int stageId)
+        {
+            stageId = Mathf.Max(1, stageId);
+            GameContext.SelectedStageId = stageId;
+
+            if (!string.IsNullOrEmpty(GameContext.StageSessionToken))
+            {
+                LoadScene(GameSceneName);
+                return;
+            }
+
+            var uiData = UiServiceLocator.UiData;
+            uiData.StartStage(stageId, result =>
+            {
+                if (!result.IsSuccess)
+                {
+                    if (result.ErrorCode == "INSUFFICIENT_STAMINA")
+                        LoadLobbyWithEnergyPopup();
+                    else
+                        UiEventBus.Publish(new UiErrorRaised("stage_start", result.ErrorCode, result.ErrorMessage));
+                    return;
+                }
+
+                var response = result.Value;
+                GameContext.SetStageSession(response.SessionToken, response.MoveLimit, response.TimeLimitSeconds);
+                LoadScene(GameSceneName);
+            });
         }
 
         public void QuitApplication()
@@ -131,6 +177,27 @@ namespace ProjectLink.OutGame.UI
             }
 
             SceneManager.LoadScene(sceneName);
+        }
+
+        static void LoadLobbyWithEnergyPopup()
+        {
+            GameContext.ClearStageSession();
+            GameContext.ClearDailyChallengeRun();
+
+            if (SceneManager.GetActiveScene().name == LobbySceneName)
+            {
+                PopupManager.Request(PopupId.Energy);
+                return;
+            }
+
+            if (SceneLoader.Instance != null)
+            {
+                SceneLoader.Instance.LoadScene(LobbySceneName, () => PopupManager.Request(PopupId.Energy));
+                return;
+            }
+
+            SceneManager.LoadScene(LobbySceneName);
+            PopupManager.Request(PopupId.Energy);
         }
     }
 

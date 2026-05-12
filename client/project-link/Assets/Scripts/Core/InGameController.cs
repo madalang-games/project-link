@@ -92,7 +92,10 @@ namespace ProjectLink.Core
             _stateMachine.OnStateChanged += HandleStateChanged;
 
             SetInputEnabled(false);
-            _uiData.StartStage(_stageId, HandleStageStarted);
+            if (!string.IsNullOrEmpty(GameContext.StageSessionToken))
+                ApplyStageSession();
+            else
+                _uiData.StartStage(_stageId, HandleStageStarted);
         }
 
         void Update()
@@ -245,20 +248,36 @@ namespace ProjectLink.Core
         {
             if (!result.IsSuccess)
             {
-                Debug.LogError($"Stage start failed: {result.ErrorCode} {result.ErrorMessage}");
+                Debug.LogWarning($"Stage start failed: {result.ErrorCode} {result.ErrorMessage}");
+                if (result.ErrorCode != "INSUFFICIENT_STAMINA")
+                    UiEventBus.Publish(new UiErrorRaised("stage_start", result.ErrorCode, result.ErrorMessage));
+
+                GameContext.ClearStageSession();
+                GameContext.ClearDailyChallengeRun();
+                if (SceneLoader.Instance != null)
+                    SceneLoader.Instance.LoadScene("Lobby", () =>
+                    {
+                        if (result.ErrorCode == "INSUFFICIENT_STAMINA")
+                            PopupManager.Request(PopupId.Energy);
+                    });
                 return;
             }
 
             var response = result.Value;
-            _moveLimit = response.MoveLimit;
             GameContext.SetStageSession(response.SessionToken, response.MoveLimit, response.TimeLimitSeconds);
+            ApplyStageSession();
+        }
+
+        void ApplyStageSession()
+        {
+            _moveLimit = GameContext.MoveLimit;
             _hud?.SetMoveDisplay(_movesUsed, _moveLimit);
             SetInputEnabled(true);
 
-            if (response.TimeLimitSeconds > 0 && response.TimeLimitSeconds != _timer.Remaining)
+            if (GameContext.TimeLimitSeconds > 0 && GameContext.TimeLimitSeconds != _timer.Remaining)
             {
-                _timer.Start(response.TimeLimitSeconds);
-                _hud?.SetTimerDisplay(response.TimeLimitSeconds);
+                _timer.Start(GameContext.TimeLimitSeconds);
+                _hud?.SetTimerDisplay(GameContext.TimeLimitSeconds);
             }
         }
 
@@ -286,6 +305,14 @@ namespace ProjectLink.Core
                 var value = stageResult.Value;
                 GameContext.ClearStageSession();
                 DataManager.Instance.ClearStage(_stageId, value.Stars);
+                var nextStageId = value.NextStageId ?? _stageId + 1;
+                var nextStageUnlocked = value.NextStageUnlocked;
+                if (GameContext.IsDailyChallengeStage)
+                {
+                    nextStageUnlocked = GameContext.TryGetNextDailyChallengeStage(out var dailyNextStageId);
+                    nextStageId = nextStageUnlocked ? dailyNextStageId : _stageId;
+                }
+
                 OpenClearPopup(new StageClearPopupModel(
                     _stageId,
                     value.Stars,
@@ -296,8 +323,8 @@ namespace ProjectLink.Core
                     value.AdjustedElapsedMs,
                     value.Score,
                     value.IsBestRecord,
-                    value.NextStageId ?? _stageId + 1,
-                    value.NextStageUnlocked));
+                    nextStageId,
+                    nextStageUnlocked));
             });
         }
 

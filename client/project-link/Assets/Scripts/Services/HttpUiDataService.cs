@@ -23,6 +23,12 @@ namespace ProjectLink.Services
     public sealed class HttpUiDataService : MonoBehaviour, IUiDataService
     {
         const float CacheTtlSeconds = 20f;
+        static readonly JsonSerializerSettings JsonSettings = new()
+        {
+            DateParseHandling = DateParseHandling.None,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+        };
+
         readonly Dictionary<string, CacheEntry> _cache = new();
 
         sealed class CacheEntry
@@ -153,7 +159,7 @@ namespace ProjectLink.Services
                     return;
                 }
 
-                network.Post(endpoint, JsonConvert.SerializeObject(body), (ok, payload) =>
+                network.Post(endpoint, JsonConvert.SerializeObject(body, JsonSettings), (ok, payload) =>
                 {
                     UiEventBus.Publish(new UiBusyChanged(endpoint, false));
                     Complete<T>(ok, payload, result =>
@@ -187,7 +193,7 @@ namespace ProjectLink.Services
 
             try
             {
-                var value = JsonConvert.DeserializeObject<T>(payload);
+                var value = JsonConvert.DeserializeObject<T>(payload, JsonSettings);
                 if (!string.IsNullOrEmpty(cacheKey))
                 {
                     _cache[cacheKey] = new CacheEntry
@@ -200,10 +206,19 @@ namespace ProjectLink.Services
             }
             catch (Exception ex)
             {
+                Debug.LogWarning($"UI data deserialize failed for {cacheKey ?? "<uncached>"}: {ex.Message}\npayload: {Clip(payload)}");
                 var result = new ServiceResult<T>("DESERIALIZE_FAILED", ex.Message);
                 UiEventBus.Publish(new UiErrorRaised(cacheKey ?? "", result.ErrorCode, result.ErrorMessage));
                 onComplete?.Invoke(result);
             }
+        }
+
+        static string Clip(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return "";
+
+            return value.Length <= 300 ? value : value[..300] + $"...({value.Length})";
         }
 
         static ServiceResult<T> ParseError<T>(string payload)
@@ -213,7 +228,7 @@ namespace ProjectLink.Services
 
             try
             {
-                var error = JsonConvert.DeserializeObject<ErrorResponse>(payload);
+                var error = JsonConvert.DeserializeObject<ErrorResponse>(payload, JsonSettings);
                 if (error != null && !string.IsNullOrEmpty(error.ErrorCode))
                     return new ServiceResult<T>(error.ErrorCode, payload);
             }
@@ -232,7 +247,7 @@ namespace ProjectLink.Services
 
             try
             {
-                onComplete?.Invoke(new ServiceResult<T>(JsonConvert.DeserializeObject<T>(entry.Payload)));
+                onComplete?.Invoke(new ServiceResult<T>(JsonConvert.DeserializeObject<T>(entry.Payload, JsonSettings)));
                 return true;
             }
             catch

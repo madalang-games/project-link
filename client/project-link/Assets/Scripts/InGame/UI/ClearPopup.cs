@@ -98,21 +98,22 @@ namespace ProjectLink.InGame.UI
 
         void LoadNext()
         {
-            GameContext.SelectedStageId = Mathf.Max(1, _model.NextStageId);
             PopupManager.Instance.CloseAll();
-            SceneLoader.Instance.LoadScene("Game");
+            if (GameContext.IsDailyChallengeStage)
+                GameContext.AdvanceDailyChallengeStage(_model.NextStageId);
+            RuntimeNavigationButtons.EnterStage(_model.NextStageId);
         }
 
         void Retry()
         {
-            GameContext.SelectedStageId = Mathf.Max(1, _model.StageId);
             PopupManager.Instance.CloseAll();
-            SceneLoader.Instance.LoadScene("Game");
+            RuntimeNavigationButtons.EnterStage(_model.StageId);
         }
 
         static void LoadLobby()
         {
             PopupManager.Instance.CloseAll();
+            GameContext.ClearDailyChallengeRun();
             SceneLoader.Instance.LoadScene("Lobby");
         }
 
