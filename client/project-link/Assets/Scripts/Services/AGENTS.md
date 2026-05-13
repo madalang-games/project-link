@@ -29,6 +29,8 @@
 | `IUiDataService.PurchaseShopProduct(...)` | method | calls shop purchase route and returns balance/inventory updates |
 | `HttpUiDataService.Get(...)` | method | publishes `UiBusyChanged` around API GET calls |
 | `HttpUiDataService.Post(...)` | method | publishes `UiBusyChanged` around API POST calls |
+| `HttpUiDataService.Complete<T>(...)` | method | deserializes success payloads and writes detailed diagnostics on deserialize failure |
+| `HttpUiDataService.BuildDeserializeDiagnostics<T>(...)` | method | adds target type, assembly, JSON path, stack trace, and object-to-string mismatch candidates to deserialize warnings |
 | `HttpUiDataService.InvalidateStageCaches()` | method | clears cached lobby/progress/daily/stamina after stage mutations |
 | `HttpUiDataService.ClaimReward(...)` | method | POST adapter for reward claim |
 | `UiServiceLocator.UiData` | prop | resolves or creates the `IUiDataService` adapter used by UI controllers |

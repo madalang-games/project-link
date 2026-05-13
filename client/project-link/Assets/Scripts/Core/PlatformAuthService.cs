@@ -203,7 +203,7 @@ namespace ProjectLink.Core
             {
                 if (_httpLogging)
                 {
-                    Debug.Log($"[AUTH] POST {url} → {req.responseCode}\nrequest: <payload hidden>\nresponse: <payload hidden>");
+                    Debug.Log($"[AUTH] POST {url} → {req.responseCode}\nrequest: {payload}\nresponse: {response}");
                 }
                 if (req.responseCode == 204 || string.IsNullOrWhiteSpace(response))
                 {

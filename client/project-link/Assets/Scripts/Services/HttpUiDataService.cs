@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ProjectLink.Contracts.Account;
 using ProjectLink.Contracts.Bootstrap;
 using ProjectLink.Contracts.Common;
@@ -191,26 +193,107 @@ namespace ProjectLink.Services
                 return;
             }
 
+            T value;
             try
             {
-                var value = JsonConvert.DeserializeObject<T>(payload, JsonSettings);
-                if (!string.IsNullOrEmpty(cacheKey))
-                {
-                    _cache[cacheKey] = new CacheEntry
-                    {
-                        Payload = payload,
-                        ExpiresAt = Time.realtimeSinceStartup + CacheTtlSeconds,
-                    };
-                }
-                onComplete?.Invoke(new ServiceResult<T>(value));
+                value = JsonConvert.DeserializeObject<T>(payload, JsonSettings);
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"UI data deserialize failed for {cacheKey ?? "<uncached>"}: {ex.Message}\npayload: {payload}");
+                Debug.LogWarning($"UI data deserialize failed for {cacheKey ?? "<uncached>"}: {ex.Message}\n{BuildDeserializeDiagnostics<T>(payload, ex)}\npayload: {payload}");
                 var result = new ServiceResult<T>("DESERIALIZE_FAILED", ex.Message);
                 UiEventBus.Publish(new UiErrorRaised(cacheKey ?? "", result.ErrorCode, result.ErrorMessage));
                 onComplete?.Invoke(result);
+                return;
             }
+
+            if (!string.IsNullOrEmpty(cacheKey))
+            {
+                _cache[cacheKey] = new CacheEntry
+                {
+                    Payload = payload,
+                    ExpiresAt = Time.realtimeSinceStartup + CacheTtlSeconds,
+                };
+            }
+            onComplete?.Invoke(new ServiceResult<T>(value));
+        }
+
+        static string BuildDeserializeDiagnostics<T>(string payload, Exception ex)
+        {
+            var lines = new List<string>
+            {
+                $"target: {typeof(T).FullName}",
+                $"target assembly: {typeof(T).Assembly.FullName}",
+                $"exception: {ex.GetType().FullName}",
+            };
+
+            if (ex is JsonSerializationException jsonEx && !string.IsNullOrEmpty(jsonEx.Path))
+                lines.Add($"json path: {jsonEx.Path}");
+
+            var suspiciousPaths = FindObjectToStringCandidates(typeof(T), payload);
+            if (suspiciousPaths.Count > 0)
+                lines.Add($"object->string candidates: {string.Join(", ", suspiciousPaths)}");
+
+            lines.Add(ex.ToString());
+            return string.Join("\n", lines);
+        }
+
+        static List<string> FindObjectToStringCandidates(Type targetType, string payload)
+        {
+            var results = new List<string>();
+            try
+            {
+                WalkExpectedJson(targetType, JToken.Parse(payload), "$", results);
+            }
+            catch (Exception scanEx)
+            {
+                results.Add($"<scan failed: {scanEx.Message}>");
+            }
+            return results;
+        }
+
+        static void WalkExpectedJson(Type expectedType, JToken token, string path, List<string> results)
+        {
+            expectedType = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
+            if (expectedType == typeof(string))
+            {
+                if (token.Type == JTokenType.Object || token.Type == JTokenType.Array)
+                    results.Add(path);
+                return;
+            }
+
+            if (token is JArray array)
+            {
+                var elementType = GetEnumerableElementType(expectedType);
+                if (elementType == null) return;
+                for (var i = 0; i < array.Count; i++)
+                    WalkExpectedJson(elementType, array[i], $"{path}[{i}]", results);
+                return;
+            }
+
+            if (token is not JObject obj || expectedType == typeof(object))
+                return;
+
+            foreach (var prop in expectedType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            {
+                if (!prop.CanWrite)
+                    continue;
+
+                var jsonName = char.ToLowerInvariant(prop.Name[0]) + prop.Name.Substring(1);
+                if (obj.TryGetValue(jsonName, StringComparison.OrdinalIgnoreCase, out var child))
+                    WalkExpectedJson(prop.PropertyType, child, $"{path}.{jsonName}", results);
+            }
+        }
+
+        static Type GetEnumerableElementType(Type type)
+        {
+            if (type.IsArray)
+                return type.GetElementType();
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+                return type.GetGenericArguments()[0];
+
+            return null;
         }
 
         static ServiceResult<T> ParseError<T>(string payload)
@@ -237,16 +320,19 @@ namespace ProjectLink.Services
             if (!_cache.TryGetValue(endpoint, out var entry) || entry.ExpiresAt < Time.realtimeSinceStartup)
                 return false;
 
+            T value;
             try
             {
-                onComplete?.Invoke(new ServiceResult<T>(JsonConvert.DeserializeObject<T>(entry.Payload, JsonSettings)));
-                return true;
+                value = JsonConvert.DeserializeObject<T>(entry.Payload, JsonSettings);
             }
             catch
             {
                 _cache.Remove(endpoint);
                 return false;
             }
+
+            onComplete?.Invoke(new ServiceResult<T>(value));
+            return true;
         }
 
         void InvalidateLobbyCaches()

@@ -121,8 +121,8 @@ namespace ProjectLink.Core
                 if (httpLogging)
                 {
                     var sb = new StringBuilder($"[HTTP] {method} {req.url} → {req.responseCode}");
-                    sb.Append("\nrequest: <payload hidden>");
-                    sb.Append("\nresponse: <payload hidden>");
+                    sb.Append($"\nrequest: {requestBody ?? ""}");
+                    sb.Append($"\nresponse: {responseBody}");
                     Debug.Log(sb);
                 }
                 onComplete?.Invoke(true, responseBody);
