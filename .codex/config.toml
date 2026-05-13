@@ -7,10 +7,37 @@ tool_timeout_sec = 120
 [mcp_servers.mcp-unity.tools.recompile_scripts]
 approval_mode = "approve"
 
+[mcp_servers.mcp-unity.tools.execute_menu_item]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.select_gameobject]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.update_gameobject]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.update_component]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.add_package]
+approval_mode = "approve"
+
 [mcp_servers.mcp-unity.tools.run_tests]
 approval_mode = "approve"
 
+[mcp_servers.mcp-unity.tools.send_console_log]
+approval_mode = "approve"
+
 [mcp_servers.mcp-unity.tools.get_console_logs]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.add_asset_to_scene]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.create_prefab]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.create_scene]
 approval_mode = "approve"
 
 [mcp_servers.mcp-unity.tools.get_scene_info]
@@ -19,11 +46,50 @@ approval_mode = "approve"
 [mcp_servers.mcp-unity.tools.load_scene]
 approval_mode = "approve"
 
+[mcp_servers.mcp-unity.tools.delete_scene]
+approval_mode = "approve"
+
 [mcp_servers.mcp-unity.tools.get_gameobject]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.unload_scene]
 approval_mode = "approve"
 
 [mcp_servers.mcp-unity.tools.delete_gameobject]
 approval_mode = "approve"
 
 [mcp_servers.mcp-unity.tools.save_scene]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.move_gameobject]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.rotate_gameobject]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.scale_gameobject]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.set_transform]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.create_material]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.assign_material]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.modify_material]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.get_material_info]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.duplicate_gameobject]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.reparent_gameobject]
+approval_mode = "approve"
+
+[mcp_servers.mcp-unity.tools.batch_execute]
 approval_mode = "approve"
