@@ -96,7 +96,7 @@ public class AuthController : ControllerBase
                 ExpiresAt    = session?.Tokens?.AccessTokenExpiresAt    ?? "",
                 Profile = new AccountMeResponse
                 {
-                    UserId  = session?.AccountId  ?? "",
+                    UserId  = session?.AccountId.ToString() ?? "",
                     IsGuest = session?.AccountType == "guest",
                 },
             });
@@ -109,7 +109,7 @@ public class AuthController : ControllerBase
 
     sealed class PlatformSession
     {
-        public string AccountId   { get; set; }
+        public long   AccountId   { get; set; }
         public string AccountType { get; set; }
         public PlatformTokens Tokens { get; set; }
     }

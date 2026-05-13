@@ -24,10 +24,10 @@
 | AdminRevokeRequest | record | Admin session revoke request (P1). |
 | SessionValidationRequest | record | Introspection request (P1). |
 | AuthTokenResponse | record | Access/refresh token pair with expiry and token type. |
-| AuthSessionResponse | record | Session result including account id, session id, account type, client id, and token pair. |
-| AccountProfileResponse | record | Account profile for /users/me. |
+| AuthSessionResponse | record | Session result including `long` account id, `long` session id, account type, client id, and token pair. |
+| AccountProfileResponse | record | Account profile for `/users/me`; `AccountId` is `long`. |
 | RevokeResponse | record | Revoke operation result. |
-| SessionStateResponse | record | Session introspection result (P1). |
+| SessionStateResponse | record | Session introspection result (P1); `AccountId` and `SessionId` are `long`. |
 | AuthError | record | Error envelope: code, message, trace id, retryability, required action, optional field errors. |
 | AuthFieldError | record | Per-field validation error inside AuthError. |
 | AuthErrorCodes | static class | Machine-readable error code constants. |

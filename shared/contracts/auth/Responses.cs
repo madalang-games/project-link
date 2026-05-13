@@ -8,14 +8,14 @@ public sealed record AuthTokenResponse(
     string TokenType = "Bearer");
 
 public sealed record AuthSessionResponse(
-    Guid AccountId,
-    Guid SessionId,
+    long AccountId,
+    long SessionId,
     string AccountType,
     string ClientId,
     AuthTokenResponse Tokens);
 
 public sealed record AccountProfileResponse(
-    Guid AccountId,
+    long AccountId,
     string AccountType,
     string Status,
     string? DisplayName);
@@ -23,8 +23,8 @@ public sealed record AccountProfileResponse(
 public sealed record RevokeResponse(bool Success, string? Reason);
 
 public sealed record SessionStateResponse(
-    Guid AccountId,
-    Guid SessionId,
+    long AccountId,
+    long SessionId,
     string AccountType,
     string ClientId,
     bool IsActive,
