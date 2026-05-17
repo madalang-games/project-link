@@ -119,6 +119,15 @@ namespace ProjectLink.Services
         public void GetPlayerSettings(Action<ServiceResult<PlayerSettingsResponse>> onComplete)
             => Get(UiDataRoutes.PlayerSettings, onComplete);
 
+        public void UpdatePlayerSettings(PlayerSettingsUpdateRequest request, Action<ServiceResult<PlayerSettingsResponse>> onComplete)
+        {
+            _cache.Remove(UiDataRoutes.PlayerSettings);
+            Patch(UiDataRoutes.PlayerSettings, request, onComplete);
+        }
+
+        public void ExtendStageTime(int stageId, Action<ServiceResult<StageExtendResponse>> onComplete)
+            => Post(UiDataRoutes.StageExtend(stageId), new StageEndRequest { SessionToken = GameContext.StageSessionToken }, onComplete);
+
         public void ClaimReward(string rewardSource, string rewardToken, int multiplier, Action<ServiceResult<RewardClaimResponse>> onComplete)
         {
             Post(UiDataRoutes.RewardsClaim, new RewardClaimRequest
@@ -174,6 +183,34 @@ namespace ProjectLink.Services
                 }
 
                 network.Post(endpoint, JsonConvert.SerializeObject(body, JsonSettings), (ok, payload) =>
+                {
+                    UiEventBus.Publish(new UiBusyChanged(endpoint, false));
+                    Complete<T>(ok, payload, result =>
+                    {
+                        if (result.IsSuccess)
+                            onSuccess?.Invoke();
+                        onComplete?.Invoke(result);
+                    });
+                });
+            });
+        }
+
+        void Patch<T>(string endpoint, object body, Action<ServiceResult<T>> onComplete, Action onSuccess = null)
+        {
+            if (!TryGetNetwork(out var network, onComplete)) return;
+            UiEventBus.Publish(new UiBusyChanged(endpoint, true));
+            network.EnsureGuestAuth((authOk, authError) =>
+            {
+                if (!authOk)
+                {
+                    UiEventBus.Publish(new UiBusyChanged(endpoint, false));
+                    if (authError == "SESSION_EXPIRED")
+                        PopupManager.Request(PopupId.SessionExpired);
+                    onComplete?.Invoke(new ServiceResult<T>(authError, authError));
+                    return;
+                }
+
+                network.Patch(endpoint, JsonConvert.SerializeObject(body, JsonSettings), (ok, payload) =>
                 {
                     UiEventBus.Publish(new UiBusyChanged(endpoint, false));
                     Complete<T>(ok, payload, result =>

@@ -47,6 +47,7 @@ namespace ProjectLink.Services
         void GetProgress(Action<ServiceResult<ProgressResponse>> onComplete);
         void StartStage(int stageId, Action<ServiceResult<StageStartResponse>> onComplete);
         void EndStage(int stageId, string sessionToken, string result, long clientElapsedMs, int movesUsed, Action<ServiceResult<StageEndResponse>> onComplete);
+        void ExtendStageTime(int stageId, Action<ServiceResult<StageExtendResponse>> onComplete);
         void GetStamina(Action<ServiceResult<StaminaResponse>> onComplete);
         void ClaimStaminaAdReward(string adToken, Action<ServiceResult<StaminaAdRewardResponse>> onComplete);
         void RefillStamina(Action<ServiceResult<StaminaRefillResponse>> onComplete);
@@ -60,6 +61,7 @@ namespace ProjectLink.Services
         void ClaimStreakReward(int level, string correlationId, Action<ServiceResult<StreakChallengeClaimRewardResponse>> onComplete);
         void GetSeasonEvents(Action<ServiceResult<ActiveEventsResponse>> onComplete);
         void GetPlayerSettings(Action<ServiceResult<PlayerSettingsResponse>> onComplete);
+        void UpdatePlayerSettings(PlayerSettingsUpdateRequest request, Action<ServiceResult<PlayerSettingsResponse>> onComplete);
         void ClaimReward(string rewardSource, string rewardToken, int multiplier, Action<ServiceResult<RewardClaimResponse>> onComplete);
     }
 }

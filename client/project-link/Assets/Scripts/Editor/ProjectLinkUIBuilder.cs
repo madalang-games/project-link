@@ -247,7 +247,7 @@ namespace ProjectLink.EditorTools
             retry.gameObject.SetActive(false);
 
             // Txt_NetworkError — hidden by default
-            var errText = MakeText(safe, "Txt_NetworkError", "bootstrap.network_error", 28, Danger, TextAlignmentOptions.Center);
+            var errText = MakeText(safe, "Txt_NetworkError", "bootstrap.network_error", 28, Danger, TextAlignmentOptions.Midline);
             Center(errText.GetComponent<RectTransform>(), new Vector2(0, -40), new Vector2(800, 60));
             errText.gameObject.SetActive(false);
 
@@ -360,31 +360,23 @@ namespace ProjectLink.EditorTools
 
         static void BuildLobby(RectTransform safe, GameObject canvasRoot, RuntimeNavigationButtons router)
         {
-            // HUD_Strip
+            // HUD_Strip — single-row HLG: Avatar | Stamina | Currency | Menu
             var hud = MakeChild(safe, "HUD_Strip");
             SetAnchor(hud, new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 1));
-            hud.sizeDelta = new Vector2(0, 240);
+            hud.sizeDelta = new Vector2(0, 120);
             hud.anchoredPosition = Vector2.zero;
             var hudImg = hud.gameObject.AddComponent<Image>();
-            hudImg.color = HudBg;
+            hudImg.color = new Color(0, 0, 0, 0);
             ApplySkin(hudImg, "slot_hud_bg", false);
-            var hudVlg = hud.gameObject.AddComponent<VerticalLayoutGroup>();
-            hudVlg.spacing = 8;
-            hudVlg.padding = new RectOffset(24, 24, 16, 16);
-            hudVlg.childAlignment = TextAnchor.MiddleLeft;
-            hudVlg.childControlWidth = true; hudVlg.childControlHeight = true;
-            hudVlg.childForceExpandWidth = true; hudVlg.childForceExpandHeight = false;
+            var hudHlg = hud.gameObject.AddComponent<HorizontalLayoutGroup>();
+            hudHlg.spacing = 16;
+            hudHlg.padding = new RectOffset(24, 24, 16, 16);
+            hudHlg.childAlignment = TextAnchor.MiddleLeft;
+            hudHlg.childControlWidth = true; hudHlg.childControlHeight = true;
+            hudHlg.childForceExpandWidth = false; hudHlg.childForceExpandHeight = true;
 
-            // Row_Profile
-            var rowProfile = MakeChild(hud, "Row_Profile");
-            rowProfile.sizeDelta = new Vector2(0, 100);
-            var rpHlg = rowProfile.gameObject.AddComponent<HorizontalLayoutGroup>();
-            rpHlg.spacing = 16; rpHlg.childAlignment = TextAnchor.MiddleLeft;
-            rpHlg.childControlWidth = true; rpHlg.childControlHeight = true;
-            rowProfile.gameObject.AddComponent<LayoutElement>().preferredHeight = 100;
-
-            var avatar = MakeChild(rowProfile, "Slot_Avatar");
-            avatar.sizeDelta = new Vector2(88, 88);
+            var avatar = MakeChild(hud, "Slot_Avatar");
+            avatar.sizeDelta = new Vector2(80, 80);
             var avatarImg = avatar.gameObject.AddComponent<Image>();
             avatarImg.color = SlotPlaceholder;
             ApplySkin(avatarImg, "slot_avatar");
@@ -393,37 +385,21 @@ namespace ProjectLink.EditorTools
             avatarBtn.targetGraphic = avatarImg;
             UnityEventTools.AddPersistentListener(avatarBtn.onClick, router.OpenAccountPopup);
             var avatarLE = avatar.gameObject.AddComponent<LayoutElement>();
-            avatarLE.preferredWidth = 88; avatarLE.preferredHeight = 88; avatarLE.flexibleWidth = 0;
+            avatarLE.preferredWidth = 80; avatarLE.preferredHeight = 80; avatarLE.flexibleWidth = 0;
 
-            var nickText = MakeChild(rowProfile, "Txt_Nickname");
-            nickText.sizeDelta = new Vector2(0, 40);
-            var nickTmp = nickText.gameObject.AddComponent<TextMeshProUGUI>();
-            nickTmp.text = "Player"; nickTmp.fontSize = 30;
-            nickTmp.fontStyle = FontStyles.Bold; nickTmp.color = TextCol;
-            nickTmp.alignment = TextAlignmentOptions.MidlineLeft;
-            var nickLE = nickText.gameObject.AddComponent<LayoutElement>();
-            nickLE.flexibleWidth = 1;
+            AddStaminaGroup(hud, router);
+            AddCurrencyGroup(hud);
 
-            var menuBtn = MakeChild(rowProfile, "Btn_Menu");
-            menuBtn.sizeDelta = new Vector2(88, 88);
+            var menuBtn = MakeChild(hud, "Btn_Menu");
+            menuBtn.sizeDelta = new Vector2(80, 80);
             var menuImg = menuBtn.gameObject.AddComponent<Image>();
             menuImg.color = HexColor("#FFFFFF26");
             ApplySkin(menuImg, "btn_icon_menu");
             var menuButton = menuBtn.gameObject.AddComponent<Button>();
             menuButton.targetGraphic = menuImg;
             UnityEventTools.AddPersistentListener(menuButton.onClick, router.OpenSettingsPopup);
-            menuBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 88;
-
-            // Row_Stats
-            var rowStats = MakeChild(hud, "Row_Stats");
-            rowStats.sizeDelta = new Vector2(0, 80);
-            var rsHlg = rowStats.gameObject.AddComponent<HorizontalLayoutGroup>();
-            rsHlg.spacing = 24; rsHlg.childAlignment = TextAnchor.MiddleLeft;
-            rsHlg.childControlWidth = true; rsHlg.childControlHeight = true;
-            rowStats.gameObject.AddComponent<LayoutElement>().preferredHeight = 80;
-
-            AddStaminaGroup(rowStats, router);
-            AddCurrencyGroup(rowStats);
+            var menuLE = menuBtn.gameObject.AddComponent<LayoutElement>();
+            menuLE.preferredWidth = 80; menuLE.flexibleWidth = 0;
 
             // MenuDropdown (hidden)
             var dropdown = MakeChild(safe, "MenuDropdown");
@@ -444,7 +420,7 @@ namespace ProjectLink.EditorTools
             var tabBodies = MakeChild(safe, "Group_TabBodies");
             SetAnchor(tabBodies, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f));
             tabBodies.offsetMin = new Vector2(0, 128);
-            tabBodies.offsetMax = new Vector2(0, -240);
+            tabBodies.offsetMax = new Vector2(0, -120);
 
             var tabHome = BuildHomeTab(tabBodies, router);
             var tabShop = BuildShopTab(tabBodies);
@@ -475,13 +451,22 @@ namespace ProjectLink.EditorTools
 
             // Controllers
             var lobbyCtrl = safe.gameObject.AddComponent<LobbyWireframeController>();
-            Assign(lobbyCtrl, "playButton",           FindButtonInChildren(tabHome, "Btn_Play"));
+            Assign(lobbyCtrl, "starOnSprite",         LoadSkin()?.Get("slot_star_on"));
+            Assign(lobbyCtrl, "starOffSprite",        LoadSkin()?.Get("slot_star_off"));
+            Assign(lobbyCtrl, "lockSprite",           LoadSkin()?.Get("slot_lock_icon"));
+            AssignSpriteArray(lobbyCtrl, "difficultySprites", new[]
+            {
+                LoadSkin()?.Get("slot_difficulty_1"),
+                LoadSkin()?.Get("slot_difficulty_2"),
+                LoadSkin()?.Get("slot_difficulty_3"),
+                LoadSkin()?.Get("slot_difficulty_4"),
+                LoadSkin()?.Get("slot_difficulty_5"),
+            });
+            Assign(lobbyCtrl, "playButton",           FindButtonInChildren(tabHome, "StageNode_Center"));
             Assign(lobbyCtrl, "refillButton",         FindButtonInChildren(tabHome, "Btn_Refill"));
-            Assign(lobbyCtrl, "profileNameText",      FindTmpInChildren(safe, "Txt_Nickname"));
             Assign(lobbyCtrl, "energyText",           FindTmpInChildren(safe, "Txt_StaminaCount"));
             Assign(lobbyCtrl, "coinText",             FindTmpInChildren(safe, "Txt_CurrencyCount"));
             Assign(lobbyCtrl, "stageNumberText",      FindTmpInChildren(tabHome, "Txt_StageNum"));
-            Assign(lobbyCtrl, "starsText",            FindTmpInChildren(tabHome, "Txt_Stars"));
             Assign(lobbyCtrl, "dailyProgressText",    FindTmpInChildren(tabHome, "Txt_Frac"));
             Assign(lobbyCtrl, "colorCupTimerText",    FindTmpInChildren(tabHome, "Txt_Ends"));
             Assign(lobbyCtrl, "playDisabledReasonText", FindTmpInChildren(tabHome, "Txt_PlayDisabled"));
@@ -499,43 +484,59 @@ namespace ProjectLink.EditorTools
         static void AddStaminaGroup(RectTransform parent, RuntimeNavigationButtons router)
         {
             var group = MakeChild(parent, "Group_Stamina");
-            group.sizeDelta = new Vector2(340, 60);
+            group.sizeDelta = new Vector2(0, 80);
+            var groupImg = group.gameObject.AddComponent<Image>();
+            groupImg.color = new Color(1, 1, 1, 0);
+            ApplySkin(groupImg, "slot_resource_bg", false);
             var hlg = group.gameObject.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 8; hlg.childAlignment = TextAnchor.MiddleLeft;
+            hlg.spacing = 8; hlg.padding = new RectOffset(8, 8, 8, 8);
+            hlg.childAlignment = TextAnchor.MiddleLeft;
             hlg.childControlWidth = false; hlg.childControlHeight = true;
             var btn = group.gameObject.AddComponent<Button>();
             btn.transition = Selectable.Transition.None;
             UnityEventTools.AddPersistentListener(btn.onClick, router.OpenEnergyPopup);
-            group.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            var staminaLe = group.gameObject.AddComponent<LayoutElement>();
+            staminaLe.preferredWidth = 220; staminaLe.flexibleWidth = 0;
 
-            var icon = MakeChild(group, "Icon_Stamina");
-            icon.sizeDelta = new Vector2(48, 48);
+            // Icon with count overlaid on top
+            var iconStack = MakeChild(group, "Stack_Stamina");
+            iconStack.sizeDelta = new Vector2(56, 56);
+            iconStack.gameObject.AddComponent<LayoutElement>().preferredWidth = 56;
+
+            var icon = MakeChild(iconStack, "Icon_Stamina");
+            Stretch(icon);
             var iconImg = icon.gameObject.AddComponent<Image>();
             iconImg.color = SlotPlaceholder;
             ApplySkin(iconImg, "slot_stamina_icon");
-            icon.gameObject.AddComponent<LayoutElement>().preferredWidth = 48;
 
-            var count = MakeChild(group, "Txt_StaminaCount");
-            count.sizeDelta = new Vector2(80, 40);
+            var count = MakeChild(iconStack, "Txt_StaminaCount");
+            Stretch(count);
             var countTmp = count.gameObject.AddComponent<TextMeshProUGUI>();
-            countTmp.text = "5/5"; countTmp.fontSize = 26; countTmp.color = TextCol;
-            count.gameObject.AddComponent<LayoutElement>().preferredWidth = 80;
+            countTmp.text = "5"; countTmp.fontSize = 22; countTmp.fontStyle = FontStyles.Bold;
+            countTmp.color = Color.white; countTmp.alignment = TextAlignmentOptions.Midline;
+            countTmp.raycastTarget = false;
 
             var timer = MakeChild(group, "Txt_StaminaTimer");
-            timer.sizeDelta = new Vector2(140, 40);
+            timer.sizeDelta = new Vector2(120, 40);
             var timerTmp = timer.gameObject.AddComponent<TextMeshProUGUI>();
-            timerTmp.text = ""; timerTmp.fontSize = 22; timerTmp.color = TextMuted;
-            timer.gameObject.AddComponent<LayoutElement>().preferredWidth = 140;
+            timerTmp.text = ""; timerTmp.fontSize = 20; timerTmp.color = TextMuted;
+            timerTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            timer.gameObject.AddComponent<LayoutElement>().preferredWidth = 120;
         }
 
         static void AddCurrencyGroup(RectTransform parent)
         {
             var group = MakeChild(parent, "Group_Currency");
-            group.sizeDelta = new Vector2(200, 60);
+            group.sizeDelta = new Vector2(160, 80);
+            var groupImg = group.gameObject.AddComponent<Image>();
+            groupImg.color = new Color(1, 1, 1, 0);
+            ApplySkin(groupImg, "slot_resource_bg", false);
             var hlg = group.gameObject.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 8; hlg.childAlignment = TextAnchor.MiddleRight;
+            hlg.spacing = 8; hlg.padding = new RectOffset(8, 8, 8, 8);
+            hlg.childAlignment = TextAnchor.MiddleLeft;
             hlg.childControlWidth = false; hlg.childControlHeight = true;
-            group.gameObject.AddComponent<LayoutElement>().preferredWidth = 200;
+            var le = group.gameObject.AddComponent<LayoutElement>();
+            le.preferredWidth = 160; le.flexibleWidth = 0;
 
             var icon = MakeChild(group, "Icon_Currency");
             icon.sizeDelta = new Vector2(48, 48);
@@ -545,11 +546,11 @@ namespace ProjectLink.EditorTools
             icon.gameObject.AddComponent<LayoutElement>().preferredWidth = 48;
 
             var count = MakeChild(group, "Txt_CurrencyCount");
-            count.sizeDelta = new Vector2(120, 40);
+            count.sizeDelta = new Vector2(88, 40);
             var countTmp = count.gameObject.AddComponent<TextMeshProUGUI>();
             countTmp.text = "0"; countTmp.fontSize = 26; countTmp.color = TextCol;
             countTmp.alignment = TextAlignmentOptions.MidlineRight;
-            count.gameObject.AddComponent<LayoutElement>().preferredWidth = 120;
+            count.gameObject.AddComponent<LayoutElement>().preferredWidth = 88;
         }
 
         static void AddDropdownItem(RectTransform parent, string name, string labelKey,
@@ -596,51 +597,75 @@ namespace ProjectLink.EditorTools
             var trackHlg = track.gameObject.AddComponent<HorizontalLayoutGroup>();
             trackHlg.spacing = 40; trackHlg.childAlignment = TextAnchor.MiddleCenter;
 
-            // Stage node placeholder
+            // Stage node — acts as play button
             var node = MakeChild(track, "StageNode_Center");
-            node.sizeDelta = new Vector2(400, 560);
+            node.sizeDelta = new Vector2(500, 500);
             var nodeImg = node.gameObject.AddComponent<Image>();
             nodeImg.color = BgSurface;
             ApplySkin(nodeImg, "slot_stage_node");
+            var nodeBtn = node.gameObject.AddComponent<Button>();
+            nodeBtn.targetGraphic = nodeImg;
+            UnityEventTools.AddPersistentListener(nodeBtn.onClick, router.LoadGame);
+            // Stage number — large, centered in top half
             var stageNum = MakeChild(node, "Txt_StageNum");
-            Center(stageNum, new Vector2(0, 210), new Vector2(120, 56));
+            Center(stageNum, new Vector2(0, 60), new Vector2(400, 120));
             var numTmp = stageNum.gameObject.AddComponent<TextMeshProUGUI>();
-            numTmp.text = "1"; numTmp.fontSize = 36; numTmp.fontStyle = FontStyles.Bold;
-            numTmp.color = TextCol; numTmp.alignment = TextAlignmentOptions.Center;
+            numTmp.text = "1"; numTmp.fontSize = 72; numTmp.fontStyle = FontStyles.Bold;
+            numTmp.color = TextCol; numTmp.alignment = TextAlignmentOptions.Midline;
 
-            var starsLbl = MakeChild(node, "Txt_Stars");
-            Center(starsLbl, new Vector2(0, 150), new Vector2(180, 40));
-            var starsTmp = starsLbl.gameObject.AddComponent<TextMeshProUGUI>();
-            starsTmp.text = "0"; starsTmp.fontSize = 26; starsTmp.color = TextMuted;
-            starsTmp.alignment = TextAlignmentOptions.Center;
+            // Star images at bottom of node — slot_star_on/slot_star_off assigned at runtime
+            var starsRow = MakeChild(node, "Group_Stars");
+            Center(starsRow, new Vector2(0, -160), new Vector2(200, 56));
+            var starsHlg = starsRow.gameObject.AddComponent<HorizontalLayoutGroup>();
+            starsHlg.spacing = 12; starsHlg.childAlignment = TextAnchor.MiddleCenter;
+            starsHlg.childControlWidth = false; starsHlg.childControlHeight = false;
+            starsHlg.childForceExpandWidth = false; starsHlg.childForceExpandHeight = false;
+            for (int si = 0; si < 3; si++)
+            {
+                var starSlot = MakeChild(starsRow, $"Img_Star_{si}");
+                starSlot.sizeDelta = new Vector2(48, 48);
+                var starImg = starSlot.gameObject.AddComponent<Image>();
+                starImg.color = new Color(1f, 1f, 1f, 0.25f);
+                ApplySkin(starImg, "slot_star_off");
+            }
+
+            // LockIcon — shown at runtime when stage is locked
+            var lockIcon = MakeChild(node, "LockIcon");
+            Center(lockIcon, Vector2.zero, new Vector2(120, 120));
+            var lockImg = lockIcon.gameObject.AddComponent<Image>();
+            lockImg.color = new Color(1f, 1f, 1f, 0.85f);
+            ApplySkin(lockImg, "slot_lock_icon");
+            lockIcon.gameObject.SetActive(false);
 
             var prevBtn = MakeIconButton(carousel, "Btn_Prev", "btn_carousel_prev",
                 new Vector2(96, 96), new Vector2(16, 0), AnchorPreset.MiddleLeft);
             var nextBtn = MakeIconButton(carousel, "Btn_Next", "btn_carousel_next",
                 new Vector2(96, 96), new Vector2(-16, 0), AnchorPreset.MiddleRight);
 
-            // Btn_Play
-            var play = MakeButton(carousel, "Btn_Play", "home.stage_play",
-                new Vector2(400, 112), "btn_primary", fontSize: 32);
-            SetAnchor(play.GetComponent<RectTransform>(),
-                new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0));
-            play.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 16);
-            UnityEventTools.AddPersistentListener(play.onClick, router.LoadGame);
-
             var playDisabled = MakeChild(carousel, "Txt_PlayDisabled");
             SetAnchor(playDisabled, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0));
-            playDisabled.sizeDelta = new Vector2(400, 40);
-            playDisabled.anchoredPosition = new Vector2(0, 140);
+            playDisabled.sizeDelta = new Vector2(500, 40);
+            playDisabled.anchoredPosition = new Vector2(0, 16);
             var pdTmp = playDisabled.gameObject.AddComponent<TextMeshProUGUI>();
             pdTmp.fontSize = 22; pdTmp.color = Danger;
-            pdTmp.alignment = TextAlignmentOptions.Center;
+            pdTmp.alignment = TextAlignmentOptions.Midline;
             playDisabled.gameObject.SetActive(false);
 
-            // Badge_Streak — top-left overlay of Carousel_Stages; always visible, state-driven appearance
-            var badge = MakeChild(carousel, "Badge_Streak");
-            SetAnchor(badge, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1));
+            // Group_Events — sibling of Carousel_Stages (child of Tab_Home); top-left overlay
+            var evtGroup = MakeChild(tab, "Group_Events");
+            SetAnchor(evtGroup, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1));
+            evtGroup.anchoredPosition = new Vector2(12, -44);
+            evtGroup.sizeDelta = new Vector2(0, 96);
+            var evtHlg = evtGroup.gameObject.AddComponent<HorizontalLayoutGroup>();
+            evtHlg.spacing = 8; evtHlg.childAlignment = TextAnchor.UpperLeft;
+            evtHlg.childControlWidth = false; evtHlg.childControlHeight = false;
+            evtHlg.childForceExpandWidth = false; evtHlg.childForceExpandHeight = false;
+            var evtFitter = evtGroup.gameObject.AddComponent<ContentSizeFitter>();
+            evtFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var badge = MakeChild(evtGroup, "Badge_Streak");
             badge.sizeDelta = new Vector2(96, 96);
-            badge.anchoredPosition = new Vector2(12, -12);
+            badge.gameObject.AddComponent<LayoutElement>().preferredWidth = 96;
             var badgeBg = badge.gameObject.AddComponent<Image>();
             badgeBg.color = new Color(0.35f, 0.35f, 0.4f, 0.9f);
             ApplySkin(badgeBg, "slot_streak_badge");
@@ -652,14 +677,14 @@ namespace ProjectLink.EditorTools
             var biTmp = badgeIconTxt.gameObject.AddComponent<TextMeshProUGUI>();
             biTmp.text = "SC"; biTmp.fontSize = 22;
             biTmp.fontStyle = FontStyles.Bold; biTmp.color = Color.white;
-            biTmp.alignment = TextAlignmentOptions.Center;
+            biTmp.alignment = TextAlignmentOptions.Midline;
 
             var badgeProgTxt = MakeChild(badge, "Txt_Progress");
             Center(badgeProgTxt, new Vector2(0, -26), new Vector2(90, 22));
             var bpTmp = badgeProgTxt.gameObject.AddComponent<TextMeshProUGUI>();
             bpTmp.text = ""; bpTmp.fontSize = 16;
             bpTmp.color = new Color(0.9f, 0.9f, 0.9f, 1f);
-            bpTmp.alignment = TextAlignmentOptions.Center;
+            bpTmp.alignment = TextAlignmentOptions.Midline;
 
             badge.gameObject.AddComponent<StreakChallengeBadge>();
 
@@ -682,7 +707,7 @@ namespace ProjectLink.EditorTools
             Center(evtEnds, new Vector2(0, -20), new Vector2(600, 32));
             var endsTmp = evtEnds.gameObject.AddComponent<TextMeshProUGUI>();
             endsTmp.text = ""; endsTmp.fontSize = 22; endsTmp.color = TextMuted;
-            endsTmp.alignment = TextAlignmentOptions.Center;
+            endsTmp.alignment = TextAlignmentOptions.Midline;
             cardEvent.gameObject.SetActive(false);
 
             return tab;
@@ -699,7 +724,7 @@ namespace ProjectLink.EditorTools
 
             var viewport = MakeChild(tab, "Viewport");
             Stretch(viewport, 16, 16, 16, 16);
-            viewport.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0);
+            viewport.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 1f);
             viewport.gameObject.AddComponent<Mask>().showMaskGraphic = false;
 
             var content = MakeChild(viewport, "Content");
@@ -772,7 +797,7 @@ namespace ProjectLink.EditorTools
             rankError.anchoredPosition = new Vector2(0, -96);
             var reTmp = rankError.gameObject.AddComponent<TextMeshProUGUI>();
             reTmp.text = ""; reTmp.fontSize = 22; reTmp.color = Danger;
-            reTmp.alignment = TextAlignmentOptions.Center;
+            reTmp.alignment = TextAlignmentOptions.Midline;
             rankError.gameObject.SetActive(false);
 
             // ScrollList
@@ -785,7 +810,7 @@ namespace ProjectLink.EditorTools
 
             var viewport = MakeChild(scrollList, "Viewport");
             Stretch(viewport);
-            viewport.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 255);
+            viewport.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 1f);
             viewport.gameObject.AddComponent<Mask>().showMaskGraphic = false;
 
             var content = MakeChild(viewport, "Content");
@@ -816,6 +841,7 @@ namespace ProjectLink.EditorTools
             rankTxt.sizeDelta = new Vector2(64, 48);
             var rtTmp = rankTxt.gameObject.AddComponent<TextMeshProUGUI>();
             rtTmp.text = "#--"; rtTmp.fontSize = 28; rtTmp.fontStyle = FontStyles.Bold; rtTmp.color = TextCol;
+            rtTmp.alignment = TextAlignmentOptions.MidlineLeft;
             rankTxt.gameObject.AddComponent<LayoutElement>().preferredWidth = 64;
 
             var youTxt = MakeChild(myRank, "Txt_You");
@@ -848,7 +874,7 @@ namespace ProjectLink.EditorTools
             var lbl = MakeChild(go, "Lbl");
             Stretch(lbl);
             var txt = lbl.gameObject.AddComponent<TextMeshProUGUI>();
-            txt.fontSize = 24; txt.color = TextCol; txt.alignment = TextAlignmentOptions.Center;
+            txt.fontSize = 24; txt.color = TextCol; txt.alignment = TextAlignmentOptions.Midline;
             txt.raycastTarget = false;
             lbl.gameObject.AddComponent<LocalizedText>().SetStringId(labelKey);
         }
@@ -865,6 +891,7 @@ namespace ProjectLink.EditorTools
             var vlg = go.gameObject.AddComponent<VerticalLayoutGroup>();
             vlg.childAlignment = TextAnchor.MiddleCenter;
             vlg.childControlWidth = true; vlg.childControlHeight = true;
+            vlg.padding = new RectOffset(0, 0, 0, 8);
             go.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
 
             var icon = MakeChild(go, "Icon");
@@ -882,17 +909,8 @@ namespace ProjectLink.EditorTools
             txt.anchoredPosition = new Vector2(0, 16);
             var tmpTxt = txt.gameObject.AddComponent<TextMeshProUGUI>();
             tmpTxt.fontSize = 22; tmpTxt.color = isDefault ? TextCol : TextMuted;
-            tmpTxt.alignment = TextAlignmentOptions.Center;
+            tmpTxt.alignment = TextAlignmentOptions.Midline;
             txt.gameObject.AddComponent<LocalizedText>().SetStringId(labelKey);
-
-            var indicator = MakeChild(go, "Indicator");
-            SetAnchor(indicator, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0));
-            indicator.sizeDelta = new Vector2(56, 8);
-            indicator.anchoredPosition = new Vector2(0, 4);
-            var indImg = indicator.gameObject.AddComponent<Image>();
-            indImg.color = AccentB;
-            ApplySkin(indImg, "slot_tab_indicator");
-            if (!isDefault) indicator.gameObject.SetActive(false);
 
             return btn;
         }
@@ -935,7 +953,7 @@ namespace ProjectLink.EditorTools
             stageLbl.sizeDelta = new Vector2(0, 60);
             var stTmp = stageLbl.gameObject.AddComponent<TextMeshProUGUI>();
             stTmp.text = "Stage 1"; stTmp.fontSize = 30; stTmp.fontStyle = FontStyles.Bold;
-            stTmp.color = TextCol; stTmp.alignment = TextAlignmentOptions.Center;
+            stTmp.color = TextCol; stTmp.alignment = TextAlignmentOptions.Midline;
             stageLbl.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
 
             var timer = MakeChild(topBar, "Txt_Timer");
@@ -1065,7 +1083,7 @@ namespace ProjectLink.EditorTools
             hearts.gameObject.AddComponent<LayoutElement>().preferredHeight = 100;
             // Full-in timer
             var timerTxt = MakeText(content, "Txt_FullIn", "popup.energy.full_in_fmt",
-                24, TextMuted, TextAlignmentOptions.Center);
+                24, TextMuted, TextAlignmentOptions.Midline);
             timerTxt.AddComponent<LayoutElement>().preferredHeight = 48;
 
             AddFooterButton(footer, "Btn_WatchAd", "popup.energy.watch_ad_fmt", "btn_primary", isPrimary: true);
@@ -1083,20 +1101,29 @@ namespace ProjectLink.EditorTools
                 "StageDetailPopup", "popup.stage.title_fmt", dismissible: true);
             var starRow = MakeChild(content, "Group_Stars");
             starRow.sizeDelta = new Vector2(0, 80);
-            starRow.gameObject.AddComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
+            var starHlgD = starRow.gameObject.AddComponent<HorizontalLayoutGroup>();
+            starHlgD.childAlignment = TextAnchor.MiddleCenter;
+            starHlgD.spacing = 16;
+            starHlgD.childControlWidth = false;
+            starHlgD.childControlHeight = false;
+            starHlgD.childForceExpandWidth = false;
+            starHlgD.childForceExpandHeight = false;
             starRow.gameObject.AddComponent<LayoutElement>().preferredHeight = 80;
-            var best = MakeText(content, "Txt_Best", "popup.stage.best_fmt",
-                26, TextMuted, TextAlignmentOptions.Center);
-            best.gameObject.AddComponent<LayoutElement>().preferredHeight = 48;
-            var rank = MakeText(content, "Txt_MyRank", "popup.stage.my_rank_fmt",
-                26, TextMuted, TextAlignmentOptions.Center);
-            rank.gameObject.AddComponent<LayoutElement>().preferredHeight = 48;
+            for (int si = 0; si < 3; si++)
+            {
+                var starSlot = MakeChild(starRow, $"Img_Star_{si}");
+                starSlot.sizeDelta = new Vector2(64, 64);
+                var starImg = starSlot.gameObject.AddComponent<Image>();
+                starImg.color = new Color(1f, 1f, 1f, 0.18f);
+                ApplySkin(starImg, "slot_star_off");
+            }
             AddFooterButton(footer, "Btn_Play", "common.play", "btn_primary", isPrimary: true);
             var popup = root.GetComponent<StageDetailPopup>();
-            Assign(popup, "btnClose", FindButtonInChildren(root, "Btn_Close"));
-            Assign(popup, "btnPlay", FindButtonInChildren(root, "Btn_Play"));
-            Assign(popup, "txtBest", best.GetComponent<TextMeshProUGUI>());
-            Assign(popup, "txtMyRank", rank.GetComponent<TextMeshProUGUI>());
+            Assign(popup, "btnClose",      FindButtonInChildren(root, "Btn_Close"));
+            Assign(popup, "btnPlay",       FindButtonInChildren(root, "Btn_Play"));
+            Assign(popup, "starRow",       starRow);
+            Assign(popup, "starOnSprite",  LoadSkin()?.Get("slot_star_on"));
+            Assign(popup, "starOffSprite", LoadSkin()?.Get("slot_star_off"));
             SavePopupPrefab(root, "StageDetailPopup");
         }
 
@@ -1106,11 +1133,11 @@ namespace ProjectLink.EditorTools
                 "StreakChallengePopup", "streak.popup.title", dismissible: true);
 
             var statusTxt = MakeText(content, "StatusText", "streak.status_inactive",
-                26, TextCol, TextAlignmentOptions.Center);
+                26, TextCol, TextAlignmentOptions.Midline);
             statusTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 48;
 
             var timerTxt = MakeText(content, "TimerText", "",
-                22, Warning, TextAlignmentOptions.Center);
+                22, Warning, TextAlignmentOptions.Midline);
             timerTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 36;
 
             var levelList = MakeChild(content, "LevelList");
@@ -1168,10 +1195,10 @@ namespace ProjectLink.EditorTools
             avatarSlot.gameObject.AddComponent<Mask>();
             avatarSlot.gameObject.AddComponent<LayoutElement>().preferredHeight = 160;
             var nickTxt = MakeText(content, "Txt_Nickname", "",
-                32, TextCol, TextAlignmentOptions.Center);
+                32, TextCol, TextAlignmentOptions.Midline);
             nickTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 48;
             var joinedTxt = MakeText(content, "Txt_Joined", "popup.account.joined_fmt",
-                22, TextMuted, TextAlignmentOptions.Center);
+                22, TextMuted, TextAlignmentOptions.Midline);
             joinedTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 36;
             AddProviderRow(content, "Row_ProviderA", "slot_provider_google", "Continue with Google");
             AddProviderRow(content, "Row_ProviderB", "slot_provider_apple", "Continue with Apple");
@@ -1191,19 +1218,33 @@ namespace ProjectLink.EditorTools
             spine.gameObject.AddComponent<LayoutElement>().preferredHeight = 440;
             var starRow = MakeChild(content, "Group_Stars");
             starRow.sizeDelta = new Vector2(0, 96);
-            starRow.gameObject.AddComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
+            var starHlgC = starRow.gameObject.AddComponent<HorizontalLayoutGroup>();
+            starHlgC.childAlignment = TextAnchor.MiddleCenter;
+            starHlgC.spacing = 16;
+            starHlgC.childControlWidth = false;
+            starHlgC.childControlHeight = false;
+            starHlgC.childForceExpandWidth = false;
+            starHlgC.childForceExpandHeight = false;
             starRow.gameObject.AddComponent<LayoutElement>().preferredHeight = 96;
+            for (int si = 0; si < 3; si++)
+            {
+                var starSlot = MakeChild(starRow, $"Img_Star_{si}");
+                starSlot.sizeDelta = new Vector2(82, 82);
+                var starImg = starSlot.gameObject.AddComponent<Image>();
+                starImg.color = new Color(1f, 1f, 1f, 0.2f);
+                ApplySkin(starImg, "slot_star_off");
+            }
             var stageTxt = MakeText(content, "StageText", "",
-                38, TextCol, TextAlignmentOptions.Center);
+                38, TextCol, TextAlignmentOptions.Midline);
             stageTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 56;
             var scoreTxt = MakeText(content, "ScoreText", "",
-                30, TextMuted, TextAlignmentOptions.Center);
+                30, TextMuted, TextAlignmentOptions.Midline);
             scoreTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 48;
             var movesTxt = MakeText(content, "MovesText", "",
-                30, TextMuted, TextAlignmentOptions.Center);
+                30, TextMuted, TextAlignmentOptions.Midline);
             movesTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 48;
             var rewardTxt = MakeText(content, "RewardText", "",
-                28, TextCol, TextAlignmentOptions.Center);
+                28, TextCol, TextAlignmentOptions.Midline);
             rewardTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 56;
             AddFooterButton(footer, "Btn_Lobby", "common.lobby", "btn_secondary");
             AddFooterButton(footer, "Btn_Retry", "popup.clear.retry", "btn_secondary");
@@ -1216,7 +1257,9 @@ namespace ProjectLink.EditorTools
             Assign(popup, "scoreText",   scoreTxt.GetComponent<TextMeshProUGUI>());
             Assign(popup, "movesText",   movesTxt.GetComponent<TextMeshProUGUI>());
             Assign(popup, "rewardText",  rewardTxt.GetComponent<TextMeshProUGUI>());
-            Assign(popup, "starRow",     starRow);
+            Assign(popup, "starRow",      starRow);
+            Assign(popup, "starOnSprite",  LoadSkin()?.Get("slot_star_on"));
+            Assign(popup, "starOffSprite", LoadSkin()?.Get("slot_star_off"));
             SavePopupPrefab(root, "ClearPopup");
         }
 
@@ -1225,7 +1268,7 @@ namespace ProjectLink.EditorTools
             var (root, panel, content, footer) = CreatePopupShell<ClearNextStageConfirmPopup>(
                 "ClearNextStageConfirmPopup", "popup.clear.title", dismissible: true);
             AddPopupIcon(panel, Warning);
-            var bodyTxt = MakeText(content, "Txt_Body", "", 26, TextMuted, TextAlignmentOptions.Center);
+            var bodyTxt = MakeText(content, "Txt_Body", "", 26, TextMuted, TextAlignmentOptions.Midline);
             bodyTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 120;
             AddFooterButton(footer, "Btn_Cancel", "common.cancel", "btn_secondary");
             AddFooterButton(footer, "Btn_Confirm", "common.confirm", "btn_primary", isPrimary: true);
@@ -1269,7 +1312,7 @@ namespace ProjectLink.EditorTools
         {
             var (root, panel, content, footer) = CreatePopupShell<T>(
                 prefabName, titleKey, dismissible: true);
-            var bodyTxt = MakeText(content, "Txt_Body", bodyKey, 26, TextMuted, TextAlignmentOptions.Center);
+            var bodyTxt = MakeText(content, "Txt_Body", bodyKey, 26, TextMuted, TextAlignmentOptions.Midline);
             bodyTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 120;
             AddFooterButton(footer, "Btn_Cancel", "common.cancel", "btn_secondary");
             AddFooterButton(footer, "Btn_Confirm", "common.confirm", "btn_primary", isPrimary: true);
@@ -1329,33 +1372,29 @@ namespace ProjectLink.EditorTools
             panel.gameObject.AddComponent<ContentSizeFitter>().verticalFit =
                 ContentSizeFitter.FitMode.PreferredSize;
 
-            // Header
+            // Header — absolute layout: Txt_Title centered, Btn_Close top-right
             var header = MakeChild(panel, "Header");
             header.sizeDelta = new Vector2(0, 80);
-            var headerHlg = header.gameObject.AddComponent<HorizontalLayoutGroup>();
-            headerHlg.spacing = 16; headerHlg.childAlignment = TextAnchor.MiddleLeft;
-            headerHlg.childControlWidth = false; headerHlg.childControlHeight = true;
             header.gameObject.AddComponent<LayoutElement>().preferredHeight = 80;
 
             var titleGo = MakeChild(header, "Txt_Title");
-            titleGo.sizeDelta = new Vector2(0, 60);
+            Stretch(titleGo, dismissible ? 72 : 0, 0, dismissible ? 72 : 0, 0);
             var titleTmp = titleGo.gameObject.AddComponent<TextMeshProUGUI>();
             titleTmp.fontSize = 36; titleTmp.fontStyle = FontStyles.Bold; titleTmp.color = TextCol;
-            titleTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            titleTmp.alignment = TextAlignmentOptions.Midline;
             titleGo.gameObject.AddComponent<LocalizedText>().SetStringId(titleKey);
-            var titleLE = titleGo.gameObject.AddComponent<LayoutElement>();
-            titleLE.flexibleWidth = 1;
 
             if (dismissible)
             {
                 var closeBtn = MakeChild(header, "Btn_Close");
+                SetAnchor(closeBtn, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(1, 0.5f));
                 closeBtn.sizeDelta = new Vector2(72, 72);
+                closeBtn.anchoredPosition = new Vector2(-24, 0);
                 var closeImg = closeBtn.gameObject.AddComponent<Image>();
                 closeImg.color = HexColor("#FFFFFF26");
                 ApplySkin(closeImg, "btn_icon_close");
                 var closeBtnComp = closeBtn.gameObject.AddComponent<Button>();
                 closeBtnComp.targetGraphic = closeImg;
-                closeBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 72;
             }
 
             // Divider top
@@ -1406,7 +1445,7 @@ namespace ProjectLink.EditorTools
 
         static GameObject AddPopupBodyText(RectTransform parent, string stringKey)
         {
-            var go = MakeText(parent, "Txt_Body", stringKey, 26, TextMuted, TextAlignmentOptions.Center);
+            var go = MakeText(parent, "Txt_Body", stringKey, 26, TextMuted, TextAlignmentOptions.Midline);
             go.gameObject.AddComponent<LayoutElement>().preferredHeight = 160;
             return go.gameObject;
         }
@@ -1428,7 +1467,7 @@ namespace ProjectLink.EditorTools
             if (fullWidth) le.flexibleWidth = 1;
             else le.flexibleWidth = 1;
             AddLocalizedLabel(rect, "Txt_Label", labelKey, Vector2.zero,
-                Vector2.zero, 28f, TextAlignmentOptions.Center, FontStyles.Bold);
+                Vector2.zero, 28f, TextAlignmentOptions.Midline, FontStyles.Bold);
             return btn;
         }
 
@@ -1644,7 +1683,7 @@ namespace ProjectLink.EditorTools
             btn.transition = Selectable.Transition.ColorTint;
 
             AddLocalizedLabel(rect, "Txt_Label", labelKey, Vector2.zero,
-                Vector2.zero, fontSize, TextAlignmentOptions.Center, FontStyles.Bold);
+                Vector2.zero, fontSize, TextAlignmentOptions.Midline, FontStyles.Bold);
 
             return btn;
         }
@@ -1683,7 +1722,7 @@ namespace ProjectLink.EditorTools
 
         static TextMeshProUGUI AddLocalizedLabel(RectTransform parent, string name, string stringId,
             Vector2 position, Vector2 size, float fontSize = 28f,
-            TextAlignmentOptions alignment = TextAlignmentOptions.Center,
+            TextAlignmentOptions alignment = TextAlignmentOptions.Midline,
             FontStyles style = FontStyles.Normal)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -1846,6 +1885,21 @@ namespace ProjectLink.EditorTools
             var prop = so.FindProperty(propertyName);
             if (prop == null) return;
             prop.objectReferenceValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static void AssignSpriteArray(Object target, string propertyName, Sprite[] sprites)
+        {
+            if (target == null || sprites == null) return;
+            var so = new SerializedObject(target);
+            var prop = so.FindProperty(propertyName);
+            if (prop == null || !prop.isArray) return;
+            prop.arraySize = sprites.Length;
+            for (int i = 0; i < sprites.Length; i++)
+            {
+                var elem = prop.GetArrayElementAtIndex(i);
+                elem.objectReferenceValue = sprites[i];
+            }
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 

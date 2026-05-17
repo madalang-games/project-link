@@ -125,7 +125,7 @@ namespace ProjectLink.OutGame.UI
 
             var buttonImage = button.targetGraphic as Image;
             if (buttonImage != null)
-                buttonImage.color = selected ? new Color(1f, 1f, 1f, 0.08f) : new Color(0f, 0f, 0f, 0f);
+                buttonImage.color = selected ? new Color(1f, 1f, 1f, 0.1f) : new Color(0f, 0f, 0f, 0f);
 
             var icon = FindChildComponent<Image>(button.transform, "Icon");
             if (icon != null)
@@ -133,11 +133,19 @@ namespace ProjectLink.OutGame.UI
 
             var label = FindChildComponent<TextMeshProUGUI>(button.transform, "Txt");
             if (label != null)
+            {
                 label.color = selected ? Color.white : new Color(0.63f, 0.68f, 0.76f, 1f);
+                label.fontStyle = selected ? FontStyles.Bold : FontStyles.Normal;
+            }
 
+            // Hide indicator — label emphasis replaces it
             var indicator = button.transform.Find("Indicator");
             if (indicator != null)
-                indicator.gameObject.SetActive(selected);
+                indicator.gameObject.SetActive(false);
+
+            // Scale up selected tab for 3D pop effect
+            var targetScale = selected ? new Vector3(1.12f, 1.12f, 1f) : Vector3.one;
+            button.transform.localScale = targetScale;
         }
 
         static T FindChildComponent<T>(Transform parent, string childName) where T : Component

@@ -57,10 +57,17 @@ namespace ProjectLink.OutGame.UI
             bool isBold = (_label.fontStyle & FontStyles.Bold) != 0;
             var lang = LocalizationManager.Instance.CurrentLanguage;
 
+            TMP_FontAsset target;
             if (registry.TryGetFonts(lang, out var regular, out var bold))
-                _label.font = isBold && bold != null ? bold : regular != null ? regular : _defaultFont;
+                target = isBold && bold != null ? bold : regular != null ? regular : _defaultFont;
             else
-                _label.font = _defaultFont;
+                target = _defaultFont;
+
+            if (_label.font != target)
+            {
+                _label.font = target;
+                _label.ForceMeshUpdate();
+            }
         }
     }
 }

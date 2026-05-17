@@ -22,8 +22,9 @@ namespace ProjectLink.Services
         public const string PlayerSettings = "/api/settings";
         public const string RewardsClaim = "/api/rewards/claim";
 
-        public static string StageStart(int stageId) => $"/api/stage/{stageId}/start";
-        public static string StageEnd(int stageId) => $"/api/stage/{stageId}/end";
+        public static string StageStart(int stageId)  => $"/api/stage/{stageId}/start";
+        public static string StageEnd(int stageId)    => $"/api/stage/{stageId}/end";
+        public static string StageExtend(int stageId) => $"/api/stage/{stageId}/extend";
         public static string RankingStage(int stageId) => $"/api/ranking/stage/{stageId}";
 
         public static string Ranking(string category)

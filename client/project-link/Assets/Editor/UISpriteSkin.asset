@@ -26,9 +26,9 @@ MonoBehaviour:
   - elementName: btn_icon_settings
     sprite: {fileID: 21300000, guid: 7de97fd968e237d4fb3e3cd37e0f311e, type: 3}
   - elementName: btn_primary
-    sprite: {fileID: 21300000, guid: 82d6d009cb580564f86b1a01699a8176, type: 3}
+    sprite: {fileID: 21300000, guid: 81f598a6f99424d4ab0f23d69bdadb8d, type: 3}
   - elementName: btn_secondary
-    sprite: {fileID: 21300000, guid: be2bc9f92f2f9604b906d1e09aafd555, type: 3}
+    sprite: {fileID: 21300000, guid: 7301700d4c6c59349b0b289d316ff55e, type: 3}
   - elementName: btn_tab_home
     sprite: {fileID: 21300000, guid: 78644dc2d1d74934ca21012099bf46e9, type: 3}
   - elementName: btn_tab_ranking
@@ -38,32 +38,48 @@ MonoBehaviour:
   - elementName: slot_avatar
     sprite: {fileID: 21300000, guid: f72056af3a9aea64bba5024f6ba05876, type: 3}
   - elementName: slot_currency_soft
-    sprite: {fileID: 21300000, guid: 666abcb89b7db5443825ae3d85ed718e, type: 3}
+    sprite: {fileID: 21300000, guid: 735e082c30521dd4199a94e6d9de74dc, type: 3}
   - elementName: slot_event_banner
     sprite: {fileID: 21300000, guid: 3ca9e703edc0fa7408478f9c48d46fe0, type: 3}
   - elementName: slot_hud_bg
-    sprite: {fileID: 21300000, guid: 1254ebff1d7277845994fe0d99865541, type: 3}
+    sprite: {fileID: 0}
+  - elementName: slot_lock_icon
+    sprite: {fileID: 0}
   - elementName: slot_logo
     sprite: {fileID: 6547496072925479820, guid: e93e52f7fbf7c7a43820b34fc1b5d339, type: 3}
   - elementName: slot_popup_bg
-    sprite: {fileID: 21300000, guid: 4632b20096f85d349a2687e2cdb5ca8e, type: 3}
+    sprite: {fileID: 21300000, guid: d8a758c646225834a9be69700dae5873, type: 3}
   - elementName: slot_popup_overlay
     sprite: {fileID: 0}
   - elementName: slot_progress_track
     sprite: {fileID: 21300000, guid: 735b46c0a8560584692f9334eebce80f, type: 3}
   - elementName: slot_provider_apple
-    sprite: {fileID: 21300000, guid: bb7f868ef302aa84792a969f0e65ab70, type: 3}
+    sprite: {fileID: 21300000, guid: f82a12c6bbcdb4a4e8c364cfbd504c0f, type: 3}
   - elementName: slot_provider_google
-    sprite: {fileID: 21300000, guid: bb7f868ef302aa84792a969f0e65ab70, type: 3}
+    sprite: {fileID: 21300000, guid: 65344ce8d1705314295109e5c2698438, type: 3}
+  - elementName: slot_resource_bg
+    sprite: {fileID: 21300000, guid: bb8c57b93d50fee49a1b2f78babb350e, type: 3}
   - elementName: slot_stage_node
-    sprite: {fileID: 21300000, guid: 53e13850a2948ce458670c438ade2c14, type: 3}
+    sprite: {fileID: 21300000, guid: c1ddcf33f3623344887245a348d4289c, type: 3}
   - elementName: slot_stamina_icon
-    sprite: {fileID: 21300000, guid: e7309b41d52003e47bda44ca0c2833d6, type: 3}
+    sprite: {fileID: 21300000, guid: 6f7ad1cefa0e7d84fb1abb2ffbc17b91, type: 3}
+  - elementName: slot_star_off
+    sprite: {fileID: 21300000, guid: 1c92590b05efb1c4a9f19cfc32d6b59a, type: 3}
+  - elementName: slot_star_on
+    sprite: {fileID: 21300000, guid: 2d235c84e7ee2224e9e14082c015c97b, type: 3}
   - elementName: slot_streak_badge
     sprite: {fileID: 21300000, guid: 9c40f6dfa61f67c4a94fd73743191899, type: 3}
-  - elementName: slot_tab_indicator
-    sprite: {fileID: 21300000, guid: 60451d7ca25722f4d852a98fcd534eab, type: 3}
   - elementName: slot_toggle_handle
     sprite: {fileID: 21300000, guid: bb352e62039d0e141a5671c9f06d9ff4, type: 3}
   - elementName: slot_toggle_track
     sprite: {fileID: 21300000, guid: 4fe0cb5d03416ed4290e0e4e32ba1eb3, type: 3}
+  - elementName: slot_popup_bg_horizontal
+    sprite: {fileID: 21300000, guid: e609237df9a219c4eaff075232370fb2, type: 3}
+  - elementName: slot_popup_bg_vertical
+    sprite: {fileID: 21300000, guid: e0341c3511b3ca9458b1e76e8593fd31, type: 3}
+  - elementName: slot_toggle_off
+    sprite: {fileID: 21300000, guid: 4fe0cb5d03416ed4290e0e4e32ba1eb3, type: 3}
+  - elementName: slot_toggle_on
+    sprite: {fileID: 21300000, guid: bb352e62039d0e141a5671c9f06d9ff4, type: 3}
+  - elementName: slot_tab_indicator
+    sprite: {fileID: 21300000, guid: 60451d7ca25722f4d852a98fcd534eab, type: 3}

@@ -41,6 +41,7 @@
 | `InGameController.Instance` | prop | singleton; valid during Game scene lifetime |
 | `InGameController.OpenPausePopup()` | method | opens PausePopup with timer pause/resume callbacks |
 | `InGameController.AbandonStageAndLoad(string)` | method | submits stage fail with active session token, clears context, then loads target scene |
+| `InGameController.ExtendTime(int)` | method | CloseAll popups + `_timer.Start(seconds)` (resets IsExpired) + SetInputEnabled(true); called by TimeoutPopup on successful extend API response |
 | `InGameController.HandleStageStarted(...)` | method | enables gameplay only after server stage-start success; insufficient stamina opens Energy popup and returns Lobby |
 | `UIManager.GetLayer(UILayer)` | method | returns canvas Transform for named layer |
 | `PopupId` | enum | popup ids: ReturnTitle, ExitGame, Settings, BuyItem, Energy, StreakChallenge, Account, Reward, StageClear, SessionExpired, Pause, ForceUpdate, Maintenance, StageDetail, ClearNextStageConfirm |

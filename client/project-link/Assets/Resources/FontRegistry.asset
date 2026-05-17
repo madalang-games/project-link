@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectLink.Core.FontRegistry
   entries:
   - language: 0
-    regular: {fileID: 0}
-    bold: {fileID: 0}
+    regular: {fileID: 11400000, guid: 69198293b74e53b49bf0ace89249e0b2, type: 2}
+    bold: {fileID: 11400000, guid: a8c2e0bda1075494ea09780b9f37ccfc, type: 2}
   - language: 1
-    regular: {fileID: 11400000, guid: e2316cdcb56675043b6e93e2600f0e45, type: 2}
-    bold: {fileID: 11400000, guid: 2fd28808cd78d5242ad5002bd272c0cb, type: 2}
+    regular: {fileID: 11400000, guid: 74c4d74688ac820458bbb3b6aa2eff0d, type: 2}
+    bold: {fileID: 11400000, guid: 74c4d74688ac820458bbb3b6aa2eff0d, type: 2}
   - language: 2
     regular: {fileID: 11400000, guid: c97bf6cddc8792243b0cf749cfab693a, type: 2}
     bold: {fileID: 11400000, guid: 9c4bdfa1fb2f0c947894fb7067815cd5, type: 2}

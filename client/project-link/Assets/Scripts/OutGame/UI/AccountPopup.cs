@@ -35,7 +35,7 @@ namespace ProjectLink.OutGame.UI
             }
 
             SetText(displayNameText, result.Value.DisplayName);
-            SetText(accountStatusText, result.Value.IsGuest ? "Guest" : string.Join(", ", result.Value.LinkedProviders));
+            SetText(accountStatusText, result.Value.IsGuest ? LocalizationManager.Get("popup.account.guest") : string.Join(", ", result.Value.LinkedProviders));
         }
 
         void ResolveMissingReferences()

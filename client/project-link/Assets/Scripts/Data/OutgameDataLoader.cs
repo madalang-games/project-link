@@ -11,6 +11,7 @@ namespace ProjectLink.Data
         static OutgameSeasonEvent[] _seasonEvents;
         static OutgameShopCatalog[] _shopCatalog;
         static OutgameStaminaConfig[] _staminaConfigs;
+        static OutgameDailyReward[] _dailyRewards;
         static IngameItem[] _items;
 
         public static IReadOnlyList<OutgameAvatar> Avatars
@@ -30,6 +31,11 @@ namespace ProjectLink.Data
                 EnsureLoaded();
                 return _staminaConfigs.Length > 0 ? _staminaConfigs[0] : null;
             }
+        }
+
+        public static IReadOnlyList<OutgameDailyReward> DailyRewards
+        {
+            get { EnsureLoaded(); return _dailyRewards; }
         }
 
         public static IReadOnlyList<OutgameShopCatalog> GetEnabledShopProducts(string category = null)
@@ -76,6 +82,7 @@ namespace ProjectLink.Data
             _seasonEvents = CsvLoader.Load<OutgameSeasonEvent>(OutgameSeasonEvent.ResourcePath);
             _shopCatalog = CsvLoader.Load<OutgameShopCatalog>(OutgameShopCatalog.ResourcePath);
             _staminaConfigs = CsvLoader.Load<OutgameStaminaConfig>(OutgameStaminaConfig.ResourcePath);
+            _dailyRewards = CsvLoader.Load<OutgameDailyReward>(OutgameDailyReward.ResourcePath);
             _items = CsvLoader.Load<IngameItem>(IngameItem.ResourcePath);
         }
     }

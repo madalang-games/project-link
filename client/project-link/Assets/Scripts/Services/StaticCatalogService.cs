@@ -9,6 +9,7 @@ namespace ProjectLink.Services
         IReadOnlyList<OutgameShopCatalog> GetEnabledShopProducts(string category = null);
         IReadOnlyList<OutgameSeasonEvent> SeasonEvents { get; }
         OutgameStaminaConfig StaminaConfig { get; }
+        IReadOnlyList<OutgameDailyReward> DailyRewards { get; }
         IngameItem FindItem(int itemId);
         OutgameAvatar FindAvatar(int avatarId);
         OutgameSeasonEvent FindSeasonEvent(int eventId);
@@ -18,6 +19,7 @@ namespace ProjectLink.Services
     {
         public IReadOnlyList<OutgameSeasonEvent> SeasonEvents => OutgameDataLoader.SeasonEvents;
         public OutgameStaminaConfig StaminaConfig => OutgameDataLoader.StaminaConfig;
+        public IReadOnlyList<OutgameDailyReward> DailyRewards => OutgameDataLoader.DailyRewards;
 
         public IReadOnlyList<OutgameShopCatalog> GetEnabledShopProducts(string category = null)
         {

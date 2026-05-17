@@ -12,6 +12,7 @@
 | `outgame/OutgameSeasonEvent.cs` | `OutgameSeasonEvent` | `shared/datas/outgame/outgame_season_event.csv` |
 | `outgame/OutgameShopCatalog.cs` | `OutgameShopCatalog` | `shared/datas/outgame/outgame_shop_catalog.csv` |
 | `outgame/OutgameStaminaConfig.cs` | `OutgameStaminaConfig` | `shared/datas/outgame/outgame_stamina_config.csv` |
+| `outgame/OutgameTimeExtendConfig.cs` | `OutgameTimeExtendConfig` | `shared/datas/outgame/outgame_time_extend_config.csv` |
 | `string/Clientstring.cs` | `Clientstring` | `shared/datas/string/clientstring.csv` |
 | `string/ErrorMessages.cs` | `ErrorMessages` | `shared/datas/string/error_messages.csv` |
 

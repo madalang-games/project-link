@@ -15,7 +15,8 @@
 | Typography | Rounded bold for headings; medium weight for body text |
 | Iconography | Filled icons, consistent visual weight |
 | Animation driver | Spine 2D for character/reward/celebration sequences; Unity Animator for scene/popup transitions; DOTween for micro-interactions |
-| Asset skinning | Static image assets applied via `UIButtonSkin` ScriptableObject (elementName → Sprite mapping). All buttons and image slots participate in skin swaps |
+| Asset skinning | Static image assets applied via `UISpriteSkin` ScriptableObject (`elementName → Sprite` mapping). All builder-generated `Image` components participate in skin swaps. Key registry: `docs/ui-skin-keys.md`. |
+| Typography | All TMP text elements use `FontRegistry` (ScriptableObject at `Resources/FontRegistry`) to apply language-appropriate fonts. Builder assigns EN font at edit time; `LocalizedText` refreshes on `LanguageChanged`. **Never use the default LiberationSans SDF.** |
 
 ### Global UX Rules
 
@@ -24,8 +25,8 @@
 | **Toast (error/info)** | Top of screen. Stack, max 3 simultaneous. New toast appears at bottom of stack; existing toasts shift upward. Auto-dismiss after 3 s. Non-critical API/network errors only; auth errors use blocking popup |
 | **API loading state** | Button `interactable=false` + spinner overlay on the interaction area while awaiting response |
 | **Currency delta feedback** | Floating `+N` text animation originating from the HUD currency/stamina icon on any reward or refill |
-| **Popup behavior** | Close button (×) fixed at top-right corner. Background (outside popup panel) tap closes the popup. Entry: scale+fade in 0.25 s cubic-bezier. Exit: scale+fade out 0.2 s. Exceptions: non-dismissible popups have no × and background tap is inert |
-| **Text binding** | All user-facing strings bound to `clientstring` table string IDs. Error codes map to `error_messages` table IDs. No hardcoded display strings |
+| **Popup behavior** | Header: `Txt_Title` centered (full-width, `MidlineCenter` alignment). `Btn_Close` (72×72, `btn_icon_close` skin) anchored to header top-right with 16 px padding. Background (outside popup panel) tap closes the popup. Entry: scale+fade in 0.25 s cubic-bezier. Exit: scale+fade out 0.2 s. Non-dismissible popups have no × and background tap is inert. |
+| **Text binding** | All user-facing strings bound to `clientstring` table string IDs. Error codes map to `error_messages` table IDs. No hardcoded display strings. Numeric state (score, counts) and icon glyphs are exempt. |
 | **Safe area** | Root canvas panels adjusted via `SafeAreaFitter` for notch/home-bar devices |
 | **Spine in "static" contexts** | Even decorative/static images use Spine idle loops for ambient life (e.g., stage nodes pulse, currency icons shimmer) |
 
@@ -150,6 +151,8 @@ HUD data populated by `GET /api/lobby` → `LobbyStateResponse` on scene entry.
 
 Order (left → right): **상점 \| 홈 \| 랭킹**  
 Default selected: **홈** (center)
+
+Selected state: label bold + scale-up (1.12×). No indicator bar. Icon + text colors white; unselected muted gray.
 
 ---
 

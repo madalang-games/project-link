@@ -19,6 +19,7 @@
 | `InGameHUD.Refresh()` | method | updates objective counter text via connectedCount getter |
 | `InGameHUD.SetTimerDisplay(float)` | method | remaining seconds -> `MM:SS` (zero-padded); color -> urgent red when <= 10 s |
 | `InGameHUD.SetMoveDisplay(int,int)` | method | moves used / server move limit text |
+| `GameWireframeController.SetStageLabel(int)` | method | updates levelLabelText via `popup.stage.title_n_fmt` LocalizationManager key (no hardcoded "Stage N") |
 | `GameWireframeController.SetToolButtonsInteractable(bool)` | method | toggles generated shell button refs |
 | `CircularGauge.Show(Vector3,Color)` | method | positions at world pos, sets arc color, enables |
 | `CircularGauge.SetProgress(float)` | method | t in [0,1] draws arc (0=empty, 1=full circle) |
@@ -26,7 +27,7 @@
 | `ClearPopup.Init(StageClearPopupModel)` | method | server-backed stage clear model; binds Next/Retry/Lobby buttons; validates next-stage progress before replay navigation |
 | `ClearNextStageConfirmPopup.Init(ClearNextStageConfirmModel)` | method | confirm -> challenge next stage; cancel/back/overlay -> Lobby |
 | `PausePopup.Init(Action)` | method | onResume callback; back-press resumes; Retry/Lobby abandon current stage before navigation |
-| `TimeoutPopup.Init(int)` | method | stageId only; Retry/Lobby abandon current stage before navigation; OnBackPressed() is no-op |
+| `TimeoutPopup.Init(int)` | method | stageId + extend button; Retry/Lobby abandon stage; Btn_Extend calls `IUiDataService.ExtendStageTime`, on success calls `InGameController.ExtendTime(seconds)`; `_extensionCount` tracks how many times extended (maps to server extensionCount); OnBackPressed() is no-op |
 
 ## Cross-refs
 - Consumed by: client `Core.InGameController` (show/hide popups, call InGameHUD.Init/Refresh/SetTimerDisplay)
