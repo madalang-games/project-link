@@ -8,8 +8,6 @@ namespace ProjectLink.Data
     public static class OutgameDataLoader
     {
         static OutgameAvatar[] _avatars;
-        static OutgameDailyChallenge[] _dailyChallenges;
-        static OutgameDailyReward[] _dailyRewards;
         static OutgameSeasonEvent[] _seasonEvents;
         static OutgameShopCatalog[] _shopCatalog;
         static OutgameStaminaConfig[] _staminaConfigs;
@@ -18,11 +16,6 @@ namespace ProjectLink.Data
         public static IReadOnlyList<OutgameAvatar> Avatars
         {
             get { EnsureLoaded(); return _avatars; }
-        }
-
-        public static IReadOnlyList<OutgameDailyReward> DailyRewards
-        {
-            get { EnsureLoaded(); return _dailyRewards; }
         }
 
         public static IReadOnlyList<OutgameSeasonEvent> SeasonEvents
@@ -36,15 +29,6 @@ namespace ProjectLink.Data
             {
                 EnsureLoaded();
                 return _staminaConfigs.Length > 0 ? _staminaConfigs[0] : null;
-            }
-        }
-
-        public static OutgameDailyChallenge DailyChallengeConfig
-        {
-            get
-            {
-                EnsureLoaded();
-                return _dailyChallenges.Length > 0 ? _dailyChallenges[0] : null;
             }
         }
 
@@ -89,8 +73,6 @@ namespace ProjectLink.Data
             if (_shopCatalog != null) return;
 
             _avatars = CsvLoader.Load<OutgameAvatar>(OutgameAvatar.ResourcePath);
-            _dailyChallenges = CsvLoader.Load<OutgameDailyChallenge>(OutgameDailyChallenge.ResourcePath);
-            _dailyRewards = CsvLoader.Load<OutgameDailyReward>(OutgameDailyReward.ResourcePath);
             _seasonEvents = CsvLoader.Load<OutgameSeasonEvent>(OutgameSeasonEvent.ResourcePath);
             _shopCatalog = CsvLoader.Load<OutgameShopCatalog>(OutgameShopCatalog.ResourcePath);
             _staminaConfigs = CsvLoader.Load<OutgameStaminaConfig>(OutgameStaminaConfig.ResourcePath);

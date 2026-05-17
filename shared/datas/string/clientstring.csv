@@ -150,3 +150,6 @@ game_undo,Undo,되돌리기,撤销,復原,ย้อนกลับ
 item_paint,Paint,페인트,颜料,顏料,สีทา
 item_shuffle,Shuffle,셔플,洗牌,洗牌,สับเปลี่ยน
 item_hammer,Hammer,망치,锤子,錘子,ค้อน
+streak.popup.title,Streak Challenge,연속 챌린지,连续挑战,連續挑戰,สตรีคชาเลนจ์
+streak.status_inactive,Start to unlock rewards!,보상을 잠금 해제하려면 시작하세요!,开始解锁奖励！,開始解鎖獎勵！,เริ่มเพื่อปลดล็อกรางวัล!
+streak.activate,Activate,시작하기,开始,開始,เริ่มต้น

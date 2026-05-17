@@ -7,8 +7,10 @@
 | `IngameItemData.cs` | `IngameItemData` | POCO for one ingame_item CSV row |
 | `OutgameStaminaConfigData.cs` | `OutgameStaminaConfigData` | Global stamina config (single row) |
 | `OutgameAvatarData.cs` | `OutgameAvatarData` | Preset avatar definitions |
-| `OutgameDailyChallengeData.cs` | `OutgameDailyChallengeData` | Daily challenge global config (single row) |
-| `OutgameDailyRewardData.cs` | `OutgameDailyRewardData` | 7-day streak reward schedule rows |
+| `StreakChallengeEventData.cs` | `StreakChallengeEventData` | 24H event config (duration, reset type, policies) |
+| `StreakChallengeLevelData.cs` | `StreakChallengeLevelData` | Level config (requiredClearCount, rewardGroupId per level) |
+| `StreakChallengeRewardGroupData.cs` | `StreakChallengeRewardGroupData` | Reward group metadata (type, enabled flag) |
+| `StreakChallengeRewardItemData.cs` | `StreakChallengeRewardItemData` | Individual reward items (itemType, amount, weight) per group |
 | `OutgameShopCatalogData.cs` | `OutgameShopCatalogData` | Shop product catalog rows |
 | `OutgameSeasonEventData.cs` | `OutgameSeasonEventData` | Season event definitions |
 
@@ -28,7 +30,7 @@
 ## Cross-refs
 - Depends on: `shared/datas/ingame/` + `shared/datas/outgame/` → `server/generated/data/` (gen pipeline)
 - Consumed by: server `Infrastructure.Data.StaticDataService` (CSV → POCO at startup)
-- Consumed by: server `Application.StageService`, `StaminaService`, `ShopService`, `DailyChallengeService` (via `IStaticDataService`)
+- Consumed by: server `Application.StageService`, `StaminaService`, `ShopService`, `StreakChallengeService` (via `IStaticDataService`)
 
 ## Rules
 - Read-only POCOs — no logic, no dependencies

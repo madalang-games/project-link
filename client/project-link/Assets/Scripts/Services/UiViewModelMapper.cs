@@ -26,14 +26,14 @@ namespace ProjectLink.Services
                 NextUnlockedStageId = response.ProgressSummary.NextUnlockedStageId,
                 TotalStarsEarned = response.ProgressSummary.TotalStarsEarned,
                 CanPlay = response.Stamina.Current > 0,
-                DailyChallenge = new DailyChallengeModel
+                StreakChallenge = new StreakChallengeModel
                 {
-                    CompletedToday = response.DailyChallenge.CompletedToday,
-                    CanComplete = response.DailyChallenge.CanComplete,
-                    PlayCountToday = response.DailyChallenge.PlayCountToday,
-                    PlayCountTarget = response.DailyChallenge.PlayCountTarget,
-                    StreakDays = response.DailyChallenge.StreakDays,
-                    ResetAt = response.DailyChallenge.ResetAt,
+                    EventStatus          = response.StreakChallenge.EventStatus,
+                    RemainingTimeIso     = response.StreakChallenge.RemainingTimeIso,
+                    CurrentLevel         = response.StreakChallenge.CurrentLevel,
+                    CurrentLevelCount    = response.StreakChallenge.CurrentLevelCount,
+                    CurrentLevelRequired = response.StreakChallenge.CurrentLevelRequired,
+                    HasPendingReward     = response.StreakChallenge.HasPendingReward,
                 },
                 SeasonEvent = response.SeasonEvent == null ? null : new SeasonEventModel
                 {

@@ -10,39 +10,58 @@ public class StaticDataService : IStaticDataService
     private readonly IReadOnlyDictionary<int, IngameItemData>        _items;
     private readonly OutgameStaminaConfigData                         _staminaConfig;
     private readonly IReadOnlyDictionary<int, OutgameAvatarData>     _avatars;
-    private readonly OutgameDailyChallengeData                        _dailyChallengeConfig;
-    private readonly IReadOnlyDictionary<int, OutgameDailyRewardData> _dailyRewards;
     private readonly IReadOnlyDictionary<int, OutgameShopCatalogData> _shopCatalog;
     private readonly IReadOnlyList<OutgameSeasonEventData>            _seasonEvents;
+    private readonly IReadOnlyDictionary<(int, int), StreakChallengeEventData>         _streakEvents;
+    private readonly IReadOnlyDictionary<(int, int), List<StreakChallengeLevelData>>   _streakLevels;
+    private readonly IReadOnlyDictionary<(int, int), List<StreakChallengeRewardItemData>> _streakRewardItems;
 
     public StaticDataService(ILogger<StaticDataService> logger)
     {
-        var basePath = AppContext.BaseDirectory;
+        var basePath    = AppContext.BaseDirectory;
         var ingamePath  = Path.Combine(basePath, "generated", "data", "ingame");
         var outgamePath = Path.Combine(basePath, "generated", "data", "outgame");
+        var streakPath  = Path.Combine(basePath, "generated", "data", "streak_challenge");
 
-        _stages               = LoadStages(Path.Combine(ingamePath, "ingame_stage.csv"), logger);
-        _items                = LoadItems(Path.Combine(ingamePath, "ingame_item.csv"), logger);
-        _staminaConfig        = LoadStaminaConfig(Path.Combine(outgamePath, "outgame_stamina_config.csv"), logger);
-        _avatars              = LoadAvatars(Path.Combine(outgamePath, "outgame_avatar.csv"), logger);
-        _dailyChallengeConfig = LoadDailyChallengeConfig(Path.Combine(outgamePath, "outgame_daily_challenge.csv"), logger);
-        _dailyRewards         = LoadDailyRewards(Path.Combine(outgamePath, "outgame_daily_reward.csv"), logger);
-        _shopCatalog          = LoadShopCatalog(Path.Combine(outgamePath, "outgame_shop_catalog.csv"), logger);
-        _seasonEvents         = LoadSeasonEvents(Path.Combine(outgamePath, "outgame_season_event.csv"), logger);
+        _stages            = LoadStages(Path.Combine(ingamePath, "ingame_stage.csv"), logger);
+        _items             = LoadItems(Path.Combine(ingamePath, "ingame_item.csv"), logger);
+        _staminaConfig     = LoadStaminaConfig(Path.Combine(outgamePath, "outgame_stamina_config.csv"), logger);
+        _avatars           = LoadAvatars(Path.Combine(outgamePath, "outgame_avatar.csv"), logger);
+        _shopCatalog       = LoadShopCatalog(Path.Combine(outgamePath, "outgame_shop_catalog.csv"), logger);
+        _seasonEvents      = LoadSeasonEvents(Path.Combine(outgamePath, "outgame_season_event.csv"), logger);
+        _streakEvents      = LoadStreakEvents(Path.Combine(streakPath, "streak_challenge_event.csv"), logger);
+        _streakLevels      = LoadStreakLevels(Path.Combine(streakPath, "streak_challenge_level.csv"), logger);
+        _streakRewardItems = LoadStreakRewardItems(Path.Combine(streakPath, "streak_challenge_reward_item.csv"), logger);
     }
 
-    public IngameStageData?                     GetStage(int stageId)      => _stages.GetValueOrDefault(stageId);
-    public IngameItemData?                      GetItem(int itemId)        => _items.GetValueOrDefault(itemId);
-    public IReadOnlyList<IngameStageData>       GetAllStages()             => _stages.Values.ToList();
-    public IReadOnlyList<IngameItemData>        GetAllItems()              => _items.Values.ToList();
-    public OutgameStaminaConfigData             GetStaminaConfig()         => _staminaConfig;
-    public IReadOnlyList<OutgameAvatarData>     GetAllAvatars()            => _avatars.Values.ToList();
-    public OutgameDailyChallengeData            GetDailyChallengeConfig()  => _dailyChallengeConfig;
-    public IReadOnlyList<OutgameDailyRewardData> GetAllDailyRewards()      => _dailyRewards.Values.ToList();
-    public OutgameDailyRewardData?              GetDailyReward(int day)    => _dailyRewards.GetValueOrDefault(day);
-    public IReadOnlyList<OutgameShopCatalogData> GetShopCatalog()          => _shopCatalog.Values.ToList();
-    public OutgameShopCatalogData?              GetShopProduct(int id)     => _shopCatalog.GetValueOrDefault(id);
-    public IReadOnlyList<OutgameSeasonEventData> GetAllSeasonEvents()      => _seasonEvents;
+    public IngameStageData?                      GetStage(int stageId)      => _stages.GetValueOrDefault(stageId);
+    public IngameItemData?                       GetItem(int itemId)        => _items.GetValueOrDefault(itemId);
+    public IReadOnlyList<IngameStageData>        GetAllStages()             => _stages.Values.ToList();
+    public IReadOnlyList<IngameItemData>         GetAllItems()              => _items.Values.ToList();
+    public OutgameStaminaConfigData              GetStaminaConfig()         => _staminaConfig;
+    public IReadOnlyList<OutgameAvatarData>      GetAllAvatars()            => _avatars.Values.ToList();
+    public IReadOnlyList<OutgameShopCatalogData> GetShopCatalog()           => _shopCatalog.Values.ToList();
+    public OutgameShopCatalogData?               GetShopProduct(int id)     => _shopCatalog.GetValueOrDefault(id);
+    public IReadOnlyList<OutgameSeasonEventData> GetAllSeasonEvents()       => _seasonEvents;
+
+    public StreakChallengeEventData? GetStreakChallengeEvent(int eventId, int version)
+        => _streakEvents.GetValueOrDefault((eventId, version));
+
+    public StreakChallengeEventData? GetLatestEnabledStreakChallengeEvent()
+        => _streakEvents.Values
+            .Where(e => e.IsEnabled)
+            .OrderByDescending(e => e.Version)
+            .FirstOrDefault();
+
+    public IReadOnlyList<StreakChallengeLevelData> GetStreakChallengeLevels(int eventId, int version)
+        => _streakLevels.TryGetValue((eventId, version), out var list)
+            ? list.OrderBy(l => l.LevelIndex).ToList()
+            : new List<StreakChallengeLevelData>();
+
+    public IReadOnlyList<StreakChallengeRewardItemData> GetStreakChallengeRewardItems(int rewardGroupId, int rewardGroupVersion)
+        => _streakRewardItems.TryGetValue((rewardGroupId, rewardGroupVersion), out var list)
+            ? list.OrderBy(i => i.DisplayOrder).ToList()
+            : new List<StreakChallengeRewardItemData>();
 
     // ingame_stage: stageId,width,height,timeLimit,moveLimit,difficulty,boardEncoding,nodeMap,cellMap,soft_reward,stageMeta...,generatorSeed
     private static IReadOnlyDictionary<int, IngameStageData> LoadStages(string path, ILogger logger)
@@ -149,51 +168,6 @@ public class StaticDataService : IStaticDataService
         return result;
     }
 
-    // outgame_daily_challenge: configId,playCountTarget,resetHourUtc,stagePickCount
-    private static OutgameDailyChallengeData LoadDailyChallengeConfig(string path, ILogger logger)
-    {
-        var fallback = new OutgameDailyChallengeData { ConfigId = 1, PlayCountTarget = 3, ResetHourUtc = 0, StagePickCount = 3 };
-        if (!File.Exists(path)) { logger.LogWarning("outgame_daily_challenge.csv not found at {Path}", path); return fallback; }
-
-        using var reader = new StreamReader(path);
-        reader.ReadLine();
-        var line = reader.ReadLine();
-        if (string.IsNullOrWhiteSpace(line)) return fallback;
-        var cols = line.Split(',');
-        return new OutgameDailyChallengeData
-        {
-            ConfigId        = int.Parse(cols[0]),
-            PlayCountTarget = int.Parse(cols[1]),
-            ResetHourUtc    = int.Parse(cols[2]),
-            StagePickCount  = cols.Length > 3 ? int.Parse(cols[3]) : 3,
-        };
-    }
-
-    // outgame_daily_reward: streakDay,rewardType,rewardId,amount
-    private static IReadOnlyDictionary<int, OutgameDailyRewardData> LoadDailyRewards(string path, ILogger logger)
-    {
-        var result = new Dictionary<int, OutgameDailyRewardData>();
-        if (!File.Exists(path)) { logger.LogWarning("outgame_daily_reward.csv not found at {Path}", path); return result; }
-
-        using var reader = new StreamReader(path);
-        reader.ReadLine();
-        string? line;
-        while ((line = reader.ReadLine()) is not null)
-        {
-            if (string.IsNullOrWhiteSpace(line)) continue;
-            var cols = line.Split(',');
-            result[int.Parse(cols[0])] = new OutgameDailyRewardData
-            {
-                StreakDay  = int.Parse(cols[0]),
-                RewardType = cols[1],
-                RewardId   = int.Parse(cols[2]),
-                Amount     = int.Parse(cols[3]),
-            };
-        }
-        logger.LogInformation("Loaded {Count} daily rewards from static data", result.Count);
-        return result;
-    }
-
     // outgame_shop_catalog: productId,category,name,grantItemId,grantQuantity,priceSoft,priceIapSku,sortOrder,isEnabled
     private static IReadOnlyDictionary<int, OutgameShopCatalogData> LoadShopCatalog(string path, ILogger logger)
     {
@@ -249,6 +223,101 @@ public class StaticDataService : IStaticDataService
             });
         }
         logger.LogInformation("Loaded {Count} season events from static data", result.Count);
+        return result;
+    }
+
+    // streak_challenge_event: eventId,version,isEnabled,durationSeconds,resetType,stageCountPolicy,rewardPolicy,adPolicy
+    private static IReadOnlyDictionary<(int, int), StreakChallengeEventData> LoadStreakEvents(string path, ILogger logger)
+    {
+        var result = new Dictionary<(int, int), StreakChallengeEventData>();
+        if (!File.Exists(path)) { logger.LogWarning("streak_challenge_event.csv not found at {Path}", path); return result; }
+
+        using var reader = new StreamReader(path);
+        reader.ReadLine();
+        string? line;
+        while ((line = reader.ReadLine()) is not null)
+        {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            var c = line.Split(',');
+            var row = new StreakChallengeEventData
+            {
+                EventId          = int.Parse(c[0]),
+                Version          = int.Parse(c[1]),
+                IsEnabled        = bool.Parse(c[2]),
+                DurationSeconds  = int.Parse(c[3]),
+                ResetType        = c[4],
+                StageCountPolicy = c[5],
+                RewardPolicy     = c[6],
+                AdPolicy         = c[7],
+            };
+            result[(row.EventId, row.Version)] = row;
+        }
+        logger.LogInformation("Loaded {Count} streak challenge events from static data", result.Count);
+        return result;
+    }
+
+    // streak_challenge_level: eventId,version,levelIndex,requiredClearCount,rewardGroupId,allowTimeExtension,allowRevive,isEnabled,displayOrder,localizationKey
+    private static IReadOnlyDictionary<(int, int), List<StreakChallengeLevelData>> LoadStreakLevels(string path, ILogger logger)
+    {
+        var result = new Dictionary<(int, int), List<StreakChallengeLevelData>>();
+        if (!File.Exists(path)) { logger.LogWarning("streak_challenge_level.csv not found at {Path}", path); return result; }
+
+        using var reader = new StreamReader(path);
+        reader.ReadLine();
+        string? line;
+        while ((line = reader.ReadLine()) is not null)
+        {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            var c = line.Split(',');
+            var row = new StreakChallengeLevelData
+            {
+                EventId             = int.Parse(c[0]),
+                Version             = int.Parse(c[1]),
+                LevelIndex          = int.Parse(c[2]),
+                RequiredClearCount  = int.Parse(c[3]),
+                RewardGroupId       = int.Parse(c[4]),
+                AllowTimeExtension  = bool.Parse(c[5]),
+                AllowRevive         = bool.Parse(c[6]),
+                IsEnabled           = bool.Parse(c[7]),
+                DisplayOrder        = int.Parse(c[8]),
+                LocalizationKey     = c[9],
+            };
+            var key = (row.EventId, row.Version);
+            if (!result.ContainsKey(key)) result[key] = new List<StreakChallengeLevelData>();
+            result[key].Add(row);
+        }
+        logger.LogInformation("Loaded streak challenge levels from static data");
+        return result;
+    }
+
+    // streak_challenge_reward_item: rewardGroupId,rewardGroupVersion,itemType,itemId,amount,weight,displayOrder
+    private static IReadOnlyDictionary<(int, int), List<StreakChallengeRewardItemData>> LoadStreakRewardItems(string path, ILogger logger)
+    {
+        var result = new Dictionary<(int, int), List<StreakChallengeRewardItemData>>();
+        if (!File.Exists(path)) { logger.LogWarning("streak_challenge_reward_item.csv not found at {Path}", path); return result; }
+
+        using var reader = new StreamReader(path);
+        reader.ReadLine();
+        string? line;
+        while ((line = reader.ReadLine()) is not null)
+        {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            var c = line.Split(',');
+            var row = new StreakChallengeRewardItemData
+            {
+                RewardGroupId      = int.Parse(c[0]),
+                RewardGroupVersion = int.Parse(c[1]),
+                ItemType           = c[2],
+                ItemId             = int.Parse(c[3]),
+                Amount             = int.Parse(c[4]),
+                Weight             = int.Parse(c[5]),
+                DisplayOrder       = int.Parse(c[6]),
+            };
+            var key = (row.RewardGroupId, row.RewardGroupVersion);
+            if (!result.ContainsKey(key)) result[key] = new List<StreakChallengeRewardItemData>();
+            result[key].Add(row);
+        }
+        logger.LogInformation("Loaded streak challenge reward items from static data");
         return result;
     }
 }

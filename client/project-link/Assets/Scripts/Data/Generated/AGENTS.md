@@ -9,8 +9,6 @@
 | `ingame/IngameNodeColors.cs` | `IngameNodeColors` | `shared/datas/ingame/ingame_node_colors.csv` |
 | `ingame/IngameItem.cs` | `IngameItem` | `shared/datas/ingame/ingame_item.csv` |
 | `outgame/OutgameAvatar.cs` | `OutgameAvatar` | `shared/datas/outgame/outgame_avatar.csv` |
-| `outgame/OutgameDailyChallenge.cs` | `OutgameDailyChallenge` | `shared/datas/outgame/outgame_daily_challenge.csv` |
-| `outgame/OutgameDailyReward.cs` | `OutgameDailyReward` | `shared/datas/outgame/outgame_daily_reward.csv` |
 | `outgame/OutgameSeasonEvent.cs` | `OutgameSeasonEvent` | `shared/datas/outgame/outgame_season_event.csv` |
 | `outgame/OutgameShopCatalog.cs` | `OutgameShopCatalog` | `shared/datas/outgame/outgame_shop_catalog.csv` |
 | `outgame/OutgameStaminaConfig.cs` | `OutgameStaminaConfig` | `shared/datas/outgame/outgame_stamina_config.csv` |
@@ -41,7 +39,6 @@
 | `OutgameShopCatalog.isEnabled` | field | bool; false hides product from catalog |
 | `OutgameStaminaConfig.maxStamina` | field | int; max stamina display cap |
 | `OutgameStaminaConfig.rechargeSeconds` | field | int; recharge cadence in seconds |
-| `OutgameDailyReward.streakDay` | field | int; 1..7 streak day |
 | `OutgameSeasonEvent.eventId` | field | int; season event PK |
 
 ## Cross-refs

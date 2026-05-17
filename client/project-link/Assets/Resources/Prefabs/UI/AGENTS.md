@@ -6,7 +6,7 @@
 | `SettingPopup.prefab` | `SettingPopup` | Generated settings popup with toggle/dropdown/save hotspots |
 | `BuyItemPopup.prefab` | `BuyItemPopup` | Generated item purchase popup |
 | `EnergyPopup.prefab` | `EnergyPopup` | Generated stamina/ad/refill popup |
-| `DailyChallengePopup.prefab` | `DailyChallengePopup` | Generated daily challenge popup |
+| `StreakChallengePopup.prefab` | `StreakChallengePopup` | Generated 24H streak challenge popup |
 | `AccountPopup.prefab` | `AccountPopup` | Generated account/profile popup |
 | `RewardPopup.prefab` | `RewardPopup` | Generated reward claim popup |
 | `ClearPopup.prefab` | `ClearPopup` | Generated stage-clear result popup |
@@ -26,7 +26,7 @@
 | `Prefabs/UI/SettingPopup` | Resources path | loaded by `PopupManager` for `PopupId.Settings` |
 | `Prefabs/UI/BuyItemPopup` | Resources path | loaded by `PopupManager` for `PopupId.BuyItem` |
 | `Prefabs/UI/EnergyPopup` | Resources path | loaded by `PopupManager` for `PopupId.Energy` |
-| `Prefabs/UI/DailyChallengePopup` | Resources path | loaded by `PopupManager` for `PopupId.DailyChallenge` |
+| `Prefabs/UI/StreakChallengePopup` | Resources path | loaded by `PopupManager` for `PopupId.StreakChallenge` |
 | `Prefabs/UI/AccountPopup` | Resources path | loaded by `PopupManager` for `PopupId.Account` |
 | `Prefabs/UI/RewardPopup` | Resources path | loaded by `PopupManager` for `PopupId.Reward` |
 | `Prefabs/UI/ClearPopup` | Resources path | loaded by `PopupManager` for `PopupId.StageClear` |

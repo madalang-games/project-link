@@ -1,0 +1,7 @@
+eventId,version,levelIndex,requiredClearCount,rewardGroupId,allowTimeExtension,allowRevive,isEnabled,displayOrder,localizationKey
+CS,CS,CS,CS,CS,CS,CS,CS,CS,CS
+int32,int32,int32,int32,int32,bool,bool,bool,int32,string(64)
+PK,PK,PK,NN,NN,NN,NN,NN,NN,NN
+1,1,0,3,1,true,true,true,1,streak_level_1
+1,1,1,5,2,true,true,true,2,streak_level_2
+1,1,2,7,3,true,true,true,3,streak_level_3

@@ -21,7 +21,10 @@
 | `IUiDataService.GetLobbyState(...)` | method | returns aggregate lobby server state |
 | `IUiDataService.GetShopCatalog(...)` | method | returns server shop catalog and balance |
 | `IUiDataService.GetRanking(...)` | method | returns server leaderboard state |
-| `IUiDataService.GetDailyChallenge(...)` | method | returns server daily challenge state |
+| `IUiDataService.GetStreakChallengeState(...)` | method | returns server streak challenge state |
+| `IUiDataService.ActivateStreakChallenge(...)` | method | activates new 24H cycle; returns updated state |
+| `IUiDataService.StartStreakLevel(int,...)` | method | starts next READY level; returns updated state |
+| `IUiDataService.ClaimStreakReward(int,string,...)` | method | claims level reward with correlationId; returns event state + inventory deltas |
 | `IUiDataService.StartStage(...)` | method | returns server stage session state |
 | `IUiDataService.EndStage(...)` | method | submits stage result and returns clear-popup reward/progress fields |
 | `IUiDataService.ClaimStaminaAdReward(...)` | method | calls stamina ad reward route and returns current/max/added data |
@@ -31,7 +34,7 @@
 | `HttpUiDataService.Post(...)` | method | publishes `UiBusyChanged` around API POST calls |
 | `HttpUiDataService.Complete<T>(...)` | method | deserializes success payloads and writes detailed diagnostics on deserialize failure |
 | `HttpUiDataService.BuildDeserializeDiagnostics<T>(...)` | method | adds target type, assembly, JSON path, stack trace, and object-to-string mismatch candidates to deserialize warnings |
-| `HttpUiDataService.InvalidateStageCaches()` | method | clears cached lobby/progress/daily/stamina after stage mutations |
+| `HttpUiDataService.InvalidateStageCaches()` | method | clears cached lobby/progress/streak/stamina after stage mutations |
 | `HttpUiDataService.ClaimReward(...)` | method | POST adapter for reward claim |
 | `UiServiceLocator.UiData` | prop | resolves or creates the `IUiDataService` adapter used by UI controllers |
 | `UiServiceLocator.Catalog` | prop | shared planning-table catalog facade |

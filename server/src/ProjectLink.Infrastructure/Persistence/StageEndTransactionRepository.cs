@@ -116,31 +116,14 @@ public class StageEndTransactionRepository : IStageEndTransaction
         }
 
         await _db.SaveChangesAsync(ct);
-
-        // Increment daily challenge play count only when stage is in today's daily set
-        if (cmd.IsDailyChallengeStage)
-        {
-            await _db.Database.ExecuteSqlInterpolatedAsync($"""
-                INSERT INTO daily_challenge_progress (user_id, challenge_date, play_count, completed, streak_days, created_at)
-                VALUES ({cmd.UserId}, {cmd.ChallengeDate}, 1, false, 0, NOW())
-                ON DUPLICATE KEY UPDATE play_count = play_count + 1
-                """, ct);
-        }
-
-        _db.ChangeTracker.Clear();
-        var dailyRow = cmd.IsDailyChallengeStage
-            ? await _db.DailyChallengeProgresses
-                .FirstOrDefaultAsync(p => p.UserId == cmd.UserId && p.ChallengeDate == cmd.ChallengeDate, ct)
-            : null;
-
         await tx.CommitAsync(ct);
 
         return new StageEndDbResult
         {
             IsBestRecord      = isBestRecord,
+            IsFirstClear      = isFirstClear,
             SoftBalanceAfter  = currency.SoftAmount,
             SoftRewardGranted = softRewardGranted,
-            DailyPlayCount    = dailyRow?.PlayCount ?? 0,
             NextStageUnlocked = isFirstClear && cmd.StageId < cmd.MaxStages,
             TotalScore        = rankingCache.TotalScore,
             StagesCleared     = rankingCache.StagesCleared,

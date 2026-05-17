@@ -253,7 +253,6 @@ namespace ProjectLink.Core
                     UiEventBus.Publish(new UiErrorRaised("stage_start", result.ErrorCode, result.ErrorMessage));
 
                 GameContext.ClearStageSession();
-                GameContext.ClearDailyChallengeRun();
                 if (SceneLoader.Instance != null)
                     SceneLoader.Instance.LoadScene("Lobby", () =>
                     {
@@ -307,11 +306,11 @@ namespace ProjectLink.Core
                 DataManager.Instance.ClearStage(_stageId, value.Stars);
                 var nextStageId = value.NextStageId ?? _stageId + 1;
                 var nextStageUnlocked = value.NextStageUnlocked;
-                if (GameContext.IsDailyChallengeStage)
-                {
-                    nextStageUnlocked = GameContext.TryGetNextDailyChallengeStage(out var dailyNextStageId);
-                    nextStageId = nextStageUnlocked ? dailyNextStageId : _stageId;
-                }
+                var streakDirective = value.StreakChallenge?.NavigationDirective ?? "NONE";
+                if (streakDirective == "RETURN_TO_LOBBY" || streakDirective == "OPEN_REWARD_POPUP")
+                    nextStageUnlocked = false;
+                if (streakDirective == "OPEN_EVENT_POPUP")
+                    GameContext.ShouldOpenStreakPopupOnLobby = true;
 
                 OpenClearPopup(new StageClearPopupModel(
                     _stageId,

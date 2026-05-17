@@ -9,7 +9,7 @@
 | `Ranking/` | Redis leaderboard build and update | `Ranking/AGENTS.md` |
 | `Lobby/` | Full lobby state snapshot | `Lobby/AGENTS.md` |
 | `Progress/` | Batch stage-progress query with unlock computation | `Progress/AGENTS.md` |
-| `DailyChallenge/` | Daily challenge state and completion | `DailyChallenge/AGENTS.md` |
+| `StreakChallenge/` | 24H streak challenge state, activation, level, rewards | `StreakChallenge/AGENTS.md` |
 | `Shop/` | Shop catalog and soft-currency item purchase | `Shop/AGENTS.md` |
 | `Reward/` | Generic reward claim for ad/reward popups | `Reward/AGENTS.md` |
 | `Settings/` | Server-synced player preferences | `Settings/AGENTS.md` |

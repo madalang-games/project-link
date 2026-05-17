@@ -12,7 +12,7 @@ namespace ProjectLink.Core
         Settings,
         BuyItem,
         Energy,
-        DailyChallenge,
+        StreakChallenge,
         Account,
         Reward,
         StageClear,
@@ -152,8 +152,8 @@ namespace ProjectLink.Core
                 case PopupId.Energy:
                     OpenPrefab<ProjectLink.OutGame.UI.EnergyPopup>("Prefabs/UI/EnergyPopup")?.Init();
                     break;
-                case PopupId.DailyChallenge:
-                    OpenPrefab<ProjectLink.OutGame.UI.DailyChallengePopup>("Prefabs/UI/DailyChallengePopup")?.Init();
+                case PopupId.StreakChallenge:
+                    OpenPrefab<ProjectLink.OutGame.UI.StreakChallengePopup>("Prefabs/UI/StreakChallengePopup")?.Init();
                     break;
                 case PopupId.Account:
                     OpenPrefab<ProjectLink.OutGame.UI.AccountPopup>("Prefabs/UI/AccountPopup")?.Init();

@@ -1,4 +1,5 @@
 using ProjectLink.Application.Stage;
+using ProjectLink.Application.StreakChallenge;
 using ProjectLink.Domain.Entities;
 using ProjectLink.Domain.Exceptions;
 using ProjectLink.Domain.Interfaces;
@@ -117,13 +118,31 @@ public sealed class StageServiceTests
         => CreateService(cache, stamina, new TestStageEndTransaction());
 
     static StageService CreateService(TestStageSessionCache cache, TestStaminaRepository stamina, TestStageEndTransaction stageEndTx)
-        => new(
-            cache,
-            stamina,
-            new TestInventoryRepository(),
-            new TestStaticDataService(),
-            null!,
-            stageEndTx);
+    {
+        var staticData = new TestStaticDataService();
+        var streakRepo = new NoopStreakChallengeRepository();
+        var streakTx   = new NoopStreakChallengeTransaction();
+        var streak     = new StreakChallengeService(streakRepo, streakTx, staticData);
+        return new StageService(cache, stamina, new TestInventoryRepository(), staticData, null!, stageEndTx, streak);
+    }
+
+    sealed class NoopStreakChallengeRepository : IStreakChallengeRepository
+    {
+        public Task<StreakChallengeUserState?> GetActiveStateAsync(string userId, int eventId, CancellationToken ct) => Task.FromResult<StreakChallengeUserState?>(null);
+        public Task<List<StreakChallengeUserLevelState>> GetLevelStatesAsync(string userId, int eventId, string cycleId, CancellationToken ct) => Task.FromResult(new List<StreakChallengeUserLevelState>());
+        public Task<bool> HasAdUsedForLevelAsync(string userId, int eventId, string cycleId, int levelIndex, CancellationToken ct) => Task.FromResult(false);
+        public Task<StreakChallengeRewardClaimHistory?> GetClaimHistoryByCorrelationAsync(string correlationId, CancellationToken ct) => Task.FromResult<StreakChallengeRewardClaimHistory?>(null);
+    }
+
+    sealed class NoopStreakChallengeTransaction : IStreakChallengeTransaction
+    {
+        public Task ActivateAsync(StreakChallengeActivateCommand cmd, CancellationToken ct) => Task.CompletedTask;
+        public Task StartLevelAsync(StreakChallengeStartLevelCommand cmd, CancellationToken ct) => Task.CompletedTask;
+        public Task<StreakChallengeProgressResult> RecordProgressAsync(StreakChallengeProgressCommand cmd, CancellationToken ct) => Task.FromResult(new StreakChallengeProgressResult());
+        public Task<StreakChallengeClaimResult> ClaimRewardAsync(StreakChallengeClaimCommand cmd, CancellationToken ct) => Task.FromResult(new StreakChallengeClaimResult());
+        public Task LazyResetAsync(StreakChallengeLazyResetCommand cmd, CancellationToken ct) => Task.CompletedTask;
+        public Task RecordAdAsync(StreakChallengeAdRewardHistory entry, CancellationToken ct) => Task.CompletedTask;
+    }
 
     sealed class TestStageSessionCache : IStageSessionCache
     {
@@ -177,12 +196,13 @@ public sealed class StageServiceTests
         public IReadOnlyList<IngameItemData> GetAllItems() => [];
         public OutgameStaminaConfigData GetStaminaConfig() => new() { ConfigId = 1, MaxStamina = 5, RechargeSeconds = 300 };
         public IReadOnlyList<OutgameAvatarData> GetAllAvatars() => [];
-        public OutgameDailyChallengeData GetDailyChallengeConfig() => new() { ConfigId = 1, PlayCountTarget = 3, ResetHourUtc = 0, StagePickCount = 1 };
-        public IReadOnlyList<OutgameDailyRewardData> GetAllDailyRewards() => [];
-        public OutgameDailyRewardData? GetDailyReward(int streakDay) => null;
         public IReadOnlyList<OutgameShopCatalogData> GetShopCatalog() => [];
         public OutgameShopCatalogData? GetShopProduct(int productId) => null;
         public IReadOnlyList<OutgameSeasonEventData> GetAllSeasonEvents() => [];
+        public StreakChallengeEventData? GetStreakChallengeEvent(int eventId, int version) => null;
+        public StreakChallengeEventData? GetLatestEnabledStreakChallengeEvent() => null;
+        public IReadOnlyList<StreakChallengeLevelData> GetStreakChallengeLevels(int eventId, int version) => [];
+        public IReadOnlyList<StreakChallengeRewardItemData> GetStreakChallengeRewardItems(int rewardGroupId, int rewardGroupVersion) => [];
     }
 
     sealed class TestStageEndTransaction : IStageEndTransaction

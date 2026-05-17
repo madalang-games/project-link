@@ -132,8 +132,6 @@ namespace ProjectLink.InGame.UI
         void LoadNextConfirmed()
         {
             PopupManager.Instance.CloseAll();
-            if (GameContext.IsDailyChallengeStage)
-                GameContext.AdvanceDailyChallengeStage(_model.NextStageId);
             RuntimeNavigationButtons.EnterStage(_model.NextStageId);
         }
 
@@ -152,7 +150,6 @@ namespace ProjectLink.InGame.UI
         static void LoadLobby()
         {
             PopupManager.Instance.CloseAll();
-            GameContext.ClearDailyChallengeRun();
             SceneLoader.Instance.LoadScene("Lobby");
         }
 

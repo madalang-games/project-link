@@ -14,7 +14,7 @@
 | `RankingController.cs` | `RankingController` | `/api/ranking` | JWT |
 | `LobbyController.cs` | `LobbyController` | `/api/lobby` | JWT |
 | `ProgressController.cs` | `ProgressController` | `/api/progress` | JWT |
-| `DailyChallengeController.cs` | `DailyChallengeController` | `/api/daily-challenge` | JWT |
+| `StreakChallengeController.cs` | `StreakChallengeController` | `/api/streak-challenge` | JWT |
 | `ShopController.cs` | `ShopController` | `/api/shop` | JWT |
 | `RewardController.cs` | `RewardController` | `/api/rewards` | JWT |
 | `PlayerSettingsController.cs` | `PlayerSettingsController` | `/api/settings` | JWT |
@@ -46,8 +46,11 @@
 | `LobbyController.Get` | method | `GET /api/lobby`; returns `LobbyStateResponse` |
 | `ProgressController.Get` | method | `GET /api/progress`; returns all progress entries |
 | `ProgressController.GetBatch` | method | `POST /api/progress/batch`; query by stageIds |
-| `DailyChallengeController.Get` | method | `GET /api/daily-challenge` |
-| `DailyChallengeController.Complete` | method | `POST /api/daily-challenge/complete` |
+| `StreakChallengeController.Get` | method | `GET /api/streak-challenge` |
+| `StreakChallengeController.Activate` | method | `POST /api/streak-challenge/activate` |
+| `StreakChallengeController.StartLevel` | method | `POST /api/streak-challenge/level/{level}/start` |
+| `StreakChallengeController.ClaimReward` | method | `POST /api/streak-challenge/level/{level}/claim-reward` |
+| `StreakChallengeController.ClaimRewardWithAd` | method | `POST /api/streak-challenge/level/{level}/claim-reward-with-ad` |
 | `ShopController.GetCatalog` | method | `GET /api/shop/catalog` |
 | `ShopController.Purchase` | method | `POST /api/shop/purchase` |
 | `RewardController.Claim` | method | `POST /api/rewards/claim`; returns `RewardClaimResponse` |

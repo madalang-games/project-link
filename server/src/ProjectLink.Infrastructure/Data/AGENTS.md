@@ -14,9 +14,10 @@
 | `StaticDataService.GetAllItems` | method | used by StageService to build POWER_UP item counts |
 | `StaticDataService.GetStaminaConfig` | method | single-row config; fallback hardcoded if CSV missing |
 | `StaticDataService.GetAllAvatars` | method | all preset avatars |
-| `StaticDataService.GetDailyChallengeConfig` | method | single-row config; fallback hardcoded if CSV missing |
-| `StaticDataService.GetAllDailyRewards` | method | all 7 streak reward rows |
-| `StaticDataService.GetDailyReward` | method | O(1) lookup by streakDay (1..7) |
+| `StaticDataService.GetStreakChallengeEvent` | method | O(1) lookup by (eventId, version) |
+| `StaticDataService.GetLatestEnabledStreakChallengeEvent` | method | returns the latest enabled event row |
+| `StaticDataService.GetStreakChallengeLevels` | method | all level rows for an (eventId, version) ordered by levelIndex |
+| `StaticDataService.GetStreakChallengeRewardItems` | method | all items for a (rewardGroupId, rewardGroupVersion) |
 | `StaticDataService.GetShopCatalog` | method | all enabled + disabled products |
 | `StaticDataService.GetShopProduct` | method | O(1) lookup by productId |
 | `StaticDataService.GetAllSeasonEvents` | method | ordered list of all season events |
@@ -24,10 +25,10 @@
 ## Cross-refs
 - Depends on: `server/generated/data/ingame/` and `server/generated/data/outgame/` CSV files
 - Depends on: all `Domain.StaticData.*Data` POCOs
-- Consumed by: server `Application.StageService`, `StaminaService`, `ShopService`, `DailyChallengeService`, `LobbyService`, `EventController` (via `IStaticDataService`)
+- Consumed by: server `Application.StageService`, `StaminaService`, `ShopService`, `StreakChallengeService`, `LobbyService`, `EventController` (via `IStaticDataService`)
 
 ## Rules
-- Loads from `AppContext.BaseDirectory/generated/data/{ingame,outgame}/`
+- Loads from `AppContext.BaseDirectory/generated/data/{ingame,outgame,streak_challenge}/`
 - Missing CSV → logs warning + returns empty/fallback (does not crash)
 - ingame_stage column order after moveLimit addition: stageId[0], width[1], height[2], timeLimit[3], moveLimit[4], difficulty[5], boardEncoding[6], nodeMap[7], cellMap[8], soft_reward[9], stageMeta[10..^1], generatorSeed[^1]
 - Run `npm run gen:data` before first server start after adding new CSV files

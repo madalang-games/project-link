@@ -23,8 +23,8 @@ namespace ProjectLink.OutGame.UI
         [SerializeField] TextMeshProUGUI previousStageNumberText;
         [SerializeField] TextMeshProUGUI nextStageNumberText;
         [SerializeField] TextMeshProUGUI starsText;
-        [SerializeField] TextMeshProUGUI dailyProgressText;
         [SerializeField] TextMeshProUGUI colorCupTimerText;
+        [SerializeField] StreakChallengeBadge streakBadge;
         [SerializeField] TextMeshProUGUI playDisabledReasonText;
         [SerializeField] TextMeshProUGUI shopBalanceText;
         [SerializeField] TextMeshProUGUI rankingMetricText;
@@ -161,7 +161,14 @@ namespace ProjectLink.OutGame.UI
             RefreshStaminaTimer();
             SetText(coinText, FormatNumber(lobby.SoftCurrency));
             RefreshStageCarousel();
-            SetText(dailyProgressText, $"{lobby.DailyChallenge.PlayCountToday}/{lobby.DailyChallenge.PlayCountTarget}");
+            var sc = lobby.StreakChallenge;
+            streakBadge?.Apply(sc?.EventStatus, sc?.HasPendingReward ?? false, sc?.RemainingTimeIso ?? "");
+
+            if (GameContext.ShouldOpenStreakPopupOnLobby)
+            {
+                GameContext.ShouldOpenStreakPopupOnLobby = false;
+                PopupManager.Request(PopupId.StreakChallenge);
+            }
             SetText(colorCupTimerText, lobby.SeasonEvent?.EndAt ?? "");
 
             if (refillButton != null)
@@ -228,8 +235,8 @@ namespace ProjectLink.OutGame.UI
             coinText ??= FindText("Txt_CurrencyCount");
             stageNumberText ??= FindText("Txt_StageNum");
             starsText ??= FindText("Txt_Stars");
-            dailyProgressText ??= FindText("Txt_Frac");
             colorCupTimerText ??= FindText("Txt_Ends");
+            streakBadge ??= GetComponentInChildren<StreakChallengeBadge>(true);
             playDisabledReasonText ??= FindText("Txt_PlayDisabled");
             shopBalanceText ??= FindTextInParent("Row_Balance", "Txt_Balance") ?? FindText("Txt_Balance");
             rankingMetricText ??= FindText("Txt_Score");

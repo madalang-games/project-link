@@ -28,7 +28,6 @@ public class GlobalExceptionMiddleware
                 InsufficientFundsException
                     or InsufficientStaminaException
                     or InsufficientInventoryException
-                    or DailyChallengeNotCompletableException
                     or StaminaAlreadyFullException           => 422,
                 StageSessionNotFoundException
                     or StageNotFoundException

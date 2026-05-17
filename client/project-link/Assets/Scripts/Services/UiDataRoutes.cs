@@ -14,7 +14,10 @@ namespace ProjectLink.Services
         public const string ShopPurchase = "/api/shop/purchase";
         public const string RankingGlobalScore = "/api/ranking/global/score";
         public const string RankingGlobalStages = "/api/ranking/global/stages";
-        public const string DailyChallenge = "/api/daily-challenge";
+        public const string StreakChallenge = "/api/streak-challenge";
+        public const string StreakChallengeActivate = "/api/streak-challenge/activate";
+        public static string StreakChallengeStartLevel(int level) => $"/api/streak-challenge/level/{level}/start";
+        public static string StreakChallengeClaimReward(int level) => $"/api/streak-challenge/level/{level}/claim-reward";
         public const string SeasonEvents = "/api/events/season";
         public const string PlayerSettings = "/api/settings";
         public const string RewardsClaim = "/api/rewards/claim";

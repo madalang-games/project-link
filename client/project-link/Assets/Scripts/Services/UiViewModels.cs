@@ -15,18 +15,18 @@ namespace ProjectLink.Services
         public int NextUnlockedStageId { get; set; }
         public int TotalStarsEarned { get; set; }
         public bool CanPlay { get; set; }
-        public DailyChallengeModel DailyChallenge { get; set; }
+        public StreakChallengeModel StreakChallenge { get; set; }
         public SeasonEventModel SeasonEvent { get; set; }
     }
 
-    public sealed class DailyChallengeModel
+    public sealed class StreakChallengeModel
     {
-        public bool CompletedToday { get; set; }
-        public bool CanComplete { get; set; }
-        public int PlayCountToday { get; set; }
-        public int PlayCountTarget { get; set; }
-        public int StreakDays { get; set; }
-        public string ResetAt { get; set; }
+        public string EventStatus          { get; set; }
+        public string RemainingTimeIso     { get; set; }
+        public int    CurrentLevel         { get; set; }
+        public int    CurrentLevelCount    { get; set; }
+        public int    CurrentLevelRequired { get; set; }
+        public bool   HasPendingReward     { get; set; }
     }
 
     public sealed class SeasonEventModel

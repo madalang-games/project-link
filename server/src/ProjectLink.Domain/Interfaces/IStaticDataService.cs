@@ -9,12 +9,14 @@ public interface IStaticDataService
     IReadOnlyList<IngameStageData> GetAllStages();
     IReadOnlyList<IngameItemData>  GetAllItems();
 
-    OutgameStaminaConfigData       GetStaminaConfig();
-    IReadOnlyList<OutgameAvatarData> GetAllAvatars();
-    OutgameDailyChallengeData      GetDailyChallengeConfig();
-    IReadOnlyList<OutgameDailyRewardData> GetAllDailyRewards();
-    OutgameDailyRewardData?        GetDailyReward(int streakDay);
+    OutgameStaminaConfigData             GetStaminaConfig();
+    IReadOnlyList<OutgameAvatarData>     GetAllAvatars();
     IReadOnlyList<OutgameShopCatalogData> GetShopCatalog();
-    OutgameShopCatalogData?        GetShopProduct(int productId);
+    OutgameShopCatalogData?              GetShopProduct(int productId);
     IReadOnlyList<OutgameSeasonEventData> GetAllSeasonEvents();
+
+    StreakChallengeEventData?              GetStreakChallengeEvent(int eventId, int version);
+    StreakChallengeEventData?              GetLatestEnabledStreakChallengeEvent();
+    IReadOnlyList<StreakChallengeLevelData> GetStreakChallengeLevels(int eventId, int version);
+    IReadOnlyList<StreakChallengeRewardItemData> GetStreakChallengeRewardItems(int rewardGroupId, int rewardGroupVersion);
 }

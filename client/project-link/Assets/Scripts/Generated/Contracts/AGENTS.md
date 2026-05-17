@@ -20,8 +20,8 @@ Unity-compatible copy of `shared/contracts/*.cs` for client API/service binding.
 | `ItemRequests.cs` | `ProjectLink.Contracts.Item` | Inventory item request DTOs |
 | `ItemResponses.cs` | `ProjectLink.Contracts.Item` | Inventory item response DTOs |
 | `RankingResponses.cs` | `ProjectLink.Contracts.Ranking` | Ranking list/my-rank response DTOs |
-| `DailyChallengeRequests.cs` | `ProjectLink.Contracts.Daily` | Daily challenge request DTOs |
-| `DailyChallengeResponses.cs` | `ProjectLink.Contracts.Daily` | Daily challenge response DTOs |
+| `StreakChallengeRequests.cs` | `ProjectLink.Contracts.StreakChallenge` | 24H streak challenge request DTOs |
+| `StreakChallengeResponses.cs` | `ProjectLink.Contracts.StreakChallenge` | 24H streak challenge response DTOs |
 | `RewardRequests.cs` | `ProjectLink.Contracts.Reward` | Reward claim request DTOs |
 | `RewardResponses.cs` | `ProjectLink.Contracts.Reward` | Reward claim response DTOs |
 | `ShopRequests.cs` | `ProjectLink.Contracts.Shop` | Shop purchase request DTOs |
@@ -44,7 +44,8 @@ Unity-compatible copy of `shared/contracts/*.cs` for client API/service binding.
 | `CurrencyResponse` | class | soft currency balance |
 | `InventoryResponse` | class | item inventory slots |
 | `RankingListResponse` | class | leaderboard rows and my pinned rank |
-| `DailyChallengeResponse` | class | daily state, tiles, rewards |
+| `StreakChallengeStateResponse` | class | event/level state, available actions, expires timestamp |
+| `StreakChallengeClaimRewardResponse` | class | claimed reward items, updated event state |
 | `RewardClaimResponse` | class | granted reward result |
 | `ShopCatalogResponse` | class | shop catalog and soft balance |
 | `ActiveEventsResponse` | class | season event list |

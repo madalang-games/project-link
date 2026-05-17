@@ -11,20 +11,24 @@
 | `StaminaRepository.cs` | `StaminaRepository` | Stamina read/deduct/add with lazy recharge and FOR UPDATE |
 | `InventoryRepository.cs` | `InventoryRepository` | Inventory grant/deduct |
 | `RankingRepository.cs` | `RankingRepository` | Best records + ranking cache CRUD |
-| `DailyChallengeRepository.cs` | `DailyChallengeRepository` | Daily challenge read + atomic play count increment |
 | `PlayerSettingsRepository.cs` | `PlayerSettingsRepository` | Player settings get-or-default + upsert |
-| `StageEndTransactionRepository.cs` | `StageEndTransactionRepository` | Atomic stage-end TX (progress, best, stamina, currency, ranking + daily increment) |
+| `StageEndTransactionRepository.cs` | `StageEndTransactionRepository` | Atomic stage-end TX (progress, best, stamina, currency, ranking); exposes `IsFirstClear` |
 | `StaminaRefillTransactionRepository.cs` | `StaminaRefillTransactionRepository` | Atomic full refill TX (stamina+currency+log) |
-| `DailyChallengeCompleteTransactionRepository.cs` | `DailyChallengeCompleteTransactionRepository` | Atomic challenge complete TX (progress+streak+rewards) |
+| `StreakChallengeRepository.cs` | `StreakChallengeRepository` | Streak challenge user state + level state CRUD |
+| `StreakChallengeTransactionRepository.cs` | `StreakChallengeTransactionRepository` | Atomic streak TX (activate, startLevel, claimReward, expiry soft-delete) |
 | `ShopPurchaseTransactionRepository.cs` | `ShopPurchaseTransactionRepository` | Atomic shop purchase TX (currency+inventory) |
 
 ## Symbols
 | symbol | kind | note |
 |--------|------|------|
-| `StageEndTransactionRepository.ExecuteAsync` | method | First-clear soft reward, clear stamina refund, ranking cache update; FOR UPDATE NOWAIT on stage rows |
+| `StageEndTransactionRepository.ExecuteAsync` | method | First-clear soft reward, clear stamina refund, ranking cache update; FOR UPDATE NOWAIT on stage rows; returns `IsFirstClear` |
 | `StaminaRefillTransactionRepository.ExecuteAsync` | method | FOR UPDATE on stamina_state + user_currency; throws if full or insufficient funds |
-| `DailyChallengeCompleteTransactionRepository.ExecuteAsync` | method | FOR UPDATE NOWAIT on daily_challenge_progress; throws if completed or not enough plays |
-| `DailyChallengeRepository.IncrementPlayCountAsync` | method | INSERT ON CONFLICT DO UPDATE play_count+1; always increments (even if completed) |
+| `StreakChallengeRepository.GetUserStateAsync` | method | reads streak_challenge_user_state + level states for a user |
+| `StreakChallengeRepository.GetLevelStateAsync` | method | reads single streak_challenge_user_level_state by (userId, eventId, levelIndex) |
+| `StreakChallengeTransactionRepository.ActivateAsync` | method | FOR UPDATE; idempotent cycle creation with correlation_id |
+| `StreakChallengeTransactionRepository.StartLevelAsync` | method | FOR UPDATE; idempotent level start; throws if wrong state |
+| `StreakChallengeTransactionRepository.ClaimRewardAsync` | method | FOR UPDATE; marks reward CLAIMED, grants items via inventory repo |
+| `StreakChallengeTransactionRepository.ExpireAsync` | method | soft-delete: marks PENDING rewards EXPIRED, sets event_status=EXPIRED |
 
 ## Cross-refs
 - Depends on: `Domain.Entities.*`, `Domain.Interfaces.*`

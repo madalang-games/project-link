@@ -9,7 +9,7 @@ public class LobbyStateResponse
     public LobbyStamina         Stamina         { get; set; } = new();
     public LobbyCurrency        Currency        { get; set; } = new();
     public LobbyProgressSummary ProgressSummary { get; set; } = new();
-    public LobbyDailyChallenge  DailyChallenge  { get; set; } = new();
+    public LobbyStreakChallenge  StreakChallenge { get; set; } = new();
     public LobbySeasonEvent?    SeasonEvent     { get; set; }
 }
 
@@ -38,14 +38,14 @@ public class LobbyProgressSummary
     public int NextUnlockedStageId { get; set; }
 }
 
-public class LobbyDailyChallenge
+public class LobbyStreakChallenge
 {
-    public bool   CompletedToday  { get; set; }
-    public bool   CanComplete     { get; set; }
-    public int    PlayCountToday  { get; set; }
-    public int    PlayCountTarget { get; set; }
-    public int    StreakDays      { get; set; }
-    public string ResetAt         { get; set; } = "";
+    public string EventStatus         { get; set; } = "INACTIVE";  // INACTIVE/ACTIVE/COMPLETED/EXPIRED
+    public string RemainingTimeIso    { get; set; } = "";           // ISO 8601 duration; empty if inactive
+    public int    CurrentLevel        { get; set; }
+    public int    CurrentLevelCount   { get; set; }
+    public int    CurrentLevelRequired { get; set; }
+    public bool   HasPendingReward    { get; set; }
 }
 
 public class LobbySeasonEvent

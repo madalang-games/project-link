@@ -33,9 +33,7 @@
 | `GameContext.SelectedStageId` | prop | set before `SceneLoader.LoadScene("Game")` |
 | `GameContext.SetStageSession(string,int,int)` | method | stores server stage session token, move limit, time limit, start timestamp |
 | `GameContext.ClearStageSession()` | method | clears server stage-session state |
-| `GameContext.SetDailyChallengeRun(...)` | method | stores active daily challenge stage sequence for clear-popup next routing |
-| `GameContext.TryGetNextDailyChallengeStage(out int)` | method | returns the next daily challenge stage instead of normal campaign next |
-| `GameContext.ClearDailyChallengeRun()` | method | clears daily challenge routing state on Lobby/Title return |
+| `GameContext.IsStreakChallengeActive` | prop | true when a 24H streak challenge cycle is active for the current session |
 | `GameContext.SuppressNextTitleSilentLogin()` | method | one-shot guard for intentional Lobby -> Title navigation |
 | `GameContext.ConsumeTitleSilentLoginSuppression()` | method | Title entry consumes the one-shot silent-login guard |
 | `GameStateMachine.TryTransition(GameState)` | method | returns false if transition invalid |
@@ -45,7 +43,7 @@
 | `InGameController.AbandonStageAndLoad(string)` | method | submits stage fail with active session token, clears context, then loads target scene |
 | `InGameController.HandleStageStarted(...)` | method | enables gameplay only after server stage-start success; insufficient stamina opens Energy popup and returns Lobby |
 | `UIManager.GetLayer(UILayer)` | method | returns canvas Transform for named layer |
-| `PopupId` | enum | popup ids: ReturnTitle, ExitGame, Settings, BuyItem, Energy, DailyChallenge, Account, Reward, StageClear, SessionExpired, Pause, ForceUpdate, Maintenance, StageDetail, ClearNextStageConfirm |
+| `PopupId` | enum | popup ids: ReturnTitle, ExitGame, Settings, BuyItem, Energy, StreakChallenge, Account, Reward, StageClear, SessionExpired, Pause, ForceUpdate, Maintenance, StageDetail, ClearNextStageConfirm |
 | `PopupManager.Request(PopupId,object)` | method | static event-driven popup request entry point |
 | `PopupManager.Open<T>()` | method | code-instantiates legacy popup T on Popup layer, pushes stack |
 | `PopupManager.CloseTop()` | method | destroys top popup, re-shows previous |

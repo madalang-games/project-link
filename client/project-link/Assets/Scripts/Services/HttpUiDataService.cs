@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 using ProjectLink.Contracts.Account;
 using ProjectLink.Contracts.Bootstrap;
 using ProjectLink.Contracts.Common;
-using ProjectLink.Contracts.Daily;
+using ProjectLink.Contracts.StreakChallenge;
 using ProjectLink.Contracts.Event;
 using ProjectLink.Contracts.Item;
 using ProjectLink.Contracts.Lobby;
@@ -98,8 +98,20 @@ namespace ProjectLink.Services
         public void GetRanking(string category, Action<ServiceResult<RankingListResponse>> onComplete)
             => Get(UiDataRoutes.Ranking(category), onComplete);
 
-        public void GetDailyChallenge(Action<ServiceResult<DailyChallengeResponse>> onComplete)
-            => Get(UiDataRoutes.DailyChallenge, onComplete);
+        public void GetStreakChallengeState(Action<ServiceResult<StreakChallengeStateResponse>> onComplete)
+        {
+            _cache.Remove(UiDataRoutes.StreakChallenge);
+            Get(UiDataRoutes.StreakChallenge, onComplete);
+        }
+
+        public void ActivateStreakChallenge(Action<ServiceResult<StreakChallengeStateResponse>> onComplete)
+            => Post(UiDataRoutes.StreakChallengeActivate, new StreakChallengeActivateRequest(), onComplete);
+
+        public void StartStreakLevel(int level, Action<ServiceResult<StreakChallengeStateResponse>> onComplete)
+            => Post(UiDataRoutes.StreakChallengeStartLevel(level), new StreakChallengeStartLevelRequest(), onComplete);
+
+        public void ClaimStreakReward(int level, string correlationId, Action<ServiceResult<StreakChallengeClaimRewardResponse>> onComplete)
+            => Post(UiDataRoutes.StreakChallengeClaimReward(level), new StreakChallengeClaimRewardRequest { CorrelationId = correlationId }, onComplete, InvalidateLobbyCaches);
 
         public void GetSeasonEvents(Action<ServiceResult<ActiveEventsResponse>> onComplete)
             => Get(UiDataRoutes.SeasonEvents, onComplete);
@@ -360,7 +372,7 @@ namespace ProjectLink.Services
         {
             _cache.Remove(UiDataRoutes.LobbyState);
             _cache.Remove(UiDataRoutes.Progress);
-            _cache.Remove(UiDataRoutes.DailyChallenge);
+            _cache.Remove(UiDataRoutes.StreakChallenge);
             _cache.Remove(UiDataRoutes.Stamina);
         }
     }

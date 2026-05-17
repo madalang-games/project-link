@@ -1,7 +1,7 @@
 using System;
 using ProjectLink.Contracts.Account;
 using ProjectLink.Contracts.Bootstrap;
-using ProjectLink.Contracts.Daily;
+using ProjectLink.Contracts.StreakChallenge;
 using ProjectLink.Contracts.Event;
 using ProjectLink.Contracts.Item;
 using ProjectLink.Contracts.Lobby;
@@ -54,7 +54,10 @@ namespace ProjectLink.Services
         void GetShopCatalog(Action<ServiceResult<ShopCatalogResponse>> onComplete);
         void PurchaseShopProduct(int productId, int quantity, string iapReceiptData, Action<ServiceResult<ShopPurchaseResponse>> onComplete);
         void GetRanking(string category, Action<ServiceResult<RankingListResponse>> onComplete);
-        void GetDailyChallenge(Action<ServiceResult<DailyChallengeResponse>> onComplete);
+        void GetStreakChallengeState(Action<ServiceResult<StreakChallengeStateResponse>> onComplete);
+        void ActivateStreakChallenge(Action<ServiceResult<StreakChallengeStateResponse>> onComplete);
+        void StartStreakLevel(int level, Action<ServiceResult<StreakChallengeStateResponse>> onComplete);
+        void ClaimStreakReward(int level, string correlationId, Action<ServiceResult<StreakChallengeClaimRewardResponse>> onComplete);
         void GetSeasonEvents(Action<ServiceResult<ActiveEventsResponse>> onComplete);
         void GetPlayerSettings(Action<ServiceResult<PlayerSettingsResponse>> onComplete);
         void ClaimReward(string rewardSource, string rewardToken, int multiplier, Action<ServiceResult<RewardClaimResponse>> onComplete);

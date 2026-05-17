@@ -21,7 +21,8 @@
 | `SettingPopup.cs` | `SettingPopup` | Prefab controller; binds close/save hotspots |
 | `BuyItemPopup.cs` | `BuyItemPopup` | Prefab controller; binds close/buy hotspots |
 | `EnergyPopup.cs` | `EnergyPopup` | Prefab controller; binds close/watch/refill hotspots |
-| `DailyChallengePopup.cs` | `DailyChallengePopup` | Prefab controller; binds daily challenge server state to streak/reward/play refs |
+| `StreakChallengePopup.cs` | `StreakChallengePopup` | Code popup; fetches streak state, builds vertical level list, handles activate/startLevel/claimReward |
+| `StreakChallengeBadge.cs` | `StreakChallengeBadge` | MonoBehaviour badge in Carousel_Stages top-left; state-driven color, 5s bounce animation, opens StreakChallenge popup on tap |
 | `AccountPopup.cs` | `AccountPopup` | Prefab controller; binds account/profile server state |
 | `RewardPopup.cs` | `RewardPopup` | Prefab controller; claims reward through `IUiDataService` |
 | `SessionExpiredPopup.cs` | `SessionExpiredPopup` | Code-only popup; auth expiry confirm -> Title |
@@ -39,7 +40,7 @@
 | `RuntimeNavigationButtons.OpenSettingsPopup()` | method | requests `PopupId.Settings` |
 | `RuntimeNavigationButtons.OpenEnergyPopup()` | method | requests `PopupId.Energy` |
 | `RuntimeNavigationButtons.OpenAccountPopup()` | method | requests `PopupId.Account` |
-| `RuntimeNavigationButtons.OpenDailyChallengePopup()` | method | requests `PopupId.DailyChallenge` |
+| `RuntimeNavigationButtons.OpenStreakChallengePopup()` | method | requests `PopupId.StreakChallenge` |
 | `RuntimeNavigationButtons.OpenPausePopup()` | method | delegates to InGameController in Game scene or requests `PopupId.Pause` |
 | `BootstrapWireframeController.Start()` | method | creates `BootstrapViewModel`, binds retry button, starts bootstrap load |
 | `BootstrapWireframeController.Render()` | method | renders loading/error/version and opens ForceUpdate or Title scene |
@@ -57,7 +58,8 @@
 | `SettingPopup.Init()` | method | binds close/save hotspots; adds LanguageSelector to TMP_Dropdown child at runtime if missing |
 | `BuyItemPopup.Init()` | method | binds close/buy hotspots |
 | `EnergyPopup.Init()` | method | binds close/watch/refill hotspots |
-| `DailyChallengePopup.Init()` | method | fetches DailyChallengeResponse and renders streak/reward/play refs |
+| `StreakChallengePopup.Init()` | method | fetches `StreakChallengeStateResponse` and renders level list; idempotent |
+| `StreakChallengeBadge.Apply(string?,bool,string)` | method | updates badge color/label/progress text and animation flag based on event state |
 | `AccountPopup.Init()` | method | fetches AccountMeResponse and renders profile/link state |
 | `RewardPopup.Init(string,string)` | method | prepares reward claim buttons |
 | `SessionExpiredPopup.Init()` | method | confirm -> Title |

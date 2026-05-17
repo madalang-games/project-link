@@ -18,8 +18,11 @@ public class AppDbContext : DbContext
     public DbSet<StageBestRecord>         StageBestRecords         => Set<StageBestRecord>();
     public DbSet<UserRankingCache>        RankingCaches            => Set<UserRankingCache>();
     public DbSet<ActionLog>               ActionLogs               => Set<ActionLog>();
-    public DbSet<DailyChallengeProgress>  DailyChallengeProgresses => Set<DailyChallengeProgress>();
-    public DbSet<PlayerSettings>          PlayerSettings           => Set<PlayerSettings>();
+    public DbSet<PlayerSettings>                     PlayerSettings                     => Set<PlayerSettings>();
+    public DbSet<StreakChallengeUserState>            StreakChallengeUserStates            => Set<StreakChallengeUserState>();
+    public DbSet<StreakChallengeUserLevelState>       StreakChallengeUserLevelStates       => Set<StreakChallengeUserLevelState>();
+    public DbSet<StreakChallengeRewardClaimHistory>   StreakChallengeRewardClaimHistories  => Set<StreakChallengeRewardClaimHistory>();
+    public DbSet<StreakChallengeAdRewardHistory>      StreakChallengeAdRewardHistories     => Set<StreakChallengeAdRewardHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -112,20 +115,6 @@ public class AppDbContext : DbContext
             e.Property(x => x.MaxClearedStageId).HasColumnName("max_cleared_stage_id").HasDefaultValue(0);
         });
 
-        modelBuilder.Entity<DailyChallengeProgress>(e =>
-        {
-            e.ToTable("daily_challenge_progress");
-            e.HasKey(x => new { x.UserId, x.ChallengeDate });
-            e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
-            e.Property(x => x.ChallengeDate).HasColumnName("challenge_date");
-            e.Property(x => x.PlayCount).HasColumnName("play_count").HasDefaultValue(0);
-            e.Property(x => x.Completed).HasColumnName("completed").HasDefaultValue(false);
-            e.Property(x => x.StreakDays).HasColumnName("streak_days").HasDefaultValue(0);
-            e.Property(x => x.LastStreakDate).HasColumnName("last_streak_date");
-            e.Property(x => x.CreatedAt).HasColumnName("created_at");
-            e.HasIndex(x => x.UserId).HasDatabaseName("idx_daily_challenge_user_id");
-        });
-
         modelBuilder.Entity<PlayerSettings>(e =>
         {
             e.ToTable("player_settings");
@@ -172,6 +161,78 @@ public class AppDbContext : DbContext
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.HasIndex(x => x.UserId).HasDatabaseName("idx_action_logs_user_id");
             e.HasIndex(x => x.ActionType).HasDatabaseName("idx_action_logs_action_type");
+        });
+
+        modelBuilder.Entity<StreakChallengeUserState>(e =>
+        {
+            e.ToTable("streak_challenge_user_state");
+            e.HasKey(x => new { x.UserId, x.EventId, x.CycleId });
+            e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
+            e.Property(x => x.EventId).HasColumnName("event_id");
+            e.Property(x => x.CycleId).HasColumnName("cycle_id").HasMaxLength(36);
+            e.Property(x => x.EventVersion).HasColumnName("event_version");
+            e.Property(x => x.EventStatus).HasColumnName("event_status").HasMaxLength(32);
+            e.Property(x => x.ActivatedAt).HasColumnName("activated_at");
+            e.Property(x => x.ExpiresAt).HasColumnName("expires_at");
+            e.Property(x => x.CurrentLevel).HasColumnName("current_level").HasDefaultValue(0);
+            e.Property(x => x.LastCountedStageId).HasColumnName("last_counted_stage_id").HasDefaultValue(0);
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+            e.HasIndex(x => new { x.UserId, x.EventId }).HasDatabaseName("idx_streak_state_user_event");
+        });
+
+        modelBuilder.Entity<StreakChallengeUserLevelState>(e =>
+        {
+            e.ToTable("streak_challenge_user_level_state");
+            e.HasKey(x => new { x.UserId, x.EventId, x.CycleId, x.LevelIndex });
+            e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
+            e.Property(x => x.EventId).HasColumnName("event_id");
+            e.Property(x => x.CycleId).HasColumnName("cycle_id").HasMaxLength(36);
+            e.Property(x => x.LevelIndex).HasColumnName("level_index");
+            e.Property(x => x.LevelStatus).HasColumnName("level_status").HasMaxLength(32);
+            e.Property(x => x.RequiredCount).HasColumnName("required_count");
+            e.Property(x => x.CurrentCount).HasColumnName("current_count").HasDefaultValue(0);
+            e.Property(x => x.StartedAt).HasColumnName("started_at");
+            e.Property(x => x.CompletedAt).HasColumnName("completed_at");
+            e.Property(x => x.RewardState).HasColumnName("reward_state").HasMaxLength(32).HasDefaultValue("NONE");
+            e.Property(x => x.RewardClaimedAt).HasColumnName("reward_claimed_at");
+            e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+        });
+
+        modelBuilder.Entity<StreakChallengeRewardClaimHistory>(e =>
+        {
+            e.ToTable("streak_challenge_reward_claim_history");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
+            e.Property(x => x.EventId).HasColumnName("event_id");
+            e.Property(x => x.CycleId).HasColumnName("cycle_id").HasMaxLength(36);
+            e.Property(x => x.LevelIndex).HasColumnName("level_index");
+            e.Property(x => x.RewardGroupId).HasColumnName("reward_group_id");
+            e.Property(x => x.RewardGroupVersion).HasColumnName("reward_group_version");
+            e.Property(x => x.RewardMultiplier).HasColumnName("reward_multiplier").HasDefaultValue(1);
+            e.Property(x => x.ClaimStatus).HasColumnName("claim_status").HasMaxLength(32);
+            e.Property(x => x.CorrelationId).HasColumnName("correlation_id").HasMaxLength(36);
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+            e.HasIndex(x => x.CorrelationId).IsUnique().HasDatabaseName("uq_streak_claim_correlation");
+        });
+
+        modelBuilder.Entity<StreakChallengeAdRewardHistory>(e =>
+        {
+            e.ToTable("streak_challenge_ad_reward_history");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            e.Property(x => x.UserId).HasColumnName("user_id").HasMaxLength(36);
+            e.Property(x => x.EventId).HasColumnName("event_id");
+            e.Property(x => x.CycleId).HasColumnName("cycle_id").HasMaxLength(36);
+            e.Property(x => x.LevelIndex).HasColumnName("level_index");
+            e.Property(x => x.AdPlacementId).HasColumnName("ad_placement_id").HasMaxLength(64);
+            e.Property(x => x.AdResult).HasColumnName("ad_result").HasMaxLength(32);
+            e.Property(x => x.MultiplierApplied).HasColumnName("multiplier_applied").HasDefaultValue(false);
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.HasIndex(x => new { x.UserId, x.EventId, x.CycleId, x.LevelIndex })
+              .HasDatabaseName("idx_streak_ad_user_level");
         });
     }
 }

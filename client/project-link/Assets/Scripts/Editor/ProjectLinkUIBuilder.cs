@@ -117,7 +117,7 @@ namespace ProjectLink.EditorTools
             BuildSettingPopup();
             BuildEnergyPopup();
             BuildStageDetailPopup();
-            BuildDailyChallengePopup();
+            BuildStreakChallengePopup();
             BuildRewardPopup();
             BuildAccountPopup();
             BuildClearPopup();
@@ -589,34 +589,32 @@ namespace ProjectLink.EditorTools
             pdTmp.alignment = TextAlignmentOptions.Center;
             playDisabled.gameObject.SetActive(false);
 
-            // Card_Daily
-            var cardDaily = MakeChild(tab, "Card_Daily");
-            SetAnchor(cardDaily, new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0));
-            cardDaily.offsetMin = new Vector2(32, 280);
-            cardDaily.offsetMax = new Vector2(-32, 480);
-            var dailyImg = cardDaily.gameObject.AddComponent<Image>();
-            dailyImg.color = BgSurface;
-            ApplySlotSkin(dailyImg, "slot_daily_card");
-            var dailyBtn = cardDaily.gameObject.AddComponent<Button>();
-            dailyBtn.targetGraphic = dailyImg;
-            UnityEventTools.AddPersistentListener(dailyBtn.onClick, router.OpenDailyChallengePopup);
-            var dailyVlg = cardDaily.gameObject.AddComponent<VerticalLayoutGroup>();
-            dailyVlg.spacing = 8; dailyVlg.padding = new RectOffset(24, 24, 16, 16);
-            dailyVlg.childControlWidth = true; dailyVlg.childControlHeight = true;
+            // Badge_Streak — top-left overlay of Carousel_Stages; always visible, state-driven appearance
+            var badge = MakeChild(carousel, "Badge_Streak");
+            SetAnchor(badge, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1));
+            badge.sizeDelta = new Vector2(96, 96);
+            badge.anchoredPosition = new Vector2(12, -12);
+            var badgeBg = badge.gameObject.AddComponent<Image>();
+            badgeBg.color = new Color(0.35f, 0.35f, 0.4f, 0.9f);
+            ApplySlotSkin(badgeBg, "slot_streak_badge");
+            var badgeBtn = badge.gameObject.AddComponent<Button>();
+            badgeBtn.targetGraphic = badgeBg;
 
-            var dailyTitle = MakeChild(cardDaily, "Txt_Title");
-            dailyTitle.sizeDelta = new Vector2(0, 40);
-            var dtTmp = dailyTitle.gameObject.AddComponent<TextMeshProUGUI>();
-            dtTmp.fontSize = 26; dtTmp.fontStyle = FontStyles.Bold; dtTmp.color = TextCol;
-            dailyTitle.gameObject.AddComponent<LocalizedText>().SetStringId("home.daily_title");
-            dailyTitle.gameObject.AddComponent<LayoutElement>().preferredHeight = 40;
+            var badgeIconTxt = MakeChild(badge, "Txt_Icon");
+            Center(badgeIconTxt, new Vector2(0, 8), new Vector2(80, 36));
+            var biTmp = badgeIconTxt.gameObject.AddComponent<TextMeshProUGUI>();
+            biTmp.text = "SC"; biTmp.fontSize = 22;
+            biTmp.fontStyle = FontStyles.Bold; biTmp.color = Color.white;
+            biTmp.alignment = TextAlignmentOptions.Center;
 
-            var dailyFrac = MakeChild(cardDaily, "Txt_Frac");
-            dailyFrac.sizeDelta = new Vector2(0, 32);
-            var dfTmp = dailyFrac.gameObject.AddComponent<TextMeshProUGUI>();
-            dfTmp.text = "0/5"; dfTmp.fontSize = 22; dfTmp.color = TextCol;
-            dfTmp.alignment = TextAlignmentOptions.MidlineRight;
-            dailyFrac.gameObject.AddComponent<LayoutElement>().preferredHeight = 32;
+            var badgeProgTxt = MakeChild(badge, "Txt_Progress");
+            Center(badgeProgTxt, new Vector2(0, -26), new Vector2(90, 22));
+            var bpTmp = badgeProgTxt.gameObject.AddComponent<TextMeshProUGUI>();
+            bpTmp.text = ""; bpTmp.fontSize = 16;
+            bpTmp.color = new Color(0.9f, 0.9f, 0.9f, 1f);
+            bpTmp.alignment = TextAlignmentOptions.Center;
+
+            badge.gameObject.AddComponent<StreakChallengeBadge>();
 
             // Card_Event (hidden by default)
             var cardEvent = MakeChild(tab, "Card_Event");
@@ -1055,35 +1053,35 @@ namespace ProjectLink.EditorTools
             SavePopupPrefab(root, "StageDetailPopup");
         }
 
-        static void BuildDailyChallengePopup()
+        static void BuildStreakChallengePopup()
         {
-            var (root, panel, content, footer) = CreatePopupShell<DailyChallengePopup>(
-                "DailyChallengePopup", "popup.daily.title", dismissible: true);
-            var streakTxt = MakeText(content, "Txt_Streak", "home.daily_streak_fmt",
-                28, Warning, TextAlignmentOptions.Center);
-            streakTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 48;
-            var tileRow = MakeChild(content, "Row_Streak_Tiles");
-            tileRow.sizeDelta = new Vector2(0, 96);
-            tileRow.gameObject.AddComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
-            tileRow.gameObject.AddComponent<LayoutElement>().preferredHeight = 96;
-            var todayTxt = MakeText(content, "Txt_Today", "popup.daily.today_fmt",
+            var (root, panel, content, footer) = CreatePopupShell<StreakChallengePopup>(
+                "StreakChallengePopup", "streak.popup.title", dismissible: true);
+
+            var statusTxt = MakeText(content, "StatusText", "streak.status_inactive",
                 26, TextCol, TextAlignmentOptions.Center);
-            todayTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 48;
-            var progressBar = MakeChild(content, "Bar_Progress");
-            progressBar.sizeDelta = new Vector2(0, 24);
-            progressBar.gameObject.AddComponent<Image>().color = HexColor("#FFFFFF22");
-            progressBar.gameObject.AddComponent<LayoutElement>().preferredHeight = 24;
-            var rewardTxt = MakeText(content, "Txt_Reward", "popup.daily.reward_fmt",
-                26, Positive, TextAlignmentOptions.Center);
-            rewardTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 48;
-            AddFooterButton(footer, "Btn_Complete", "common.complete", "btn_primary", isPrimary: true);
-            var popup = root.GetComponent<DailyChallengePopup>();
-            Assign(popup, "closeButton", FindButtonInChildren(root, "Btn_Close"));
-            Assign(popup, "playButton", FindButtonInChildren(root, "Btn_Complete"));
-            Assign(popup, "progressText", todayTxt.GetComponent<TextMeshProUGUI>());
-            Assign(popup, "rewardText", rewardTxt.GetComponent<TextMeshProUGUI>());
-            Assign(popup, "streakRow", tileRow);
-            SavePopupPrefab(root, "DailyChallengePopup");
+            statusTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 48;
+
+            var timerTxt = MakeText(content, "TimerText", "",
+                22, Warning, TextAlignmentOptions.Center);
+            timerTxt.gameObject.AddComponent<LayoutElement>().preferredHeight = 36;
+
+            var levelList = MakeChild(content, "LevelList");
+            var lvlVlg = levelList.gameObject.AddComponent<VerticalLayoutGroup>();
+            lvlVlg.spacing = 12; lvlVlg.padding = new RectOffset(0, 0, 8, 8);
+            lvlVlg.childControlWidth = true; lvlVlg.childControlHeight = false;
+            levelList.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            levelList.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+
+            var activateBtn = AddFooterButton(footer, "ActivateButton", "streak.activate", "btn_primary", isPrimary: true);
+
+            var popup = root.GetComponent<StreakChallengePopup>();
+            Assign(popup, "closeButton",    FindButtonInChildren(root, "Btn_Close"));
+            Assign(popup, "activateButton", activateBtn);
+            Assign(popup, "statusText",     statusTxt.GetComponent<TextMeshProUGUI>());
+            Assign(popup, "timerText",      timerTxt.GetComponent<TextMeshProUGUI>());
+            Assign(popup, "levelListRoot",  levelList);
+            SavePopupPrefab(root, "StreakChallengePopup");
         }
 
         static void BuildRewardPopup()

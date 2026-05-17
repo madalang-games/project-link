@@ -14,16 +14,21 @@
 | `UserProfile.cs` | `UserProfile` | `user_profiles` |
 | `UserRankingCache.cs` | `UserRankingCache` | `user_ranking_cache` |
 | `ActionLog.cs` | `ActionLog` | `action_logs` (append-only) |
-| `DailyChallengeProgress.cs` | `DailyChallengeProgress` | `daily_challenge_progress` (PK: user_id+challenge_date) |
 | `PlayerSettings.cs` | `PlayerSettings` | `player_settings` |
+| `StreakChallengeUserState.cs` | `StreakChallengeUserState` | `streak_challenge_user_state` (PK: user_id+event_id+cycle_id) |
+| `StreakChallengeUserLevelState.cs` | `StreakChallengeUserLevelState` | `streak_challenge_user_level_state` (PK: user_id+event_id+cycle_id+level_index) |
+| `StreakChallengeRewardClaimHistory.cs` | `StreakChallengeRewardClaimHistory` | `streak_challenge_reward_claim_history` (correlation-id dedup) |
+| `StreakChallengeAdRewardHistory.cs` | `StreakChallengeAdRewardHistory` | `streak_challenge_ad_reward_history` (one-per-level ad claim) |
 
 ## Symbols
 | symbol | kind | note |
 |--------|------|------|
 | `UserProfile.AvatarId` | property | default=1; shown in ranking entries and lobby |
 | `UserProfile.MaxClearedStageId` | property | highest sequentially-cleared stage (0 = none); updated by atomic conditional UPDATE in `StageEndTransactionRepository` |
-| `DailyChallengeProgress.StreakDays` | property | set at COMPLETION time (not at row creation); 0 on new rows |
-| `DailyChallengeProgress.LastStreakDate` | property | nullable; date of last consecutive completion |
+| `StreakChallengeUserState.EventStatus` | property | `ACTIVE` / `COMPLETED` / `EXPIRED`; mutated by lazy reset |
+| `StreakChallengeUserState.ExpiresAt` | property | UTC expiry for the 24H cycle |
+| `StreakChallengeUserLevelState.LevelStatus` | property | `LOCKED` / `READY` / `STARTED` / `COMPLETED` |
+| `StreakChallengeUserLevelState.CurrentCount` | property | stage clears counted toward required threshold |
 | `PlayerSettings.Language` | property | default="EN"; ISO 639-1 code |
 
 ## Cross-refs
@@ -32,5 +37,5 @@
 
 ## Rules
 - Plain C# POCOs — no validation logic, no domain methods
-- `DailyChallengeProgress.StreakDays` is computed by `Application.DailyChallengeService` from yesterday's row before calling the transaction
+- `StreakChallengeUserState.EventStatus` is lazily reset on read: expired cycles are marked EXPIRED and a fresh INACTIVE state is returned
 - Append-only tables (`currency_logs`, `action_logs`): never UPDATE or DELETE rows

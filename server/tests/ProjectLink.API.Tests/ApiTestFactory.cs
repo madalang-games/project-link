@@ -86,7 +86,8 @@ public sealed class ApiTestFactory : WebApplicationFactory<Program>
             services.RemoveAll<IStaminaRepository>();
             services.RemoveAll<ICurrencyRepository>();
             services.RemoveAll<IProgressRepository>();
-            services.RemoveAll<IDailyChallengeRepository>();
+            services.RemoveAll<IStreakChallengeRepository>();
+            services.RemoveAll<IStreakChallengeTransaction>();
             services.RemoveAll<IStaticDataService>();
 
             services.AddSingleton<IUserProfileRepository, InMemoryUserProfileRepository>();
@@ -95,7 +96,8 @@ public sealed class ApiTestFactory : WebApplicationFactory<Program>
             services.AddSingleton<IStaminaRepository, TestStaminaRepository>();
             services.AddSingleton<ICurrencyRepository, TestCurrencyRepository>();
             services.AddSingleton<IProgressRepository, TestProgressRepository>();
-            services.AddSingleton<IDailyChallengeRepository, TestDailyChallengeRepository>();
+            services.AddSingleton<IStreakChallengeRepository, TestStreakChallengeRepository>();
+            services.AddSingleton<IStreakChallengeTransaction, TestStreakChallengeTransaction>();
             services.AddSingleton<IStaticDataService, TestStaticDataService>();
             services.AddSingleton<IHttpClientFactory>(new TestPlatformHttpClientFactory(() =>
                 CreatePlatformToken("platform-guest", "Platform Guest")));
@@ -284,20 +286,28 @@ public sealed class ApiTestFactory : WebApplicationFactory<Program>
         public Task UpsertClearAsync(string userId, int stageId, int stars, CancellationToken ct) => Task.CompletedTask;
     }
 
-    private sealed class TestDailyChallengeRepository : IDailyChallengeRepository
+    private sealed class TestStreakChallengeRepository : IStreakChallengeRepository
     {
-        public Task<DailyChallengeProgress?> GetForDateAsync(string userId, DateOnly date, CancellationToken ct)
-            => Task.FromResult<DailyChallengeProgress?>(new DailyChallengeProgress
-            {
-                UserId = userId,
-                ChallengeDate = date,
-                PlayCount = 1,
-                Completed = false,
-                StreakDays = 2,
-                CreatedAt = DateTimeOffset.UtcNow,
-            });
+        public Task<StreakChallengeUserState?> GetActiveStateAsync(string userId, int eventId, CancellationToken ct)
+            => Task.FromResult<StreakChallengeUserState?>(null);
+        public Task<List<StreakChallengeUserLevelState>> GetLevelStatesAsync(string userId, int eventId, string cycleId, CancellationToken ct)
+            => Task.FromResult(new List<StreakChallengeUserLevelState>());
+        public Task<bool> HasAdUsedForLevelAsync(string userId, int eventId, string cycleId, int levelIndex, CancellationToken ct)
+            => Task.FromResult(false);
+        public Task<StreakChallengeRewardClaimHistory?> GetClaimHistoryByCorrelationAsync(string correlationId, CancellationToken ct)
+            => Task.FromResult<StreakChallengeRewardClaimHistory?>(null);
+    }
 
-        public Task<int> IncrementPlayCountAsync(string userId, DateOnly date, CancellationToken ct) => Task.FromResult(1);
+    private sealed class TestStreakChallengeTransaction : IStreakChallengeTransaction
+    {
+        public Task ActivateAsync(StreakChallengeActivateCommand cmd, CancellationToken ct) => Task.CompletedTask;
+        public Task StartLevelAsync(StreakChallengeStartLevelCommand cmd, CancellationToken ct) => Task.CompletedTask;
+        public Task<StreakChallengeProgressResult> RecordProgressAsync(StreakChallengeProgressCommand cmd, CancellationToken ct)
+            => Task.FromResult(new StreakChallengeProgressResult());
+        public Task<StreakChallengeClaimResult> ClaimRewardAsync(StreakChallengeClaimCommand cmd, CancellationToken ct)
+            => Task.FromResult(new StreakChallengeClaimResult());
+        public Task LazyResetAsync(StreakChallengeLazyResetCommand cmd, CancellationToken ct) => Task.CompletedTask;
+        public Task RecordAdAsync(StreakChallengeAdRewardHistory entry, CancellationToken ct) => Task.CompletedTask;
     }
 
     private sealed class TestStaticDataService : IStaticDataService
@@ -312,11 +322,12 @@ public sealed class ApiTestFactory : WebApplicationFactory<Program>
         public IReadOnlyList<IngameItemData> GetAllItems() => [];
         public OutgameStaminaConfigData GetStaminaConfig() => new() { ConfigId = 1, MaxStamina = 5, RechargeSeconds = 300 };
         public IReadOnlyList<OutgameAvatarData> GetAllAvatars() => [];
-        public OutgameDailyChallengeData GetDailyChallengeConfig() => new() { ConfigId = 1, PlayCountTarget = 3, ResetHourUtc = 0, StagePickCount = 3 };
-        public IReadOnlyList<OutgameDailyRewardData> GetAllDailyRewards() => [];
-        public OutgameDailyRewardData? GetDailyReward(int streakDay) => null;
         public IReadOnlyList<OutgameShopCatalogData> GetShopCatalog() => [];
         public OutgameShopCatalogData? GetShopProduct(int productId) => null;
         public IReadOnlyList<OutgameSeasonEventData> GetAllSeasonEvents() => [];
+        public StreakChallengeEventData? GetStreakChallengeEvent(int eventId, int version) => null;
+        public StreakChallengeEventData? GetLatestEnabledStreakChallengeEvent() => null;
+        public IReadOnlyList<StreakChallengeLevelData> GetStreakChallengeLevels(int eventId, int version) => [];
+        public IReadOnlyList<StreakChallengeRewardItemData> GetStreakChallengeRewardItems(int rewardGroupId, int rewardGroupVersion) => [];
     }
 }

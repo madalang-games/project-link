@@ -5,8 +5,6 @@
 |------|------|-----|
 | `outgame_stamina_config.csv` | Global stamina config (1 row) | `configId` (PK) |
 | `outgame_avatar.csv` | Preset avatar icons | `id` (PK) |
-| `outgame_daily_challenge.csv` | Daily challenge config (1 row) | `configId` (PK) |
-| `outgame_daily_reward.csv` | 7-day streak reward schedule | `streakDay` (PK) |
 | `outgame_shop_catalog.csv` | Shop product catalog | `productId` (PK) |
 | `outgame_season_event.csv` | Season event definitions | `eventId` (PK) |
 
@@ -24,18 +22,6 @@
 - `name` string(64) NN — display name
 - `iconPath` string(128) NN — relative resource path
 - `unlockCondition` string(64) NN — `default` = always available
-
-**outgame_daily_challenge**
-- `configId` int32 PK — always 1
-- `playCountTarget` int32 NN — successful daily-stage clears required per day to unlock reward
-- `resetHourUtc` int32 NN — UTC hour of daily reset (0 = midnight)
-- `stagePickCount` int32 NN — number of stages randomly selected each day as today's daily set (date-seeded)
-
-**outgame_daily_reward**
-- `streakDay` int32 PK — 1..7 consecutive completion day
-- `rewardType` string(32) NN — `SOFT_CURRENCY` | `ITEM`
-- `rewardId` int32 NN — `ingame_item.id` for ITEM; 0 for SOFT_CURRENCY
-- `amount` int32 NN — quantity or currency amount
 
 **outgame_shop_catalog**
 - `productId` int32 PK
@@ -59,12 +45,11 @@
 
 ## Cross-refs
 - Gen output: `client/generated/data/outgame/` and `server/generated/data/outgame/`
-- Consumed by: server `Infrastructure.StaticDataService`
-- Consumed by: server `Domain.OutgameStaminaConfigData`, `OutgameAvatarData`, `OutgameDailyChallengeData`, `OutgameDailyRewardData`, `OutgameShopCatalogData`, `OutgameSeasonEventData`
+- Consumed by: server `Infrastructure.Data.StaticDataService`
+- Consumed by: server `Domain.StaticData.OutgameStaminaConfigData`, `OutgameAvatarData`, `OutgameShopCatalogData`, `OutgameSeasonEventData`
 
 ## Rules
-- `outgame_stamina_config` and `outgame_daily_challenge` always have exactly 1 row (configId=1)
-- `outgame_daily_reward` always has exactly 7 rows (streakDay 1..7)
+- `outgame_stamina_config` always has exactly 1 row (configId=1)
 - ITEM shop products: `grantItemId` must reference a valid `ingame_item.id`
 - IAP products (`COIN`, `BUNDLE`, `NO_ADS`): `priceSoft=0`, `priceIapSku` must be non-empty
 - Soft products (`ITEM`): `priceIapSku` is empty, `priceSoft > 0`

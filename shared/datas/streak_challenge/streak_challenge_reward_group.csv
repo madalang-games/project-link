@@ -1,0 +1,7 @@
+rewardGroupId,rewardGroupVersion,rewardType,isEnabled
+CS,CS,CS,CS
+int32,int32,string(32),bool
+PK,PK,NN,NN
+1,1,FIXED,true
+2,1,FIXED,true
+3,1,FIXED,true

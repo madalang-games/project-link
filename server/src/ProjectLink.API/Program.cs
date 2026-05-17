@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ProjectLink.Application.Bootstrap;
 using ProjectLink.Application.Currency;
-using ProjectLink.Application.DailyChallenge;
+using ProjectLink.Application.StreakChallenge;
 using ProjectLink.Application.Inventory;
 using ProjectLink.Application.Lobby;
 using ProjectLink.Application.Progress;
@@ -72,12 +72,12 @@ builder.Services.AddScoped<IStaminaRepository,              StaminaRepository>()
 builder.Services.AddScoped<IInventoryRepository,            InventoryRepository>();
 builder.Services.AddScoped<IRankingRepository,              RankingRepository>();
 builder.Services.AddScoped<IStageSessionCache,              StageSessionCache>();
-builder.Services.AddScoped<IDailyChallengeRepository,       DailyChallengeRepository>();
 builder.Services.AddScoped<IPlayerSettingsRepository,       PlayerSettingsRepository>();
 builder.Services.AddScoped<IStageEndTransaction,            StageEndTransactionRepository>();
 builder.Services.AddScoped<IStaminaRefillTransaction,       StaminaRefillTransactionRepository>();
-builder.Services.AddScoped<IDailyChallengeCompleteTransaction, DailyChallengeCompleteTransactionRepository>();
 builder.Services.AddScoped<IShopPurchaseTransaction,        ShopPurchaseTransactionRepository>();
+builder.Services.AddScoped<IStreakChallengeRepository,      StreakChallengeRepository>();
+builder.Services.AddScoped<IStreakChallengeTransaction,     StreakChallengeTransactionRepository>();
 
 // 5. Application services
 builder.Services.AddScoped<SessionService>();
@@ -90,7 +90,7 @@ builder.Services.AddScoped<StageService>();
 builder.Services.AddScoped<GetProgressQueryHandler>();
 builder.Services.AddScoped<BootstrapService>();
 builder.Services.AddScoped<LobbyService>();
-builder.Services.AddScoped<DailyChallengeService>();
+builder.Services.AddScoped<StreakChallengeService>();
 builder.Services.AddScoped<ShopService>();
 builder.Services.AddScoped<PlayerSettingsService>();
 builder.Services.AddScoped<RewardService>();

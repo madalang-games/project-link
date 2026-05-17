@@ -10,11 +10,11 @@
 |--------|------|------|
 | `StageService.StartAsync` | method | Deducts stamina, replaces any active session with a new paid attempt, returns `StageStartResponse` with item counts from static data |
 | `StageService.LockAsync` | method | Validates `sessionToken`, transitions session to locked state; must be called before EndAsync |
-| `StageService.EndAsync` | method | Validates sessionToken + move limit; checks `DailyChallengeStageSelector`; delegates first-clear reward + clear stamina refund to `IStageEndTransaction`; calls `RankingService.OnStageEndAsync` only on best record; elapsed-ms tolerance uses `_rankingService.NetworkToleranceMs` |
+| `StageService.EndAsync` | method | Validates sessionToken + move limit; delegates first-clear reward + clear stamina refund to `IStageEndTransaction`; calls `RankingService.OnStageEndAsync` on best record; calls `StreakChallengeService.ProcessStageResultAsync`; elapsed-ms tolerance uses `_rankingService.NetworkToleranceMs` |
 | `StageService.ExtendAsync` | method | Refunds stamina on stage-fail; validates sessionToken; cost from `IStaticDataService.GetStaminaConfig()` |
 
 ## Cross-refs
-- Depends on: `ISessionCache`, `IStaminaRepository`, `IInventoryRepository`, `IStageEndTransaction`, `IStaticDataService`, `RankingService`, `DailyChallengeStageSelector` (internal static)
+- Depends on: `IStageSessionCache`, `IStaminaRepository`, `IInventoryRepository`, `IStageEndTransaction`, `IStaticDataService`, `RankingService`, `StreakChallengeService`
 - Consumed by: `API.Controllers.StageController` → `POST /api/stage/{id}/start`, `POST /api/stage/{id}/lock`, `POST /api/stage/{id}/end`, `POST /api/stage/{id}/extend`
 
 ## Rules

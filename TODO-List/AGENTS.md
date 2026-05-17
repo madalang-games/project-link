@@ -17,6 +17,7 @@ Navigation and progress tracker for all remaining work before release.
 | [08_sound_vfx.md](08_sound_vfx.md) | Sound & VFX Polish | TODO |
 | [09_platform_build.md](09_platform_build.md) | Platform Build (Android) | TODO |
 | [10_server.md](10_server.md) | Server (ASP.NET) | IN_PROGRESS |
+| [11_streak_challenge.md](11_streak_challenge.md) | 24H Streak Challenge | DONE |
 | [12_client_rule_refactor.md](12_client_rule_refactor.md) | Client Rule Refactor | TODO |
 | [13_stamina.md](13_stamina.md) | Stamina System | DONE |
 | [14_currency.md](14_currency.md) | Currency System | IN_PROGRESS |
@@ -61,3 +62,4 @@ Legacy order preserved below for reference:
 <!-- changed: marked Stage Editor DONE after CRUD, solver validation, generator, and CI validation command landed -->
 <!-- changed: added UI wireframe server contract tracker for Color Paths PDF UI refresh -->
 <!-- changed: added infrastructure tracker for Docker dev/prod exposure and port allocation -->
+<!-- changed: added 11_streak_challenge.md — daily_challenge fully replaced with 24H Streak Challenge -->

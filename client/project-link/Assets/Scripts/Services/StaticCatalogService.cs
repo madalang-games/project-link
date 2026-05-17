@@ -7,10 +7,8 @@ namespace ProjectLink.Services
     public interface IStaticCatalogService
     {
         IReadOnlyList<OutgameShopCatalog> GetEnabledShopProducts(string category = null);
-        IReadOnlyList<OutgameDailyReward> DailyRewards { get; }
         IReadOnlyList<OutgameSeasonEvent> SeasonEvents { get; }
         OutgameStaminaConfig StaminaConfig { get; }
-        OutgameDailyChallenge DailyChallengeConfig { get; }
         IngameItem FindItem(int itemId);
         OutgameAvatar FindAvatar(int avatarId);
         OutgameSeasonEvent FindSeasonEvent(int eventId);
@@ -18,10 +16,8 @@ namespace ProjectLink.Services
 
     public sealed class StaticCatalogService : IStaticCatalogService
     {
-        public IReadOnlyList<OutgameDailyReward> DailyRewards => OutgameDataLoader.DailyRewards;
         public IReadOnlyList<OutgameSeasonEvent> SeasonEvents => OutgameDataLoader.SeasonEvents;
         public OutgameStaminaConfig StaminaConfig => OutgameDataLoader.StaminaConfig;
-        public OutgameDailyChallenge DailyChallengeConfig => OutgameDataLoader.DailyChallengeConfig;
 
         public IReadOnlyList<OutgameShopCatalog> GetEnabledShopProducts(string category = null)
         {

@@ -1,0 +1,5 @@
+eventId,version,isEnabled,durationSeconds,resetType,stageCountPolicy,rewardPolicy,adPolicy
+CS,CS,CS,CS,CS,CS,CS,CS
+int32,int32,bool,int32,string(32),string(64),string(64),string(64)
+PK,NN,NN,NN,NN,NN,NN,NN
+1,1,true,86400,LAZY,FIRST_CLEAR_MAIN,MANUAL_CLAIM,MULTIPLIER_ONCE_PER_LEVEL

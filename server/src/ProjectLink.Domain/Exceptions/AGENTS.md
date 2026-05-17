@@ -14,8 +14,6 @@
 | `StageNotFoundException.cs` | `StageNotFoundException` | HTTP 404 — STAGE_NOT_FOUND |
 | `AdTokenAlreadyUsedException.cs` | `AdTokenAlreadyUsedException` | HTTP 409 — AD_TOKEN_ALREADY_USED |
 | `InvalidStageResultException.cs` | `InvalidStageResultException` | HTTP 400 — INVALID_STAGE_RESULT |
-| `DailyChallengeAlreadyCompletedException.cs` | `DailyChallengeAlreadyCompletedException` | HTTP 409 — DAILY_CHALLENGE_ALREADY_COMPLETED |
-| `DailyChallengeNotCompletableException.cs` | `DailyChallengeNotCompletableException` | HTTP 422 — DAILY_CHALLENGE_NOT_COMPLETABLE |
 | `StaminaAlreadyFullException.cs` | `StaminaAlreadyFullException` | HTTP 422 — STAMINA_ALREADY_FULL |
 | `ShopItemNotFoundException.cs` | `ShopItemNotFoundException` | HTTP 404 — SHOP_ITEM_NOT_FOUND |
 

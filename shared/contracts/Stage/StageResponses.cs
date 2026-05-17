@@ -1,6 +1,8 @@
 #nullable enable
 
 using System.Collections.Generic;
+using ProjectLink.Contracts.StreakChallenge;
+
 namespace ProjectLink.Contracts.Stage
 {
 
@@ -26,5 +28,6 @@ public class StageEndResponse
     public int   MoveLimit         { get; set; }
     public int?  NextStageId       { get; set; }
     public bool  NextStageUnlocked { get; set; }
+    public StreakChallengeStageResultResponse? StreakChallenge { get; set; }
 }
 }

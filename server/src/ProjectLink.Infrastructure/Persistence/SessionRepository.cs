@@ -35,24 +35,11 @@ public class SessionRepository : ISessionRepository
 
     public async Task<bool> TryCreateSessionAsync(string userId, string sessionId, DateTimeOffset expiresAt, CancellationToken ct)
     {
-        try
-        {
-            _db.Sessions.Add(new Session
-            {
-                UserId    = userId,
-                SessionId = sessionId,
-                CreatedAt = DateTimeOffset.UtcNow,
-                ExpiresAt = expiresAt,
-                Active    = true,
-            });
-            await _db.SaveChangesAsync(ct);
-            return true;
-        }
-        catch (DbUpdateException)
-        {
-            _db.ChangeTracker.Clear();
-            return false;
-        }
+        var now  = DateTimeOffset.UtcNow;
+        var rows = await _db.Database.ExecuteSqlInterpolatedAsync(
+            $"INSERT IGNORE INTO sessions (user_id, session_id, created_at, expires_at, active) VALUES ({userId}, {sessionId}, {now}, {expiresAt}, 1)",
+            ct);
+        return rows > 0;
     }
 
     public async Task InvalidateAsync(string userId, CancellationToken ct)

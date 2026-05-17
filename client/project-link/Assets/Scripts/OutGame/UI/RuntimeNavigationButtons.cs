@@ -18,7 +18,6 @@ namespace ProjectLink.OutGame.UI
         public void LoadTitle()
         {
             GameContext.SuppressNextTitleSilentLogin();
-            GameContext.ClearDailyChallengeRun();
             LoadScene(TitleSceneName);
         }
 
@@ -57,12 +56,12 @@ namespace ProjectLink.OutGame.UI
             PopupManager.Request(PopupId.Account);
         }
 
-        public void OpenDailyChallengePopup()
+        public void OpenStreakChallengePopup()
         {
             if (PopupManager.Instance == null)
                 return;
 
-            PopupManager.Request(PopupId.DailyChallenge);
+            PopupManager.Request(PopupId.StreakChallenge);
         }
 
         public void OpenRewardPopup()
@@ -102,7 +101,6 @@ namespace ProjectLink.OutGame.UI
 
         public void LoadLobby()
         {
-            GameContext.ClearDailyChallengeRun();
             LoadScene(LobbySceneName);
         }
 
@@ -182,7 +180,6 @@ namespace ProjectLink.OutGame.UI
         static void LoadLobbyWithEnergyPopup()
         {
             GameContext.ClearStageSession();
-            GameContext.ClearDailyChallengeRun();
 
             if (SceneManager.GetActiveScene().name == LobbySceneName)
             {

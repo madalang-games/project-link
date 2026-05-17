@@ -1,0 +1,2 @@
+eventId,version,isEnabled,durationSeconds,resetType,stageCountPolicy,rewardPolicy,adPolicy
+1,1,true,86400,LAZY,FIRST_CLEAR_MAIN,MANUAL_CLAIM,MULTIPLIER_ONCE_PER_LEVEL

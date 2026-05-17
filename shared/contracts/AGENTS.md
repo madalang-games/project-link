@@ -51,8 +51,8 @@ shared/contracts/
 | `Lobby/LobbyResponses.cs` | `ProjectLink.Contracts.Lobby` | Full lobby state snapshot |
 | `Progress/ProgressRequests.cs` | `ProjectLink.Contracts.Progress` | Batch stage-progress query |
 | `Progress/ProgressResponses.cs` | `ProjectLink.Contracts.Progress` | Stage progress list with unlock status |
-| `Daily/DailyChallengeRequests.cs` | `ProjectLink.Contracts.Daily` | Daily challenge complete trigger |
-| `Daily/DailyChallengeResponses.cs` | `ProjectLink.Contracts.Daily` | Challenge state, streak tiles, rewards |
+| `StreakChallenge/StreakChallengeRequests.cs` | `ProjectLink.Contracts.StreakChallenge` | Activate, startLevel, claimReward, claimRewardWithAd, refresh request bodies |
+| `StreakChallenge/StreakChallengeResponses.cs` | `ProjectLink.Contracts.StreakChallenge` | Event/level state, reward items, stage result directive |
 | `Reward/RewardRequests.cs` | `ProjectLink.Contracts.Reward` | Generic reward claim (ad / daily login) |
 | `Reward/RewardResponses.cs` | `ProjectLink.Contracts.Reward` | Granted rewards + balance deltas |
 | `Shop/ShopRequests.cs` | `ProjectLink.Contracts.Shop` | Product purchase request |
@@ -75,7 +75,7 @@ shared/contracts/
 | `StageStartRequest` | class | empty body — stageId in route |
 | `StageStartResponse` | class | `SessionToken`, `ServerStartAt`, `MoveLimit` (0=unlimited), `TimeLimitSeconds` (0=unlimited), `ItemCounts` (Dict\<int,int\>), `StaminaCurrent` |
 | `StageEndRequest` | class | `SessionToken`, `Result` ("success"\|"fail"), `ClientElapsedMs`, `MovesUsed` |
-| `StageEndResponse` | class | `Score`, `Stars`, `AdjustedElapsedMs`, `IsBestRecord`, `SoftBalanceAfter`, `SoftReward` (actual granted), `MovesUsed`, `MoveLimit`, `NextStageId?`, `NextStageUnlocked` |
+| `StageEndResponse` | class | `Score`, `Stars`, `AdjustedElapsedMs`, `IsBestRecord`, `SoftBalanceAfter`, `SoftReward` (actual granted), `MovesUsed`, `MoveLimit`, `NextStageId?`, `NextStageUnlocked`, `StreakChallenge?` (`StreakChallengeStageResultResponse`) |
 | `StaminaAdRewardRequest` | class | `AdToken` — platform-issued, idempotency key |
 | `StaminaRefillRequest` | class | empty — server reads cost from static data |
 | `StaminaResponse` | class | `Current`, `Max`, `NextRechargeAt?` (ISO 8601) |
@@ -95,22 +95,26 @@ shared/contracts/
 | `RankingListResponse` | class | `Entries`, `MyRank?`, `Category`, `MetricLabel`, `NextCursor?` |
 | `MyRankEntry` | class | `Rank`, `Value` — one category |
 | `MyRankResponse` | class | `StagesCleared?`, `TotalScore?` — `/api/ranking/me` |
-| `LobbyStateResponse` | class | `Profile`, `Stamina`, `Currency`, `ProgressSummary`, `DailyChallenge`, `SeasonEvent?` |
+| `LobbyStateResponse` | class | `Profile`, `Stamina`, `Currency`, `ProgressSummary`, `StreakChallenge`, `SeasonEvent?` |
 | `LobbyProfile` | class | `DisplayName`, `AvatarId` |
 | `LobbyStamina` | class | `Current`, `Max`, `NextRechargeAt?` |
 | `LobbyCurrency` | class | `SoftAmount` |
 | `LobbyProgressSummary` | class | `HighestStageId`, `TotalStarsEarned`, `NextUnlockedStageId` |
-| `LobbyDailyChallenge` | class | `CompletedToday`, `CanComplete`, `PlayCountToday`, `PlayCountTarget`, `StreakDays`, `ResetAt` |
+| `LobbyStreakChallenge` | class | `EventStatus`, `RemainingTimeIso`, `CurrentLevel`, `CurrentLevelCount`, `CurrentLevelRequired`, `HasPendingReward` |
 | `LobbySeasonEvent` | class | `EventId`, `Name`, `EndAt`, `IsActive` — nullable; omitted if no active event |
 | `BatchProgressRequest` | class | `StageIds` (List\<int\>) — query, not upsert |
 | `StageProgressEntry` | class | `StageId`, `Stars`, `IsUnlocked`, `ClearedAt?` |
 | `ProgressResponse` | class | `Stages` (List\<StageProgressEntry\>) |
-| `DailyChallengeCompleteRequest` | class | empty body |
-| `DailyChallengeResponse` | class | `TodayStageIds` (List\<int\>, date-seeded), `CompletedToday`, `CanComplete`, `PlayCountToday`, `PlayCountTarget`, `StreakDays`, `ResetAt`, `Tiles`, `TodayRewards` |
-| `DailyChallengeStreakTile` | class | `Day`, `IsDone`, `IsToday`, `IsLocked` |
-| `DailyChallengeRewardPreview` | class | `RewardType`, `RewardId`, `Amount` — preview before completion |
-| `DailyChallengeCompleteResponse` | class | `RewardsGranted`, `StreakDays`, `SoftBalanceAfter`, `InventoryUpdates` |
-| `DailyInventoryUpdate` | class | `ItemId`, `QuantityAfter` |
+| `StreakChallengeActivateRequest` | class | empty body — activates a new 24H cycle |
+| `StreakChallengeStartLevelRequest` | class | empty body — starts the next READY level |
+| `StreakChallengeClaimRewardRequest` | class | `CorrelationId` — idempotency key |
+| `StreakChallengeClaimRewardWithAdRequest` | class | `CorrelationId`, `AdToken` |
+| `StreakChallengeStateResponse` | class | `EventStatus`, `RemainingTimeIso`, `AvailableActions`, `Levels` (List\<StreakChallengeLevelState\>) |
+| `StreakChallengeLevelState` | class | `LevelIndex`, `LevelStatus`, `CurrentCount`, `RequiredCount`, `RewardState`, `RewardItems` |
+| `StreakChallengeRewardItem` | class | `ItemType`, `ItemId`, `Amount` |
+| `StreakChallengeStageResultResponse` | class | `EventStatus`, `LevelIndex`, `CurrentCount`, `RequiredCount`, `NavigationDirective` |
+| `StreakChallengeClaimRewardResponse` | class | `EventState` (StreakChallengeStateResponse), `InventoryUpdates` (List\<StreakChallengeInventoryUpdate\>) |
+| `StreakChallengeInventoryUpdate` | class | `ItemId`, `QuantityAfter` |
 | `RewardClaimRequest` | class | `RewardSource`, `RewardToken`, `Multiplier` |
 | `RewardClaimResponse` | class | `RewardsGranted`, `SoftBalanceAfter`, `InventoryUpdates` |
 | `ShopPurchaseRequest` | class | `ProductId`, `Quantity` (default 1), `IapReceiptData?` (null for soft-currency) |

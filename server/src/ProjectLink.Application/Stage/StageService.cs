@@ -1,5 +1,5 @@
-using ProjectLink.Application.DailyChallenge;
 using ProjectLink.Application.Ranking;
+using ProjectLink.Application.StreakChallenge;
 using ProjectLink.Contracts.Stage;
 using ProjectLink.Domain.Exceptions;
 using ProjectLink.Domain.Interfaces;
@@ -10,27 +10,30 @@ namespace ProjectLink.Application.Stage;
 
 public class StageService
 {
-    private readonly IStageSessionCache    _sessionCache;
-    private readonly IStaminaRepository    _stamina;
-    private readonly IInventoryRepository  _inventory;
-    private readonly IStaticDataService    _staticData;
-    private readonly RankingService        _rankingService;
-    private readonly IStageEndTransaction  _stageEndTx;
+    private readonly IStageSessionCache      _sessionCache;
+    private readonly IStaminaRepository      _stamina;
+    private readonly IInventoryRepository    _inventory;
+    private readonly IStaticDataService      _staticData;
+    private readonly RankingService          _rankingService;
+    private readonly IStageEndTransaction    _stageEndTx;
+    private readonly StreakChallengeService  _streakChallenge;
 
     public StageService(
-        IStageSessionCache   sessionCache,
-        IStaminaRepository   stamina,
-        IInventoryRepository inventory,
-        IStaticDataService   staticData,
-        RankingService       rankingService,
-        IStageEndTransaction stageEndTx)
+        IStageSessionCache     sessionCache,
+        IStaminaRepository     stamina,
+        IInventoryRepository   inventory,
+        IStaticDataService     staticData,
+        RankingService         rankingService,
+        IStageEndTransaction   stageEndTx,
+        StreakChallengeService streakChallenge)
     {
-        _sessionCache   = sessionCache;
-        _stamina        = stamina;
-        _inventory      = inventory;
-        _staticData     = staticData;
-        _rankingService = rankingService;
-        _stageEndTx     = stageEndTx;
+        _sessionCache    = sessionCache;
+        _stamina         = stamina;
+        _inventory       = inventory;
+        _staticData      = staticData;
+        _rankingService  = rankingService;
+        _stageEndTx      = stageEndTx;
+        _streakChallenge = streakChallenge;
     }
 
     public async Task<StageStartResponse> StartAsync(string userId, int stageId, CancellationToken ct)
@@ -114,14 +117,18 @@ public class StageService
 
         if (result == "fail")
         {
+            var failStreakResult = await _streakChallenge.ProcessStageResultAsync(
+                userId, stageId, isFirstClear: false, isMainStage: true, result: "fail", ct);
+
             return new StageEndResponse
             {
-                Score      = 0,
-                Stars      = 0,
-                MovesUsed  = movesUsed,
-                MoveLimit  = stageData.MoveLimit,
-                NextStageId = null,
+                Score             = 0,
+                Stars             = 0,
+                MovesUsed         = movesUsed,
+                MoveLimit         = stageData.MoveLimit,
+                NextStageId       = null,
                 NextStageUnlocked = false,
+                StreakChallenge   = failStreakResult,
             };
         }
 
@@ -139,30 +146,28 @@ public class StageService
         var allStages  = _staticData.GetAllStages();
         var maxStageId = allStages.Count > 0 ? allStages.Max(s => s.StageId) : stageId;
 
-        var dailyConfig      = _staticData.GetDailyChallengeConfig();
-        var todayDailyStages = DailyChallengeStageSelector.GetTodayStageIds(dailyConfig.StagePickCount, allStages);
-
         var dbResult = await _stageEndTx.ExecuteAsync(new StageEndDbCommand
         {
-            UserId               = userId,
-            StageId              = stageId,
-            Stars                = stars,
-            Score                = score,
-            AdjustedMs           = adjustedMs,
-            SoftReward           = stageData.SoftReward,
+            UserId                  = userId,
+            StageId                 = stageId,
+            Stars                   = stars,
+            Score                   = score,
+            AdjustedMs              = adjustedMs,
+            SoftReward              = stageData.SoftReward,
             StaminaRefund           = 1,
             MaxStamina              = config.MaxStamina,
             RechargeIntervalMinutes = config.RechargeSeconds / 60,
             MovesUsed               = movesUsed,
             MaxStages               = maxStageId,
             CorrelationId           = correlationId,
-            ChallengeDate           = DateOnly.FromDateTime(DateTime.UtcNow),
-            IsDailyChallengeStage = todayDailyStages.Contains(stageId),
         }, ct);
 
         // Update Redis ranking best-effort (non-transactional, recoverable from DB)
         if (dbResult.IsBestRecord)
             await _rankingService.OnStageEndAsync(userId, stageId, adjustedMs, score, dbResult.TotalScore, dbResult.StagesCleared, ct);
+
+        var streakResult = await _streakChallenge.ProcessStageResultAsync(
+            userId, stageId, isFirstClear: dbResult.IsFirstClear, isMainStage: true, result: "success", ct);
 
         var nextStageId = stageId < maxStageId ? stageId + 1 : (int?)null;
 
@@ -176,8 +181,9 @@ public class StageService
             SoftReward        = dbResult.SoftRewardGranted,
             MovesUsed         = movesUsed,
             MoveLimit         = stageData.MoveLimit,
-            NextStageId       = nextStageId,
+            NextStageId       = streakResult?.NavigationDirective is "RETURN_TO_LOBBY" or "OPEN_REWARD_POPUP" ? null : nextStageId,
             NextStageUnlocked = dbResult.NextStageUnlocked,
+            StreakChallenge   = streakResult,
         };
     }
 

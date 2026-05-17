@@ -11,7 +11,7 @@
 | `IdHelper.NewId` | static method | Returns `Random.Shared.NextInt64(10^15, 2^53).ToString()`; safe for JavaScript/JSON (≤ 2^53); replaces Guid usage for all transaction/session IDs |
 
 ## Cross-refs
-- Consumed by: `Application.Currency.CurrencyService`, `Application.Stage.StageService`, `Application.Session.SessionService`, `Application.Reward.RewardService`, `Application.Inventory.InventoryService`, `Infrastructure.Persistence.StageEndTransactionRepository`, `Infrastructure.Persistence.StaminaRefillTransactionRepository`, `Infrastructure.Persistence.ShopPurchaseTransactionRepository`, `Infrastructure.Persistence.DailyChallengeCompleteTransactionRepository`
+- Consumed by: `Application.Currency.CurrencyService`, `Application.Stage.StageService`, `Application.Session.SessionService`, `Application.Reward.RewardService`, `Application.Inventory.InventoryService`, `Application.StreakChallenge.StreakChallengeService`, `Infrastructure.Persistence.StageEndTransactionRepository`, `Infrastructure.Persistence.StaminaRefillTransactionRepository`, `Infrastructure.Persistence.ShopPurchaseTransactionRepository`, `Infrastructure.Persistence.StreakChallengeTransactionRepository`
 
 ## Rules
 - Range `[10^15, 2^53)` guarantees exactly 16 digits and JSON number safety

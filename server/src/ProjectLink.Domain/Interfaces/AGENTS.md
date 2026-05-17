@@ -4,7 +4,6 @@
 | file | interface | role |
 |------|-----------|------|
 | `IStaticDataService.cs` | `IStaticDataService` | Static game data lookups (in-memory, loaded at startup) |
-| `ISessionCache.cs` | `ISessionCache` | JWT/session token Redis cache |
 | `IStageSessionCache.cs` | `IStageSessionCache` | Active stage session Redis cache |
 | `ISessionRepository.cs` | `ISessionRepository` | Session DB CRUD |
 | `IUserProfileRepository.cs` | `IUserProfileRepository` | User profile DB CRUD |
@@ -13,11 +12,11 @@
 | `IStaminaRepository.cs` | `IStaminaRepository` | Stamina read/deduct/add with lazy recharge |
 | `IInventoryRepository.cs` | `IInventoryRepository` | Inventory grant/deduct |
 | `IRankingRepository.cs` | `IRankingRepository` | Stage best records + ranking cache DB CRUD |
-| `IDailyChallengeRepository.cs` | `IDailyChallengeRepository` | Daily challenge progress read + play count increment |
+| `IStreakChallengeRepository.cs` | `IStreakChallengeRepository` | Streak user state + level state + claim history reads |
 | `IPlayerSettingsRepository.cs` | `IPlayerSettingsRepository` | Player settings get/upsert |
-| `IStageEndTransaction.cs` | `IStageEndTransaction` | Atomic stage-end DB transaction (progress+best+stamina+ranking+currency+daily) |
+| `IStageEndTransaction.cs` | `IStageEndTransaction` | Atomic stage-end DB transaction (progress+best+stamina+ranking+currency) |
 | `IStaminaRefillTransaction.cs` | `IStaminaRefillTransaction` | Atomic full stamina refill (stamina+currency+log) with FOR UPDATE |
-| `IDailyChallengeCompleteTransaction.cs` | `IDailyChallengeCompleteTransaction` | Atomic challenge complete (mark done+streak+rewards) |
+| `IStreakChallengeTransaction.cs` | `IStreakChallengeTransaction` | Atomic streak ops: activate, startLevel, processResult, claimReward |
 | `IShopPurchaseTransaction.cs` | `IShopPurchaseTransaction` | Atomic shop purchase (currency deduct+inventory grant) |
 
 ## Symbols
@@ -27,13 +26,14 @@
 | `StageEndDbResult.SoftRewardGranted` | property | actual soft currency granted by stage end; 0 on already-cleared replay |
 | `StageEndDbResult.TotalScore` | property | post-commit ranking cache total score for Redis ZADD |
 | `StageEndDbResult.StagesCleared` | property | post-commit stages cleared count for Redis ZADD |
-| `IDailyChallengeRepository.IncrementPlayCountAsync` | method | atomic INSERT ON CONFLICT; returns new play_count |
+| `IStreakChallengeRepository.GetActiveStateAsync` | method | returns `StreakChallengeUserState?` for the given user+eventId |
+| `IStreakChallengeTransaction.ActivateAsync` | method | creates new cycle + level rows; idempotent on duplicate cycleId |
+| `IStreakChallengeTransaction.ClaimRewardAsync` | method | marks level reward claimed; deduplicates via correlation_id |
 | `IStaminaRefillTransaction.ExecuteAsync` | method | throws `StaminaAlreadyFullException` or `InsufficientFundsException` |
-| `IDailyChallengeCompleteTransaction.ExecuteAsync` | method | throws `DailyChallengeAlreadyCompletedException` or `DailyChallengeNotCompletableException` |
 
 ## Cross-refs
 - Implemented by: server `Infrastructure.Persistence.*` and `Infrastructure.Data.StaticDataService`
-- Consumed by: server `Application.*Service`
+- Consumed by: server `Application.*Service`, `Application.StreakChallenge.StreakChallengeService`
 
 ## Rules
 - Transaction interfaces (`IStageEndTransaction` etc.) encapsulate multi-table atomic writes
