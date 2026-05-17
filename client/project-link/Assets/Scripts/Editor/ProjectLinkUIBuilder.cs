@@ -21,7 +21,7 @@ namespace ProjectLink.EditorTools
         const float RefH = 1920f;
         const string PopupPrefabRoot = "Assets/Resources/Prefabs/UI";
         const string ResourceRoot = "Assets/Resources/UI";
-        const string SkinAssetPath = "Assets/Editor/UIButtonSkin.asset";
+        const string SkinAssetPath = "Assets/Editor/UISpriteSkin.asset";
 
         // Palette (scenes.json)
         static readonly Color BgPrimary   = HexColor("#1A1A2E");
@@ -40,24 +40,71 @@ namespace ProjectLink.EditorTools
         static readonly Color SurfaceEE   = HexColor("#16213EEE");
         static readonly Color SlotPlaceholder = new(0.08f, 0.16f, 0.28f, 0.4f);
 
-        static UIButtonSkin _skin;
+        static UISpriteSkin _skin;
 
         // ─── Menu entries ──────────────────────────────────────────────────
 
-        [MenuItem("Tools/Project Link/UI Build/Create UI Button Skin")]
-        public static void CreateUIButtonSkin()
+        [MenuItem("Tools/Project Link/UI Build/Create UI Sprite Skin")]
+        public static void CreateUISpriteSkin()
         {
             EnsureFolder("Assets/Editor");
-            if (AssetDatabase.LoadAssetAtPath<UIButtonSkin>(SkinAssetPath) != null)
+            var skin = AssetDatabase.LoadAssetAtPath<UISpriteSkin>(SkinAssetPath);
+            if (skin == null)
             {
-                Debug.Log($"UIButtonSkin already exists at {SkinAssetPath}");
-                Selection.activeObject = AssetDatabase.LoadAssetAtPath<UIButtonSkin>(SkinAssetPath);
-                return;
+                skin = ScriptableObject.CreateInstance<UISpriteSkin>();
+                AssetDatabase.CreateAsset(skin, SkinAssetPath);
             }
-            var skin = ScriptableObject.CreateInstance<UIButtonSkin>();
-            AssetDatabase.CreateAsset(skin, SkinAssetPath);
+
+            var existing = new System.Collections.Generic.Dictionary<string, Sprite>();
+            foreach (var e in skin.sprites)
+                if (!string.IsNullOrEmpty(e.elementName))
+                    existing[e.elementName] = e.sprite;
+
+            var scanned = CollectSkinKeysFromSource();
+            foreach (var key in scanned)
+                if (!existing.ContainsKey(key))
+                    existing[key] = null;
+
+            // scanned keys first (sorted), then user-added custom keys
+            var entries = new System.Collections.Generic.List<UISpriteSkin.Entry>();
+            var sorted = new System.Collections.Generic.List<string>(scanned);
+            sorted.Sort();
+            foreach (var key in sorted)
+                entries.Add(new UISpriteSkin.Entry { elementName = key, sprite = existing[key] });
+            foreach (var kvp in existing)
+                if (!scanned.Contains(kvp.Key))
+                    entries.Add(new UISpriteSkin.Entry { elementName = kvp.Key, sprite = kvp.Value });
+
+            skin.sprites = entries.ToArray();
+            EditorUtility.SetDirty(skin);
             AssetDatabase.SaveAssets();
             Selection.activeObject = skin;
+            Debug.Log($"UISpriteSkin synced: {entries.Count} entries at {SkinAssetPath}");
+        }
+
+        static System.Collections.Generic.HashSet<string> CollectSkinKeysFromSource()
+        {
+            var keys = new System.Collections.Generic.HashSet<string>();
+            var guids = AssetDatabase.FindAssets("ProjectLinkUIBuilder t:Script");
+            if (guids.Length == 0) return keys;
+
+            var src = System.IO.File.ReadAllText(
+                System.IO.Path.GetFullPath(AssetDatabase.GUIDToAssetPath(guids[0])));
+
+            // All "btn_*" and "slot_*" string literals in the source
+            var re = new System.Text.RegularExpressions.Regex(@"""((btn|slot)_[a-z_]+)""");
+            foreach (System.Text.RegularExpressions.Match m in re.Matches(src))
+                keys.Add(m.Groups[1].Value);
+
+            // MakeSlot: name arg is "Slot_Xxx" -> derives key via ToLower/Replace
+            var slotRe = new System.Text.RegularExpressions.Regex(@"MakeSlot\s*\([^,]+,\s*""([^""]+)""");
+            foreach (System.Text.RegularExpressions.Match m in slotRe.Matches(src))
+            {
+                var derived = m.Groups[1].Value.ToLower().Replace("_", "").Replace("slot", "slot_");
+                keys.Add(derived);
+            }
+
+            return keys;
         }
 
         [MenuItem("Tools/Project Link/UI Build/Build Current Scene UI")]
@@ -178,7 +225,7 @@ namespace ProjectLink.EditorTools
             bar.offsetMax = new Vector2(-80, bar.offsetMax.y);
             var barBg = bar.gameObject.AddComponent<Image>();
             barBg.color = HexColor("#FFFFFF22");
-            ApplySlotSkin(barBg, "slot_progress_track");
+            ApplySkin(barBg, "slot_progress_track", false);
             var fill = MakeChild(bar, "Fill");
             Stretch(fill, 2, 2, 2, 2);
             var fillImg = fill.gameObject.AddComponent<Image>();
@@ -273,7 +320,7 @@ namespace ProjectLink.EditorTools
             rect.sizeDelta = new Vector2(0, 128);
             var img = go.GetComponent<Image>();
             img.color = BgSurface;
-            ApplyButtonSkin(img, bgSkinKey);
+            ApplySkin(img, bgSkinKey);
 
             var btn = go.GetComponent<Button>();
             btn.targetGraphic = img;
@@ -292,7 +339,7 @@ namespace ProjectLink.EditorTools
             icon.sizeDelta = new Vector2(56, 56);
             var iconImg = icon.gameObject.AddComponent<Image>();
             iconImg.color = SlotPlaceholder;
-            ApplySlotSkin(iconImg, iconSkinKey);
+            ApplySkin(iconImg, iconSkinKey);
             var iconLE = icon.gameObject.AddComponent<LayoutElement>();
             iconLE.preferredWidth = 56; iconLE.preferredHeight = 56; iconLE.flexibleWidth = 0;
 
@@ -320,7 +367,7 @@ namespace ProjectLink.EditorTools
             hud.anchoredPosition = Vector2.zero;
             var hudImg = hud.gameObject.AddComponent<Image>();
             hudImg.color = HudBg;
-            ApplySlotSkin(hudImg, "slot_hud_bg");
+            ApplySkin(hudImg, "slot_hud_bg", false);
             var hudVlg = hud.gameObject.AddComponent<VerticalLayoutGroup>();
             hudVlg.spacing = 8;
             hudVlg.padding = new RectOffset(24, 24, 16, 16);
@@ -340,7 +387,7 @@ namespace ProjectLink.EditorTools
             avatar.sizeDelta = new Vector2(88, 88);
             var avatarImg = avatar.gameObject.AddComponent<Image>();
             avatarImg.color = SlotPlaceholder;
-            ApplySlotSkin(avatarImg, "slot_avatar");
+            ApplySkin(avatarImg, "slot_avatar");
             avatar.gameObject.AddComponent<Mask>();
             var avatarBtn = avatar.gameObject.AddComponent<Button>();
             avatarBtn.targetGraphic = avatarImg;
@@ -361,7 +408,7 @@ namespace ProjectLink.EditorTools
             menuBtn.sizeDelta = new Vector2(88, 88);
             var menuImg = menuBtn.gameObject.AddComponent<Image>();
             menuImg.color = HexColor("#FFFFFF26");
-            ApplyButtonSkin(menuImg, "btn_icon_menu");
+            ApplySkin(menuImg, "btn_icon_menu");
             var menuButton = menuBtn.gameObject.AddComponent<Button>();
             menuButton.targetGraphic = menuImg;
             UnityEventTools.AddPersistentListener(menuButton.onClick, router.OpenSettingsPopup);
@@ -385,7 +432,7 @@ namespace ProjectLink.EditorTools
             dropdown.anchoredPosition = new Vector2(-32, -240);
             var ddImg = dropdown.gameObject.AddComponent<Image>();
             ddImg.color = SurfaceEE;
-            ApplySlotSkin(ddImg, "slot_popup_bg");
+            ApplySkin(ddImg, "slot_popup_bg", false);
             var ddVlg = dropdown.gameObject.AddComponent<VerticalLayoutGroup>();
             ddVlg.spacing = 4; ddVlg.padding = new RectOffset(12, 12, 12, 12);
             ddVlg.childControlWidth = true; ddVlg.childControlHeight = true;
@@ -465,7 +512,7 @@ namespace ProjectLink.EditorTools
             icon.sizeDelta = new Vector2(48, 48);
             var iconImg = icon.gameObject.AddComponent<Image>();
             iconImg.color = SlotPlaceholder;
-            ApplySlotSkin(iconImg, "slot_stamina_icon");
+            ApplySkin(iconImg, "slot_stamina_icon");
             icon.gameObject.AddComponent<LayoutElement>().preferredWidth = 48;
 
             var count = MakeChild(group, "Txt_StaminaCount");
@@ -494,7 +541,7 @@ namespace ProjectLink.EditorTools
             icon.sizeDelta = new Vector2(48, 48);
             var iconImg = icon.gameObject.AddComponent<Image>();
             iconImg.color = SlotPlaceholder;
-            ApplySlotSkin(iconImg, "slot_currency_soft");
+            ApplySkin(iconImg, "slot_currency_soft");
             icon.gameObject.AddComponent<LayoutElement>().preferredWidth = 48;
 
             var count = MakeChild(group, "Txt_CurrencyCount");
@@ -554,7 +601,7 @@ namespace ProjectLink.EditorTools
             node.sizeDelta = new Vector2(400, 560);
             var nodeImg = node.gameObject.AddComponent<Image>();
             nodeImg.color = BgSurface;
-            ApplySlotSkin(nodeImg, "slot_stage_node");
+            ApplySkin(nodeImg, "slot_stage_node");
             var stageNum = MakeChild(node, "Txt_StageNum");
             Center(stageNum, new Vector2(0, 210), new Vector2(120, 56));
             var numTmp = stageNum.gameObject.AddComponent<TextMeshProUGUI>();
@@ -596,7 +643,7 @@ namespace ProjectLink.EditorTools
             badge.anchoredPosition = new Vector2(12, -12);
             var badgeBg = badge.gameObject.AddComponent<Image>();
             badgeBg.color = new Color(0.35f, 0.35f, 0.4f, 0.9f);
-            ApplySlotSkin(badgeBg, "slot_streak_badge");
+            ApplySkin(badgeBg, "slot_streak_badge");
             var badgeBtn = badge.gameObject.AddComponent<Button>();
             badgeBtn.targetGraphic = badgeBg;
 
@@ -623,7 +670,7 @@ namespace ProjectLink.EditorTools
             cardEvent.offsetMax = new Vector2(-32, 252);
             var evtImg = cardEvent.gameObject.AddComponent<Image>();
             evtImg.color = BgSurface;
-            ApplySlotSkin(evtImg, "slot_event_banner");
+            ApplySkin(evtImg, "slot_event_banner");
             var evtBtn = cardEvent.gameObject.AddComponent<Button>();
             evtBtn.targetGraphic = evtImg;
             var evtTitle = MakeChild(cardEvent, "Txt_Title");
@@ -826,7 +873,7 @@ namespace ProjectLink.EditorTools
             icon.anchoredPosition = new Vector2(0, -20);
             var iconImg = icon.gameObject.AddComponent<Image>();
             iconImg.color = isDefault ? TextCol : TextMuted;
-            ApplyButtonSkin(iconImg, iconSkinKey);
+            ApplySkin(iconImg, iconSkinKey);
             icon.gameObject.AddComponent<LayoutElement>().preferredWidth = 56;
 
             var txt = MakeChild(go, "Txt");
@@ -844,7 +891,7 @@ namespace ProjectLink.EditorTools
             indicator.anchoredPosition = new Vector2(0, 4);
             var indImg = indicator.gameObject.AddComponent<Image>();
             indImg.color = AccentB;
-            ApplySlotSkin(indImg, "slot_tab_indicator");
+            ApplySkin(indImg, "slot_tab_indicator");
             if (!isDefault) indicator.gameObject.SetActive(false);
 
             return btn;
@@ -877,7 +924,7 @@ namespace ProjectLink.EditorTools
             pauseBtn.sizeDelta = new Vector2(80, 80);
             var pauseImg = pauseBtn.gameObject.AddComponent<Image>();
             pauseImg.color = HexColor("#FFFFFF26");
-            ApplyButtonSkin(pauseImg, "btn_icon_pause");
+            ApplySkin(pauseImg, "btn_icon_pause");
             var pauseButton = pauseBtn.gameObject.AddComponent<Button>();
             pauseButton.targetGraphic = pauseImg;
             UnityEventTools.AddPersistentListener(pauseButton.onClick, router.OpenPausePopup);
@@ -1260,7 +1307,7 @@ namespace ProjectLink.EditorTools
             Stretch(overlay);
             var ovImg = overlay.gameObject.AddComponent<Image>();
             ovImg.color = Scrim;
-            ApplySlotSkin(ovImg, "slot_popup_overlay");
+            ApplySkin(ovImg, "slot_popup_overlay", false);
             if (dismissible)
             {
                 var ovBtn = overlay.gameObject.AddComponent<Button>();
@@ -1273,7 +1320,7 @@ namespace ProjectLink.EditorTools
             panel.sizeDelta = new Vector2(960, 0);
             var panelImg = panel.gameObject.AddComponent<Image>();
             panelImg.color = BgSurface;
-            ApplySlotSkin(panelImg, "slot_popup_bg");
+            ApplySkin(panelImg, "slot_popup_bg", false);
             var panelVlg = panel.gameObject.AddComponent<VerticalLayoutGroup>();
             panelVlg.spacing = 24; panelVlg.padding = new RectOffset(40, 40, 32, 32);
             panelVlg.childAlignment = TextAnchor.UpperCenter;
@@ -1305,7 +1352,7 @@ namespace ProjectLink.EditorTools
                 closeBtn.sizeDelta = new Vector2(72, 72);
                 var closeImg = closeBtn.gameObject.AddComponent<Image>();
                 closeImg.color = HexColor("#FFFFFF26");
-                ApplyButtonSkin(closeImg, "btn_icon_close");
+                ApplySkin(closeImg, "btn_icon_close");
                 var closeBtnComp = closeBtn.gameObject.AddComponent<Button>();
                 closeBtnComp.targetGraphic = closeImg;
                 closeBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 72;
@@ -1373,7 +1420,7 @@ namespace ProjectLink.EditorTools
             rect.sizeDelta = new Vector2(0, 112);
             var img = go.GetComponent<Image>();
             img.color = isPrimary ? AccentA : BgSurface;
-            ApplyButtonSkin(img, skinKey);
+            ApplySkin(img, skinKey);
             var btn = go.GetComponent<Button>();
             btn.targetGraphic = img;
             var le = go.AddComponent<LayoutElement>();
@@ -1405,7 +1452,7 @@ namespace ProjectLink.EditorTools
             toggle.sizeDelta = new Vector2(120, 56);
             var toggleImg = toggle.gameObject.AddComponent<Image>();
             toggleImg.color = HexColor("#FFFFFF33");
-            ApplySlotSkin(toggleImg, "slot_toggle_track");
+            ApplySkin(toggleImg, "slot_toggle_track");
             toggle.gameObject.AddComponent<Toggle>().targetGraphic = toggleImg;
             toggle.gameObject.AddComponent<LayoutElement>().preferredWidth = 120;
 
@@ -1414,7 +1461,7 @@ namespace ProjectLink.EditorTools
             handle.anchoredPosition = new Vector2(4, 0);
             var handleImg = handle.gameObject.AddComponent<Image>();
             handleImg.color = TextCol;
-            ApplySlotSkin(handleImg, "slot_toggle_handle");
+            ApplySkin(handleImg, "slot_toggle_handle");
         }
 
         static void AddDropdownRow(RectTransform parent, string name, string labelKey)
@@ -1457,7 +1504,7 @@ namespace ProjectLink.EditorTools
             icon.sizeDelta = new Vector2(56, 56);
             var iconImg = icon.gameObject.AddComponent<Image>();
             iconImg.color = SlotPlaceholder;
-            ApplySlotSkin(iconImg, iconSkinKey);
+            ApplySkin(iconImg, iconSkinKey);
             icon.gameObject.AddComponent<LayoutElement>().preferredWidth = 56;
 
             var nameGo = MakeChild(row, "Txt_Name");
@@ -1470,7 +1517,7 @@ namespace ProjectLink.EditorTools
             linkBtn.sizeDelta = new Vector2(200, 72);
             var linkImg = linkBtn.gameObject.AddComponent<Image>();
             linkImg.color = BgSurface;
-            ApplyButtonSkin(linkImg, "btn_secondary");
+            ApplySkin(linkImg, "btn_secondary");
             var linkBtnComp = linkBtn.gameObject.AddComponent<Button>();
             linkBtnComp.targetGraphic = linkImg;
             linkBtn.gameObject.AddComponent<LayoutElement>().preferredWidth = 200;
@@ -1576,7 +1623,7 @@ namespace ProjectLink.EditorTools
             var img = rect.gameObject.AddComponent<Image>();
             img.color = SlotPlaceholder;
             img.raycastTarget = false;
-            ApplySlotSkin(img, name.ToLower().Replace("_", "").Replace("slot", "slot_"));
+            ApplySkin(img, name.ToLower().Replace("_", "").Replace("slot", "slot_"));
             return rect;
         }
 
@@ -1590,7 +1637,7 @@ namespace ProjectLink.EditorTools
 
             var img = go.GetComponent<Image>();
             img.color = AccentA;
-            ApplyButtonSkin(img, skinKey);
+            ApplySkin(img, skinKey);
 
             var btn = go.GetComponent<Button>();
             btn.targetGraphic = img;
@@ -1614,7 +1661,7 @@ namespace ProjectLink.EditorTools
 
             var img = go.GetComponent<Image>();
             img.color = HexColor("#FFFFFF26");
-            ApplyButtonSkin(img, skinKey);
+            ApplySkin(img, skinKey);
 
             var btn = go.GetComponent<Button>();
             btn.targetGraphic = img;
@@ -1734,23 +1781,16 @@ namespace ProjectLink.EditorTools
 
         // ─── Skin helpers ──────────────────────────────────────────────────
 
-        static UIButtonSkin LoadSkin() =>
-            _skin ??= AssetDatabase.LoadAssetAtPath<UIButtonSkin>(SkinAssetPath);
+        static UISpriteSkin LoadSkin() =>
+            _skin ??= AssetDatabase.LoadAssetAtPath<UISpriteSkin>(SkinAssetPath);
 
-        static void ApplyButtonSkin(Image image, string key)
+        static void ApplySkin(Image image, string key, bool preserveAspect = true)
         {
-            var sprite = LoadSkin()?.GetButton(key);
+            var sprite = LoadSkin()?.Get(key);
             if (sprite == null) return;
             image.sprite = sprite;
             image.color = Color.white;
-        }
-
-        static void ApplySlotSkin(Image image, string key)
-        {
-            var sprite = LoadSkin()?.GetSlot(key);
-            if (sprite == null) return;
-            image.sprite = sprite;
-            image.color = Color.white;
+            image.preserveAspect = preserveAspect;
         }
 
         // ─── Scene infrastructure helpers ────────────────────────────────

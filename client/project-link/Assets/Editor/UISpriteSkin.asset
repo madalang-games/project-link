@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ca3c7d5c2e239740be1e5f9ee05a19a, type: 3}
+  m_Name: UISpriteSkin
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::ProjectLink.EditorTools.UISpriteSkin
+  sprites:
+  - elementName: btn_carousel_next
+    sprite: {fileID: 21300000, guid: 22bdafd04753bdf469ba821db01038c7, type: 3}
+  - elementName: btn_carousel_prev
+    sprite: {fileID: 21300000, guid: 30cce231815f47648afd30596e0bf311, type: 3}
+  - elementName: btn_icon_close
+    sprite: {fileID: 21300000, guid: 61c30a294c12dcd498e2f10fa4edeac9, type: 3}
+  - elementName: btn_icon_menu
+    sprite: {fileID: 21300000, guid: 7de97fd968e237d4fb3e3cd37e0f311e, type: 3}
+  - elementName: btn_icon_pause
+    sprite: {fileID: 21300000, guid: 66cc6f2527dc11641b953d2310697a0d, type: 3}
+  - elementName: btn_icon_settings
+    sprite: {fileID: 21300000, guid: 7de97fd968e237d4fb3e3cd37e0f311e, type: 3}
+  - elementName: btn_primary
+    sprite: {fileID: 21300000, guid: 82d6d009cb580564f86b1a01699a8176, type: 3}
+  - elementName: btn_secondary
+    sprite: {fileID: 21300000, guid: be2bc9f92f2f9604b906d1e09aafd555, type: 3}
+  - elementName: btn_tab_home
+    sprite: {fileID: 21300000, guid: 78644dc2d1d74934ca21012099bf46e9, type: 3}
+  - elementName: btn_tab_ranking
+    sprite: {fileID: 21300000, guid: 02d6ed6959d64694c8565f45310e0936, type: 3}
+  - elementName: btn_tab_shop
+    sprite: {fileID: 21300000, guid: 405b2d03dd3374a40884c767605c4b2b, type: 3}
+  - elementName: slot_avatar
+    sprite: {fileID: 21300000, guid: f72056af3a9aea64bba5024f6ba05876, type: 3}
+  - elementName: slot_currency_soft
+    sprite: {fileID: 21300000, guid: 666abcb89b7db5443825ae3d85ed718e, type: 3}
+  - elementName: slot_event_banner
+    sprite: {fileID: 21300000, guid: 3ca9e703edc0fa7408478f9c48d46fe0, type: 3}
+  - elementName: slot_hud_bg
+    sprite: {fileID: 21300000, guid: 1254ebff1d7277845994fe0d99865541, type: 3}
+  - elementName: slot_logo
+    sprite: {fileID: 6547496072925479820, guid: e93e52f7fbf7c7a43820b34fc1b5d339, type: 3}
+  - elementName: slot_popup_bg
+    sprite: {fileID: 21300000, guid: 4632b20096f85d349a2687e2cdb5ca8e, type: 3}
+  - elementName: slot_popup_overlay
+    sprite: {fileID: 0}
+  - elementName: slot_progress_track
+    sprite: {fileID: 21300000, guid: 735b46c0a8560584692f9334eebce80f, type: 3}
+  - elementName: slot_provider_apple
+    sprite: {fileID: 21300000, guid: bb7f868ef302aa84792a969f0e65ab70, type: 3}
+  - elementName: slot_provider_google
+    sprite: {fileID: 21300000, guid: bb7f868ef302aa84792a969f0e65ab70, type: 3}
+  - elementName: slot_stage_node
+    sprite: {fileID: 21300000, guid: 53e13850a2948ce458670c438ade2c14, type: 3}
+  - elementName: slot_stamina_icon
+    sprite: {fileID: 21300000, guid: e7309b41d52003e47bda44ca0c2833d6, type: 3}
+  - elementName: slot_streak_badge
+    sprite: {fileID: 21300000, guid: 9c40f6dfa61f67c4a94fd73743191899, type: 3}
+  - elementName: slot_tab_indicator
+    sprite: {fileID: 21300000, guid: 60451d7ca25722f4d852a98fcd534eab, type: 3}
+  - elementName: slot_toggle_handle
+    sprite: {fileID: 21300000, guid: bb352e62039d0e141a5671c9f06d9ff4, type: 3}
+  - elementName: slot_toggle_track
+    sprite: {fileID: 21300000, guid: 4fe0cb5d03416ed4290e0e4e32ba1eb3, type: 3}
