@@ -113,6 +113,9 @@ public class StageService
         if (result != "success" && result != "fail")
             throw new InvalidStageResultException();
 
+        if (movesUsed < 0 || clientElapsedMs < 0)
+            throw new InvalidStageResultException();
+
         await _sessionCache.DeleteAsync(userId, ct);
 
         var stageData = _staticData.GetStage(stageId)!;

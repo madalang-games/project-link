@@ -58,8 +58,8 @@ public class StreakChallengeTransactionRepository : IStreakChallengeTransaction
         await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
         var level = await _db.StreakChallengeUserLevelStates
-            .FirstOrDefaultAsync(l => l.UserId == cmd.UserId && l.EventId == cmd.EventId
-                                   && l.CycleId == cmd.CycleId && l.LevelIndex == cmd.LevelIndex, ct);
+            .FromSqlInterpolated($"SELECT * FROM streak_challenge_user_level_state WHERE user_id = {cmd.UserId} AND event_id = {cmd.EventId} AND cycle_id = {cmd.CycleId} AND level_index = {cmd.LevelIndex} FOR UPDATE")
+            .FirstOrDefaultAsync(ct);
 
         if (level is null || level.LevelStatus != "READY")
         {
@@ -72,8 +72,8 @@ public class StreakChallengeTransactionRepository : IStreakChallengeTransaction
         level.UpdatedAt   = DateTimeOffset.UtcNow;
 
         var state = await _db.StreakChallengeUserStates
-            .FirstOrDefaultAsync(s => s.UserId == cmd.UserId && s.EventId == cmd.EventId
-                                   && s.CycleId == cmd.CycleId, ct);
+            .FromSqlInterpolated($"SELECT * FROM streak_challenge_user_state WHERE user_id = {cmd.UserId} AND event_id = {cmd.EventId} AND cycle_id = {cmd.CycleId} FOR UPDATE")
+            .FirstOrDefaultAsync(ct);
         if (state is not null)
         {
             state.UpdatedAt = DateTimeOffset.UtcNow;

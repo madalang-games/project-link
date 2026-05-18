@@ -29,6 +29,9 @@ public class InventoryService
 
     public async Task<ItemPurchaseResponse> PurchaseAsync(string userId, int itemId, int quantity, string correlationId, CancellationToken ct)
     {
+        if (quantity <= 0)
+            throw new Domain.Exceptions.InvalidStageResultException();
+
         var item = _staticData.GetItem(itemId)
             ?? throw new Domain.Exceptions.InvalidStageResultException();
 
@@ -46,6 +49,9 @@ public class InventoryService
 
     public async Task<ItemUseResponse> UseAsync(string userId, List<ItemUseEntry> items, CancellationToken ct)
     {
+        if (items.Any(e => e.Quantity <= 0))
+            throw new Domain.Exceptions.InsufficientInventoryException();
+
         var updatedSlots = new List<InventorySlot>();
         foreach (var entry in items)
         {

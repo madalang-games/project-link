@@ -16,6 +16,9 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task<int> GrantAsync(string userId, int itemId, int quantity, CancellationToken ct)
     {
+        if (quantity <= 0)
+            throw new ArgumentOutOfRangeException(nameof(quantity), "Grant quantity must be positive.");
+
         await _db.Database.ExecuteSqlInterpolatedAsync(
             $@"INSERT INTO inventory (user_id, item_id, quantity)
                VALUES ({userId}, {itemId}, {quantity})
@@ -28,6 +31,9 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task<int> DeductAsync(string userId, int itemId, int quantity, CancellationToken ct)
     {
+        if (quantity <= 0)
+            throw new ArgumentOutOfRangeException(nameof(quantity), "Deduct quantity must be positive.");
+
         var affected = await _db.Database.ExecuteSqlInterpolatedAsync(
             $"UPDATE inventory SET quantity = quantity - {quantity} WHERE user_id = {userId} AND item_id = {itemId} AND quantity >= {quantity}", ct);
 

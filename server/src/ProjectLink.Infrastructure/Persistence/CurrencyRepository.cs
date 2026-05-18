@@ -19,6 +19,9 @@ public class CurrencyRepository : ICurrencyRepository
 
     public async Task<long> GrantAsync(string userId, long amount, string reason, string transactionId, string correlationId, CancellationToken ct)
     {
+        if (amount <= 0)
+            throw new ArgumentOutOfRangeException(nameof(amount), "Grant amount must be positive.");
+
         await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
         await _db.Database.ExecuteSqlInterpolatedAsync(
@@ -52,6 +55,9 @@ public class CurrencyRepository : ICurrencyRepository
 
     public async Task<long> DeductAsync(string userId, long amount, string reason, string transactionId, string correlationId, CancellationToken ct)
     {
+        if (amount <= 0)
+            throw new ArgumentOutOfRangeException(nameof(amount), "Deduct amount must be positive.");
+
         await using var tx = await _db.Database.BeginTransactionAsync(ct);
 
         await _db.Database.ExecuteSqlInterpolatedAsync(

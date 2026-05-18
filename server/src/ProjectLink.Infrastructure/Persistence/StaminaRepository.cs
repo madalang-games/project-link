@@ -37,8 +37,8 @@ public class StaminaRepository : IStaminaRepository
 
         var state = await _db.StaminaStates.FirstAsync(s => s.UserId == userId, ct);
         ApplyRecharge(state, maxStamina, rechargeIntervalMinutes);
-        // Persist lazily computed recharge without a lock (best-effort read path)
-        await _db.SaveChangesAsync(ct);
+        // Do NOT persist here — unlocked read-path save can overwrite a concurrent DeductAsync commit.
+        // Recharge is re-applied correctly by any subsequent write operation (DeductAsync / AddAsync).
         return state;
     }
 
