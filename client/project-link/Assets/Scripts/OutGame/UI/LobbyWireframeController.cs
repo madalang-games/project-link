@@ -84,6 +84,7 @@ namespace ProjectLink.OutGame.UI
             _viewModel = new LobbyViewModel(_uiData, _catalog);
             _viewModel.Changed += Render;
             BindStageNavigation();
+            AddLobbyPressEffects();
         }
 
         void Start()
@@ -350,6 +351,29 @@ namespace ProjectLink.OutGame.UI
             _pinnedScoreText ??= FindTextInParent("Row_MyRank_Pinned", "Txt_Score");
             shopInventoryStrip ??= GetComponentInChildren<ShopInventoryStrip>(true);
             EnsureSideStageNodes();
+        }
+
+        void AddLobbyPressEffects()
+        {
+            EnsurePressEffect(playButton);
+            EnsurePressEffect(refillButton);
+            EnsurePressEffect(previousStageButton);
+            EnsurePressEffect(nextStageButton);
+            EnsurePressEffect(_rankingStagesButton);
+            EnsurePressEffect(_rankingScoreButton);
+
+            foreach (var btn in GetComponentsInChildren<Button>(true))
+            {
+                if (btn.name is "Btn_Settings" or "Btn_Menu" or "Slot_Avatar" or "Btn_Play" or "Tab_Home" or "Tab_Shop" or "Tab_Ranking")
+                    EnsurePressEffect(btn);
+            }
+        }
+
+        static void EnsurePressEffect(Button btn)
+        {
+            if (btn == null) return;
+            if (btn.GetComponent<ProjectLink.Core.ButtonPressEffect>() == null)
+                btn.gameObject.AddComponent<ProjectLink.Core.ButtonPressEffect>();
         }
 
         void BindAvatarButton()

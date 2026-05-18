@@ -1,12 +1,15 @@
 using ProjectLink.Core;
+using ProjectLink.OutGame.UI;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ProjectLink.InGame.UI
 {
     public sealed class GameWireframeController : MonoBehaviour
     {
         [SerializeField] TextMeshProUGUI levelLabelText;
+        [SerializeField] TextMeshProUGUI pipeCounterText;
         [SerializeField] TextMeshProUGUI moveCounterText;
         [SerializeField] TextMeshProUGUI timerText;
 
@@ -22,6 +25,7 @@ namespace ProjectLink.InGame.UI
 
         int _stageId;
 
+        public TextMeshProUGUI PipeCounterText => pipeCounterText;
         public TextMeshProUGUI MoveCounterText => moveCounterText;
         public TextMeshProUGUI TimerText => timerText;
 
@@ -39,7 +43,9 @@ namespace ProjectLink.InGame.UI
             timerText ??= FindText("Txt_Timer");
             if (moveCounterText == null)
                 moveCounterText = FindText("Txt_Moves");
+            pipeCounterText ??= FindText("Txt_Pipe");
             ResolveItemSlots();
+            EnsurePipeCounterText();
         }
 
         void ResolveItemSlots()
@@ -65,6 +71,51 @@ namespace ProjectLink.InGame.UI
         void Start()
         {
             SetStageLabel(GameContext.SelectedStageId);
+            AddPressEffects();
+        }
+
+        void EnsurePipeCounterText()
+        {
+            if (pipeCounterText != null) return;
+            if (moveCounterText == null) return;
+
+            var parent = moveCounterText.transform.parent;
+            var go = new GameObject("Txt_Pipe", typeof(RectTransform), typeof(TextMeshProUGUI), typeof(LayoutElement));
+            go.transform.SetParent(parent, false);
+            go.transform.SetSiblingIndex(moveCounterText.transform.GetSiblingIndex());
+
+            go.GetComponent<LayoutElement>().flexibleWidth = 1;
+
+            var tmp = go.GetComponent<TextMeshProUGUI>();
+            tmp.fontSize = moveCounterText.fontSize;
+            tmp.fontStyle = moveCounterText.fontStyle;
+            tmp.color = moveCounterText.color;
+            tmp.alignment = TextAlignmentOptions.MidlineLeft;
+            tmp.raycastTarget = false;
+            tmp.text = "0 / 0";
+
+            pipeCounterText = tmp;
+            go.AddComponent<LocalizedFont>();
+        }
+
+        void AddPressEffects()
+        {
+            EnsurePressEffect(item1Button);
+            EnsurePressEffect(item2Button);
+            EnsurePressEffect(item3Button);
+            EnsurePressEffect(item4Button);
+
+            foreach (var btn in GetComponentsInChildren<Button>(true))
+            {
+                if (btn.name == "Btn_Pause") { EnsurePressEffect(btn); break; }
+            }
+        }
+
+        static void EnsurePressEffect(Button btn)
+        {
+            if (btn == null) return;
+            if (btn.GetComponent<ButtonPressEffect>() == null)
+                btn.gameObject.AddComponent<ButtonPressEffect>();
         }
 
         void OnEnable()  { LocalizationManager.LanguageChanged += OnLanguageChanged; }

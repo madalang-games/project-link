@@ -8,7 +8,7 @@ Scene: `Assets/Scenes/Game.unity`
 ## HUD
 
 - [ ] Stage number label (top-center)
-- [ ] Pipe connection counter: "X / Y connected" updates on each path completion
+- [x] Pipe connection counter: "X / Y connected" updates on each path completion
 - [ ] Pause button (top-right) — opens Pause Popup
 
 ---

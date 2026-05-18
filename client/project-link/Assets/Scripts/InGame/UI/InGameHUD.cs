@@ -129,13 +129,18 @@ namespace ProjectLink.InGame.UI
             if (ctrl != null)
             {
                 ctrl.SetStageLabel(stageId);
+                _pipeCounterText = ctrl.PipeCounterText;
                 _moveCounterText = ctrl.MoveCounterText;
                 _timerText = ctrl.TimerText;
 
                 // Bind pause button from DDL
                 var pauseBtn = FindButtonInHud(hudLayer, "Btn_Pause");
                 if (pauseBtn != null)
+                {
                     pauseBtn.onClick.AddListener(() => OnPausePressed?.Invoke());
+                    if (pauseBtn.GetComponent<ButtonPressEffect>() == null)
+                        pauseBtn.gameObject.AddComponent<ButtonPressEffect>();
+                }
                 return;
             }
 
@@ -267,12 +272,6 @@ namespace ProjectLink.InGame.UI
             label.alignment = TextAlignmentOptions.Center;
             label.raycastTarget = false;
             return label;
-        }
-
-        static void OpenBuyItemPopup()
-        {
-            if (PopupManager.Instance != null)
-                PopupManager.Request(PopupId.BuyItem);
         }
 
         static void Stretch(RectTransform rect)

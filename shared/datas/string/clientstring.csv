@@ -24,6 +24,7 @@ hud.moves_fmt,Moves: {0}/{1},이동 횟수 : {0}/{1},步数: {0}/{1},步數: {0}
 hud.moves_no_limit_fmt,Moves: {0},이동 횟수 : {0},步数: {0},步數: {0},การเคลื่อนที่: {0}
 status.energy_empty,Energy 0,에너지 0,能量 0,能量 0,พลังงาน 0
 status.stamina_full,Full,가득 참,已满,已滿,เต็ม
+lobby.stage_label,STAGE,스테이지,关卡,關卡,ด่าน
 tab.shop,Shop,상점,商店,商店,ร้านค้า
 tab.home,Home,홈,主页,首頁,หน้าแรก
 tab.ranking,Ranking,랭킹,排行榜,排行榜,อันดับ

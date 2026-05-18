@@ -26,6 +26,7 @@ namespace ProjectLink.OutGame.UI
             _initialized = true;
 
             ResolveMissingReferences();
+            BindOverlayClose();
             BindClose(closeButton);
             BindClose(closeIconButton);
             if (buyButton != null)

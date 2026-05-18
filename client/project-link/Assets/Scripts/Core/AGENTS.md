@@ -9,7 +9,8 @@
 | `GameStateMachine.cs` | `GameStateMachine` | Pure FSM with validated transitions + change event |
 | `InGameController.cs` | `InGameController` | Singleton; orchestrates board/input/paths/HUD/timer |
 | `UIManager.cs` | `UIManager` | Canvas layer resolver (Background/HUD/Popup/System) |
-| `PopupManager.cs` | `PopupManager` | Event-driven popup request router + stack lifecycle; back-press aware |
+| `PopupManager.cs` | `PopupManager`, `PopupBase` | Event-driven popup request router + stack lifecycle; `PopupBase.Awake/Start` auto-plays panel scale-in (EaseOutBack 0.22 s) and adds `ButtonPressEffect` to all non-Overlay child buttons |
+| `ButtonPressEffect.cs` | `ButtonPressEffect` | MonoBehaviour; scale-down (0.88) on pointer down, restore on up/exit; auto-added by `PopupBase` to all popup buttons |
 | `SceneLoader.cs` | `SceneLoader` | Faded async scene transitions; supports overlay hold via HoldForReady/NotifyReady |
 | `DataManager.cs` | `DataManager` | PlayerPrefs persistence: progress, settings |
 | `SoundManager.cs` | `SoundManager` | BGM + SFX AudioSource management |
@@ -58,6 +59,9 @@
 | `PopupManager.Open<T>()` | method | code-instantiates legacy popup T on Popup layer, pushes stack |
 | `PopupManager.CloseTop()` | method | destroys top popup, re-shows previous |
 | `PopupBase.BindOverlayClose()` | method | binds the first child Button named "Overlay" to CloseTop; call from each prefab popup Init() |
+| `PopupBase.Awake()` | method | virtual; sets Panel child localScale=0 (scale-in prep); adds `ButtonPressEffect` to all non-Overlay child Buttons |
+| `PopupBase.Start()` | method | adds `ButtonPressEffect` to fallback-built buttons created in Init(); starts `RunOpenAnim` coroutine |
+| `ButtonPressEffect.OnPointerDown/Up/Exit` | methods | animate localScale 0.88 on press, restore on release/exit; uses `Time.unscaledDeltaTime` |
 | `AppEnvironment` | enum | `Dev` / `Prod` |
 | `AppConfig.DevGameServerUrl` | const | `http://localhost:20101` |
 | `AppConfig.DevPlatformAuthUrl` | const | `http://localhost:20001` — server-side only; client routes auth via game server |

@@ -24,6 +24,9 @@
 | `InGameHUD.SetItemButtonState(int,int,bool)` | method | itemId, count, extraCondition → updates count text + interactable (count > 0 AND extraCondition) |
 | `InGameHUD.SetTotalColors(int)` | method | updates _totalColors and calls Refresh; used after node-pair eraser removes a group |
 | `GameWireframeController.SetStageLabel(int)` | method | updates levelLabelText via `popup.stage.title_n_fmt` LocalizationManager key; font handled automatically by `LocalizedFont` component on the label (added by UIBuilder) |
+| `GameWireframeController.PipeCounterText` | prop | SerializeField assigned by UIBuilder (Txt_Pipe); Awake: FindText fallback then runtime-creates Txt_Pipe (sibling before Txt_Moves, flexibleWidth=1) if still null; AddPressEffects (Start) adds ButtonPressEffect to item buttons + Btn_Pause |
+| `GameWireframeController.MoveCounterText` | prop | SerializeField assigned by UIBuilder (Txt_Moves); Awake fallback via FindText("Txt_Moves") |
+| `GameWireframeController.TimerText` | prop | Awake fallback via FindText("Txt_Timer"); not assigned by UIBuilder (resolved at runtime) |
 | `GameWireframeController.Item1Button..Item4Button` | props | Item toolbar buttons; SerializeField assigned by UIBuilder, auto-resolved from Toolbar_Items/ItemSlot_N in Awake if null |
 | `GameWireframeController.Item1CountText..Item4CountText` | props | Item count labels (Txt_Count); SerializeField assigned by UIBuilder, auto-resolved from Toolbar_Items/ItemSlot_N/Txt_Count in Awake if null |
 | `CircularGauge.Show(Vector3,Color)` | method | positions at world pos, sets arc color, enables |
@@ -46,4 +49,4 @@
 - `HapticManager` here is a shim only; logic lives in `Core.HapticManager`.
 - `InGameHUD` is created at runtime (no prefab); parented to `UILayer.HUD`.
 - `PausePopup` is prefab-based (`Resources/Prefabs/UI/PausePopup`); opened via `PopupManager.Request(PopupId.Pause, System.Action callback)`.
-- `GameWireframeController` exposes only: levelLabelText, moveCounterText, timerText, item1-4Button, item1-4CountText. All other button specs removed.
+- `GameWireframeController` exposes: pipeCounterText (Txt_Pipe), levelLabelText, moveCounterText, timerText, item1-4Button, item1-4CountText. All other button specs removed.

@@ -366,11 +366,5 @@ namespace ProjectLink.InGame.UI
                 Destroy(parent.GetChild(i).gameObject);
         }
 
-        static string FormatTime(long elapsedMs)
-        {
-            if (elapsedMs <= 0) return "00:00";
-            var seconds = Mathf.FloorToInt(elapsedMs / 1000f);
-            return $"{seconds / 60:D2}:{seconds % 60:D2}";
-        }
     }
 }

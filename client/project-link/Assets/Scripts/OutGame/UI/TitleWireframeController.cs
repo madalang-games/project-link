@@ -27,6 +27,9 @@ namespace ProjectLink.OutGame.UI
             BindButton(btnTapToStart, OnTapToStart);
             BindButton(btnGoogle, OnGoogle);
             BindButton(btnApple, OnApple);
+            EnsurePressEffect(btnTapToStart);
+            EnsurePressEffect(btnGoogle);
+            EnsurePressEffect(btnApple);
 
             _viewModel = new TitleViewModel(UiServiceLocator.UiData, NetworkManager.Instance);
             _viewModel.Changed += Render;
@@ -100,6 +103,13 @@ namespace ProjectLink.OutGame.UI
         {
             if (label != null)
                 label.text = value ?? "";
+        }
+
+        static void EnsurePressEffect(Button btn)
+        {
+            if (btn == null) return;
+            if (btn.GetComponent<ProjectLink.Core.ButtonPressEffect>() == null)
+                btn.gameObject.AddComponent<ProjectLink.Core.ButtonPressEffect>();
         }
 
         static void BindButton(Button button, UnityEngine.Events.UnityAction action)

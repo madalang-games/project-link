@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -44,6 +45,63 @@ namespace ProjectLink.Core
     public abstract class PopupBase : MonoBehaviour
     {
         public virtual void OnBackPressed() => PopupManager.Instance.CloseTop();
+
+        protected virtual void Awake()
+        {
+            var panel = GetPanel();
+            if (panel != null)
+                panel.localScale = Vector3.zero;
+
+            foreach (var btn in GetComponentsInChildren<Button>(true))
+            {
+                if (btn.name == "Overlay") continue;
+                if (btn.GetComponent<ButtonPressEffect>() == null)
+                    btn.gameObject.AddComponent<ButtonPressEffect>();
+            }
+        }
+
+        void Start()
+        {
+            foreach (var btn in GetComponentsInChildren<Button>(true))
+            {
+                if (btn.name == "Overlay") continue;
+                if (btn.GetComponent<ButtonPressEffect>() == null)
+                    btn.gameObject.AddComponent<ButtonPressEffect>();
+            }
+            StartCoroutine(RunOpenAnim());
+        }
+
+        IEnumerator RunOpenAnim()
+        {
+            var panel = GetPanel();
+            if (panel == null) yield break;
+            float t = 0f;
+            const float dur = 0.22f;
+            while (t < 1f)
+            {
+                t = Mathf.Min(1f, t + Time.unscaledDeltaTime / dur);
+                float s = EaseOutBack(t);
+                panel.localScale = new Vector3(s, s, 1f);
+                yield return null;
+            }
+            panel.localScale = Vector3.one;
+        }
+
+        Transform GetPanel()
+        {
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                var child = transform.GetChild(i);
+                if (child.name == "Panel") return child;
+            }
+            return null;
+        }
+
+        static float EaseOutBack(float t)
+        {
+            const float c1 = 1.70158f, c3 = c1 + 1f;
+            return 1f + c3 * Mathf.Pow(t - 1f, 3f) + c1 * Mathf.Pow(t - 1f, 2f);
+        }
 
         protected void BindOverlayClose()
         {
