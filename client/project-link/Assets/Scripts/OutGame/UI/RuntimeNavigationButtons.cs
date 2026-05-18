@@ -160,7 +160,7 @@ namespace ProjectLink.OutGame.UI
                 }
 
                 var response = result.Value;
-                GameContext.SetStageSession(response.SessionToken, response.MoveLimit, response.TimeLimitSeconds);
+                GameContext.SetStageSession(response.SessionToken, response.MoveLimit, response.TimeLimitSeconds, response.ItemCounts);
                 LoadScene(GameSceneName);
             });
         }
